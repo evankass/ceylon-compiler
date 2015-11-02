@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.lambda;
 
-class ConstrainedTypeParam<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ConstrainedTypeParam<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ConstrainedTypeParam(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T) {
         this.$reified$T = $reified$T;
@@ -11,7 +11,7 @@ class ConstrainedTypeParam<T> implements .com.redhat.ceylon.compiler.java.runtim
     }
     
     private final void test$priv$() {
-        method$priv$(new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, $reified$T, $reified$T, .ceylon.language.Empty.$TypeDescriptor$), "Anything(T)", (short)-1){
+        method$priv$(new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, -1, $reified$T), "Anything(T)", (short)-1){
             
             @.java.lang.Override
             public .java.lang.Object $call$(final .java.lang.Object $param$0) {
@@ -25,11 +25,6 @@ class ConstrainedTypeParam<T> implements .com.redhat.ceylon.compiler.java.runtim
                 );
             }
         });
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.lambda.ConstrainedTypeParam(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
     }
     
     @.java.lang.Override

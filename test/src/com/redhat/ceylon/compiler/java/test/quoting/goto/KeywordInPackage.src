@@ -1,13 +1,8 @@
 package com.redhat.ceylon.compiler.java.test.quoting.$goto;
 
-class KeywordInPackage implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class KeywordInPackage implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     KeywordInPackage() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.quoting.$goto.KeywordInPackage();
     }
     
     @.java.lang.Override

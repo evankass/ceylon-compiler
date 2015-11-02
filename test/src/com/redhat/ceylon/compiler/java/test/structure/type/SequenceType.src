@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.type;
 
-class SequenceType implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class SequenceType implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     SequenceType() {
     }
@@ -16,11 +16,6 @@ class SequenceType implements .com.redhat.ceylon.compiler.java.runtime.model.Rei
                 this,
                 this});
         final .ceylon.language.Sequential<? extends .com.redhat.ceylon.compiler.java.test.structure.type.SequenceType> s4 = (.ceylon.language.Sequential<? extends .com.redhat.ceylon.compiler.java.test.structure.type.SequenceType>)(.ceylon.language.Sequential).ceylon.language.empty_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.type.SequenceType();
     }
     
     @.java.lang.Override

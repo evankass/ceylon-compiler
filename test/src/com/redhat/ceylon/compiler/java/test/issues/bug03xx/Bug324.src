@@ -1,11 +1,11 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug03xx;
 
-class Bug324 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug324 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug324() {
     }
     
-    class Bug324 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class Bug324 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         Bug324() {
         }
@@ -18,7 +18,7 @@ class Bug324 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTy
     
     private final void m$priv$() {
         
-        class Bug324 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+        class Bug324 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
             
             Bug324() {
             }
@@ -28,11 +28,6 @@ class Bug324 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTy
                 return .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.member(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.member(.com.redhat.ceylon.compiler.java.test.issues.bug03xx.Bug324.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.functionOrValue("m")), .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(Bug324.class));
             }
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug03xx.Bug324();
     }
     
     @.java.lang.Override

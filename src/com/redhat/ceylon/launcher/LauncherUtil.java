@@ -5,15 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.ProcessBuilder.Redirect;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.redhat.ceylon.common.Constants;
-import com.redhat.ceylon.common.OSUtil;
 import com.redhat.ceylon.common.Versions;
-import com.redhat.ceylon.common.tool.ToolError;
 
 public class LauncherUtil {
     private LauncherUtil() {}
@@ -32,9 +29,13 @@ public class LauncherUtil {
         String ceylonHomeStr = System.getProperty(Constants.PROP_CEYLON_HOME_DIR);
         if (ceylonHomeStr == null) {
             // Second try to deduce it from the location of the current JAR file
-            // (assuming $CEYLON_HOME/lib/ceylon-bootstrap.jar)
+            // (assuming either $CEYLON_HOME/lib/ceylon-bootstrap.jar or
+            // $CEYLON_HOME/repo/ceylon/bootstrap/x.x.x/ceylon-bootstrap-x.x.x.jar)
             File jar = determineRuntimeJar();
             ceylonHome = jar.getParentFile().getParentFile();
+            if (ceylonHome.getName().equals("bootstrap") && ceylonHome.getParentFile().getName().equals("ceylon")) {
+                ceylonHome = ceylonHome.getParentFile().getParentFile().getParentFile();
+            }
             if (!checkHome(ceylonHome)) {
                 // Third try the CEYLON_HOME environment variable
                 ceylonHomeStr = System.getenv(Constants.ENV_CEYLON_HOME_DIR);
@@ -79,12 +80,11 @@ public class LauncherUtil {
     
     public static String determineSystemVersion() {
         // Determine the Ceylon system/language/runtime version
-        String ceylonSystemVersion = System.getProperty(Constants.PROP_CEYLON_SYSTEM_VERSION);
-        if (ceylonSystemVersion == null) {
-            // Second try the constant defined in Versions
-            ceylonSystemVersion = Versions.CEYLON_VERSION_NUMBER;
+        String ceylonVersion = System.getenv(Constants.ENV_CEYLON_VERSION);
+        if (ceylonVersion == null) {
+            ceylonVersion = System.getProperty(Constants.PROP_CEYLON_SYSTEM_VERSION, Versions.CEYLON_VERSION_NUMBER);
         }
-        return ceylonSystemVersion;
+        return ceylonVersion;
     }
     
     public static File determineRuntimeJar() throws URISyntaxException {
@@ -147,5 +147,33 @@ public class LauncherUtil {
 
     private static boolean checkHome(File ceylonHome) {
         return (new File(ceylonHome, CEYLON_REPO)).isDirectory() && (new File(ceylonHome, CEYLON_LIBS)).isDirectory();
+    }
+
+    public static boolean hasArgument(final String[] args, final String test) {
+        for (String arg : args) {
+            if ("--".equals(arg)) {
+                break;
+            }
+            if (arg.equals(test) || arg.startsWith(test + "=")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static String getArgument(final String[] args, final String test, boolean optionalArgument) {
+        for (int i=0; i < args.length; i++) {
+            String arg = args[i];
+            if ("--".equals(arg)) {
+                break;
+            }
+            if (!optionalArgument && i < (args.length - 1) && arg.equals(test)) {
+                return args[i + 1];
+            }
+            if (arg.startsWith(test + "=")) {
+                return arg.substring(test.length() + 1);
+            }
+        }
+        return null;
     }
 }

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class AssertConditionListIsBoolBool implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class AssertConditionListIsBoolBool implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     AssertConditionListIsBoolBool() {
     }
@@ -47,11 +47,6 @@ class AssertConditionListIsBoolBool implements .com.redhat.ceylon.compiler.java.
         }
         if ($ceylontmp$assert$3 != null) throw new .ceylon.language.AssertionError("Assertion failed" + $ceylontmp$assert$3);
         return z == 1L;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.AssertConditionListIsBoolBool();
     }
     
     @.java.lang.Override

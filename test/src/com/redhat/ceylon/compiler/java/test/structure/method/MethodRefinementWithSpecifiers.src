@@ -54,14 +54,9 @@ final class methodRefinementWithSpecifiers_returnsMethod_ {
         };
     }
 }
-class MethodRefinementWithSpecifiers_ClassNoParam implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodRefinementWithSpecifiers_ClassNoParam implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodRefinementWithSpecifiers_ClassNoParam() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.method.MethodRefinementWithSpecifiers_ClassNoParam();
     }
     
     @.java.lang.Override
@@ -70,7 +65,14 @@ class MethodRefinementWithSpecifiers_ClassNoParam implements .com.redhat.ceylon.
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.method.MethodRefinementWithSpecifiers_ClassNoParam.class);
 }
-class MethodRefinementWithSpecifiers_Class implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.method.MethodRefinementWithSpecifiers_Interface {
+class MethodRefinementWithSpecifiers_Class implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.method.MethodRefinementWithSpecifiers_Interface, .java.io.Serializable {
+    
+    protected MethodRefinementWithSpecifiers_Class() {
+        super();
+        this.arg = null;
+        this.f9$specifier$ = null;
+        this.f10$specifier$ = null;
+    }
     
     MethodRefinementWithSpecifiers_Class(final .ceylon.language.Callable<? extends .java.lang.Object> arg) {
         this.arg = arg;
@@ -83,7 +85,7 @@ class MethodRefinementWithSpecifiers_Class implements .com.redhat.ceylon.compile
         arg.$call$();
     }
     
-    class Inner implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class Inner implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         Inner() {
         }
@@ -98,7 +100,7 @@ class MethodRefinementWithSpecifiers_Class implements .com.redhat.ceylon.compile
         return new InnerShared();
     }
     
-    public class InnerShared implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    public class InnerShared implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         protected InnerShared() {
         }
@@ -212,7 +214,7 @@ class MethodRefinementWithSpecifiers_Class implements .com.redhat.ceylon.compile
     
     @.java.lang.Override
     public final .java.lang.Object f16() {
-        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$), "Anything(Integer)", (short)-1){
+        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, -1, .ceylon.language.Integer.$TypeDescriptor$), "Anything(Integer)", (short)-1){
             
             @.java.lang.Override
             public .java.lang.Object $call$(final .java.lang.Object $param$0) {
@@ -262,11 +264,6 @@ final class arg2_ {
     
     static void arg2() {
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.structure.method.arg2_.arg2();
-    }
 }
 interface Bug891_Interface2 extends .com.redhat.ceylon.compiler.java.test.structure.method.MethodRefinementWithSpecifiers_Interface {
     
@@ -299,14 +296,14 @@ interface Bug891_Interface2 extends .com.redhat.ceylon.compiler.java.test.struct
     public .java.lang.Object f19();
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.method.Bug891_Interface2.class);
 }
-final class Bug891_Interface2$impl {
+final class Bug891_Interface2$impl implements .java.io.Serializable {
     
     Bug891_Interface2$impl(.com.redhat.ceylon.compiler.java.test.structure.method.Bug891_Interface2 $this) {
         this.$this = $this;
     }
     private final .com.redhat.ceylon.compiler.java.test.structure.method.Bug891_Interface2 $this;
     
-    class Inner implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class Inner implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         Inner() {
         }
@@ -321,7 +318,7 @@ final class Bug891_Interface2$impl {
         return new InnerShared();
     }
     
-    public class InnerShared implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    public class InnerShared implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         protected InnerShared() {
         }
@@ -365,7 +362,7 @@ final class Bug891_Interface2$impl {
     }
     
     public .java.lang.Object f16() {
-        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$), "Anything(Integer)", (short)-1){
+        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, -1, .ceylon.language.Integer.$TypeDescriptor$), "Anything(Integer)", (short)-1){
             
             @.java.lang.Override
             public .java.lang.Object $call$(final .java.lang.Object $param$0) {
@@ -427,22 +424,25 @@ final class methodRefinementWithSpecifiers_attributeMethod_ {
     
     private methodRefinementWithSpecifiers_attributeMethod_() {
     }
-    private static final .ceylon.language.Callable<? extends .java.lang.Object>[] value;
+    private static final .ceylon.language.Callable<? extends .java.lang.Object> value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new .ceylon.language.Callable[]{.com.redhat.ceylon.compiler.java.test.structure.method.methodRefinementWithSpecifiers_returnsMethod_.methodRefinementWithSpecifiers_returnsMethod()};
+            value = .com.redhat.ceylon.compiler.java.test.structure.method.methodRefinementWithSpecifiers_returnsMethod_.methodRefinementWithSpecifiers_returnsMethod();
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
             value = null;
+            $init$value = false;
         }
     }
     
     public static .ceylon.language.Callable<? extends .java.lang.Object> get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (methodRefinementWithSpecifiers_attributeMethod_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'methodRefinementWithSpecifiers_attributeMethod\' before it was set");
         }

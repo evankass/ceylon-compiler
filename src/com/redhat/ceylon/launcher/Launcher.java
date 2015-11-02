@@ -1,7 +1,11 @@
 package com.redhat.ceylon.launcher;
 
+import static com.redhat.ceylon.launcher.CeylonDebugEvaluationThread.START_EVALUATION_THREAD_PROPERTY;
+import static com.redhat.ceylon.launcher.CeylonDebugEvaluationThread.startDebugEvaluationThread;
+
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -44,17 +48,14 @@ public class Launcher {
     // FIXME: perhaps we should clear all the properties we set in there on exit?
     // this may not work for run, if they leave threads running 
     public static int runInJava7Checked(CeylonClassLoader loader, String... args) throws Throwable {
-
+        if (Boolean.getBoolean(START_EVALUATION_THREAD_PROPERTY)) {
+            startDebugEvaluationThread();
+        }
+        
         // If the --sysrep option was set on the command line we set the corresponding system property
-        String ceylonSystemRepo = getArgument(args, "--sysrep", false);
+        String ceylonSystemRepo = LauncherUtil.getArgument(args, "--sysrep", false);
         if (ceylonSystemRepo != null) {
             System.setProperty(Constants.PROP_CEYLON_SYSTEM_REPO, ceylonSystemRepo);
-        }
-
-        // If the --ceylonversion option was set on the command line we set the corresponding system property
-        String ceylonSystemVersion = getArgument(args, "--ceylonversion", false);
-        if (ceylonSystemVersion != null) {
-            System.setProperty(Constants.PROP_CEYLON_SYSTEM_VERSION, ceylonSystemVersion);
         }
 
         ClassLoader ccl = Thread.currentThread().getContextClassLoader();
@@ -75,14 +76,22 @@ public class Launcher {
 
             // Set up the arguments for the tool
             Object mainTool = mainClass.newInstance();
+            Integer result;
             Method setupMethod = mainClass.getMethod("setup", args.getClass());
-            Integer result = (Integer)setupMethod.invoke(mainTool, (Object)args);
+            try {
+                result = (Integer)setupMethod.invoke(mainTool, (Object)args);
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
             if (result == 0 /* SC_OK */) {
                 try {
-                    Method toolGetter = mainClass.getMethod("getTool");
-                    Object tool = toolGetter.invoke(mainTool);
-                    Method verboseGetter = tool.getClass().getMethod("getVerbose");
-                    verbose = (String)verboseGetter.invoke(tool);
+                    Method toolGetter = mainClass.getMethod("getTools");
+                    Object[] tools = (Object[]) toolGetter.invoke(mainTool);
+                    // just use the first one since they share args
+                    if(tools != null && tools.length > 0){
+                        Method verboseGetter = tools[0].getClass().getMethod("getVerbose");
+                        verbose = (String)verboseGetter.invoke(tools[0]);
+                    }
                 } catch (Exception ex) {
                     // Probably doesn't have a --verbose option
                 }
@@ -101,7 +110,11 @@ public class Launcher {
 
                     // And finally execute the tool
                     Method execMethod = mainClass.getMethod("execute");
-                    result = (Integer)execMethod.invoke(mainTool);
+                    try {
+                        result = (Integer)execMethod.invoke(mainTool);
+                    } catch (InvocationTargetException e) {
+                        throw e.getCause();
+                    }
                 }finally{
                     // make sure we reset it, otherwise it will keep a reference to the CeylonClassLoader
                     LogManager.getLogManager().reset();
@@ -131,34 +144,6 @@ public class Launcher {
         }catch(FileNotFoundException e){
             throw new ClassLoaderSetupException(e);
         }
-    }
-
-    private static boolean hasArgument(final String[] args, final String test) {
-        for (String arg : args) {
-            if ("--".equals(arg)) {
-                break;
-            }
-            if (arg.equals(test) || arg.startsWith(test + "=")) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static String getArgument(final String[] args, final String test, boolean optionalArgument) {
-        for (int i=0; i < args.length; i++) {
-            String arg = args[i];
-            if ("--".equals(arg)) {
-                break;
-            }
-            if (!optionalArgument && i < (args.length - 1) && arg.equals(test)) {
-                return args[i + 1];
-            }
-            if (arg.startsWith(test + "=")) {
-                return arg.substring(test.length() + 1);
-            }
-        }
-        return null;
     }
 
     public static void initGlobalProperties() throws URISyntaxException {

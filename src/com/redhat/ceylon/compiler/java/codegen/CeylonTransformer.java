@@ -20,34 +20,44 @@
 
 package com.redhat.ceylon.compiler.java.codegen;
 
+import static com.redhat.ceylon.compiler.typechecker.tree.TreeUtil.isForBackend;
+
 import java.util.Iterator;
 
 import javax.tools.JavaFileObject;
 
+import com.redhat.ceylon.common.Backend;
 import com.redhat.ceylon.compiler.java.codegen.recovery.HasErrorException;
-import com.redhat.ceylon.compiler.loader.SourceDeclarationVisitor;
+import com.redhat.ceylon.compiler.java.loader.SourceDeclarationVisitor;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.Setter;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.ClassOrInterface;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.CompilationUnit;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.Declaration;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.ModuleDescriptor;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.PackageDescriptor;
+import com.redhat.ceylon.compiler.typechecker.tree.TreeUtil;
+import com.redhat.ceylon.model.loader.NamingBase.Suffix;
+import com.redhat.ceylon.model.loader.model.OutputElement;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.Setter;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.main.OptionName;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCAnnotation;
 import com.sun.tools.javac.tree.JCTree.JCBlock;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.JCTree.JCImport;
+import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
 import com.sun.tools.javac.tree.JCTree.JCModifiers;
 import com.sun.tools.javac.tree.JCTree.JCNewClass;
 import com.sun.tools.javac.tree.JCTree.JCStatement;
+import com.sun.tools.javac.tree.JCTree.JCTypeParameter;
+import com.sun.tools.javac.tree.JCTree.JCVariableDecl;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
@@ -125,25 +135,44 @@ public class CeylonTransformer extends AbstractTransformer {
         return topLev;
     }
 
+    private enum WantedDeclaration {
+        Normal, Annotation, AnnotationSequence;
+    }
+    
     private List<JCTree> makeDefs(CompilationUnit t) {
         final ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
         
         t.visit(new SourceDeclarationVisitor(){
             @Override
             public void loadFromSource(Declaration decl) {
-                if(isNative(decl))
+                if(!checkNative(decl))
                     return;
                 long flags = decl instanceof Tree.AnyInterface ? Flags.INTERFACE : 0;
                 String name = Naming.toplevelClassName("", decl);
                 
-                defs.add(makeClassDef(decl, flags, name));
+                defs.add(makeClassDef(decl, flags, name, WantedDeclaration.Normal));
                 if(decl instanceof Tree.AnyInterface){
                     String implName = Naming.getImplClassName(name);
-                    defs.add(makeClassDef(decl, 0, implName));
+                    defs.add(makeClassDef(decl, 0, implName, WantedDeclaration.Normal));
+                }
+                // only do it for Bootstrap where we control the annotations, because it's so dodgy ATM
+                if(options.get(OptionName.BOOTSTRAPCEYLON) != null
+                        && decl instanceof Tree.AnyClass
+                        && TreeUtil.hasAnnotation(decl.getAnnotationList(), "annotation", decl.getUnit())){
+                    String annotationName = Naming.suffixName(Suffix.$annotation$, name);
+                    defs.add(makeClassDef(decl, Flags.ANNOTATION, annotationName, WantedDeclaration.Annotation));
+                    
+                    for(Tree.StaticType sat : ((Tree.AnyClass)decl).getSatisfiedTypes().getTypes()){
+                        if(sat instanceof Tree.BaseType 
+                                && ((Tree.BaseType) sat).getIdentifier().getText().equals("SequencedAnnotation")){
+                            String annotationsName = Naming.suffixName(Suffix.$annotations$, name);
+                            defs.add(makeClassDef(decl, Flags.ANNOTATION, annotationsName, WantedDeclaration.AnnotationSequence));
+                        }
+                    }
                 }
             }
 
-            private JCTree makeClassDef(Declaration decl, long flags, String name) {
+            private JCTree makeClassDef(Declaration decl, long flags, String name, WantedDeclaration wantedDeclaration) {
                 ListBuffer<JCTree.JCTypeParameter> typarams = new ListBuffer<JCTree.JCTypeParameter>();
                 if(decl instanceof Tree.ClassOrInterface){
                     Tree.ClassOrInterface classDecl = (ClassOrInterface) decl;
@@ -156,7 +185,92 @@ public class CeylonTransformer extends AbstractTransformer {
                     }
                 }
 
-                return make().ClassDef(make().Modifiers(flags | Flags.PUBLIC), names().fromString(name), typarams.toList(), null, List.<JCExpression>nil(), List.<JCTree>nil());
+                return make().ClassDef(make().Modifiers(flags | Flags.PUBLIC), names().fromString(name), 
+                        typarams.toList(), null, List.<JCExpression>nil(), makeClassBody(decl, wantedDeclaration));
+            }
+
+            private List<JCTree> makeClassBody(Declaration decl, WantedDeclaration wantedDeclaration) {
+                // only do it for Bootstrap where we control the annotations, because it's so dodgy ATM
+                if(wantedDeclaration == WantedDeclaration.Annotation){
+                    ListBuffer<JCTree> body = new ListBuffer<JCTree>();
+                    for(Tree.Parameter param : ((Tree.ClassDefinition)decl).getParameterList().getParameters()){
+                        String name;
+                        
+                        JCExpression type = make().TypeArray(make().Type(syms().stringType));
+                        if(param instanceof Tree.InitializerParameter)
+                            name = ((Tree.InitializerParameter)param).getIdentifier().getText();
+                        else if(param instanceof Tree.ParameterDeclaration){
+                            Tree.TypedDeclaration typedDeclaration = ((Tree.ParameterDeclaration)param).getTypedDeclaration();
+                            name = typedDeclaration.getIdentifier().getText();
+                            type = getAnnotationTypeFor(typedDeclaration.getType());
+                        }else
+                            name = "ERROR";
+                        JCMethodDecl method
+                            = make().MethodDef(make().Modifiers(Flags.PUBLIC), names().fromString(name), 
+                                type,
+                                List.<JCTypeParameter>nil(), 
+                                List.<JCVariableDecl>nil(),
+                                List.<JCExpression>nil(), 
+                                null, 
+                                null);
+                        body.append(method);
+                    }
+                    return body.toList();
+                }
+                if(wantedDeclaration == WantedDeclaration.AnnotationSequence){
+                    String name = Naming.toplevelClassName("", decl);
+                    String annotationName = Naming.suffixName(Suffix.$annotation$, name);
+                    JCExpression type = make().TypeArray(make().Ident(names().fromString(annotationName)));
+                    JCMethodDecl method
+                            = make().MethodDef(make().Modifiers(Flags.PUBLIC), names().fromString("value"), 
+                                type,
+                                List.<JCTypeParameter>nil(), 
+                                List.<JCVariableDecl>nil(),
+                                List.<JCExpression>nil(), 
+                                null, 
+                                null);
+                    return List.<JCTree>of(method);
+                }
+                return List.<JCTree>nil();
+            }
+
+            private JCExpression getAnnotationTypeFor(Tree.Type type) {
+                if(type instanceof Tree.BaseType){
+                    String name = ((Tree.BaseType) type).getIdentifier().getText();
+                    if(name.equals("String") || name.equals("Declaration"))
+                        return make().Type(syms().stringType);
+                    if(name.equals("Boolean"))
+                        return make().Type(syms().booleanType);
+                    if(name.equals("Integer"))
+                        return make().Type(syms().longType);
+                    if(name.equals("Float"))
+                        return make().Type(syms().doubleType);
+                    if(name.equals("Byte"))
+                        return make().Type(syms().byteType);
+                    if(name.equals("Character"))
+                        return make().Type(syms().charType);
+                    if(name.equals("Declaration")
+                            || name.equals("ClassDeclaration")
+                            || name.equals("InterfaceDeclaration")
+                            || name.equals("ClassOrInterfaceDeclaration"))
+                        return make().Type(syms().stringType);
+                }
+                if(type instanceof Tree.SequencedType){
+                    return make().TypeArray(getAnnotationTypeFor(((Tree.SequencedType) type).getType()));
+                }
+                if(type instanceof Tree.SequenceType){
+                    return make().TypeArray(getAnnotationTypeFor(((Tree.SequenceType) type).getElementType()));
+                }
+                if(type instanceof Tree.IterableType){
+                    return make().TypeArray(getAnnotationTypeFor(((Tree.IterableType) type).getElementType()));
+                }
+                if(type instanceof Tree.TupleType){
+                    // can only be one, must be a SequencedType
+                    Tree.Type sequencedType = ((Tree.TupleType) type).getElementTypes().get(0);
+                    return getAnnotationTypeFor(sequencedType);
+                }
+                System.err.println("Unknown Annotation type: "+type);
+                return make().TypeArray(make().Type(syms().stringType));
             }
 
             @Override
@@ -249,7 +363,6 @@ public class CeylonTransformer extends AbstractTransformer {
         final String attrClassName = Naming.getAttrClassName(declarationModel, 0);
         final Tree.SpecifierOrInitializerExpression expression;
         final Tree.Block block;
-        final Tree.AnnotationList annotationList = decl.getAnnotationList();
         if (decl instanceof Tree.AttributeDeclaration) {
             Tree.AttributeDeclaration adecl = (Tree.AttributeDeclaration)decl;
             expression = adecl.getSpecifierOrInitializerExpression();
@@ -269,13 +382,13 @@ public class CeylonTransformer extends AbstractTransformer {
             throw new RuntimeException();
         }
         return transformAttribute(declarationModel, attrName, attrClassName,
-                annotationList, block, expression, decl, setterDecl);
+                decl, block, expression, decl, setterDecl);
     }
 
     public List<JCTree> transformAttribute(
             TypedDeclaration declarationModel,
             String attrName, String attrClassName,
-            final Tree.AnnotationList annotations,
+            final Tree.Declaration annotated,
             final Tree.Block block,
             final Tree.SpecifierOrInitializerExpression expression, 
             final Tree.TypedDeclaration decl,
@@ -283,7 +396,7 @@ public class CeylonTransformer extends AbstractTransformer {
         
         // For everything else generate a getter/setter method
         AttributeDefinitionBuilder builder = AttributeDefinitionBuilder
-            .wrapped(this, attrClassName, attrName, declarationModel, declarationModel.isToplevel())
+            .wrapped(this, attrClassName, null, attrName, declarationModel, declarationModel.isToplevel())
             .is(Flags.PUBLIC, declarationModel.isShared());
         
         final JCExpression initialValue;
@@ -329,6 +442,9 @@ public class CeylonTransformer extends AbstractTransformer {
                 scopeAnnotations = makeAtLocalDeclarations(decl);
             }
             builder.classAnnotations(scopeAnnotations);
+        }else if(block != null){
+            List<JCAnnotation> scopeAnnotations = makeAtLocalDeclarations(block);
+            builder.classAnnotations(scopeAnnotations);
         }
 
         // Remember the setter class if we generate a getter
@@ -345,8 +461,8 @@ public class CeylonTransformer extends AbstractTransformer {
         }
         
         if (declarationModel instanceof Setter
-                || (declarationModel instanceof MethodOrValue 
-                    && ((MethodOrValue)declarationModel).isParameter())) {
+                || (declarationModel instanceof FunctionOrValue 
+                    && ((FunctionOrValue)declarationModel).isParameter())) {
             // For local setters
             JCBlock setterBlock = makeSetterBlock(declarationModel, block, expression);
             builder.setterBlock(setterBlock);
@@ -368,7 +484,14 @@ public class CeylonTransformer extends AbstractTransformer {
                 }
             } else {
                 // For local and toplevel getters
+                boolean prevSyntheticClassBody;
+                if (Decl.isLocal(declarationModel)) {
+                    prevSyntheticClassBody = expressionGen().withinSyntheticClassBody(true);
+                } else {
+                    prevSyntheticClassBody = expressionGen().isWithinSyntheticClassBody();
+                }
                 JCBlock getterBlock = makeGetterBlock(declarationModel, block, expression);
+                prevSyntheticClassBody = expressionGen().withinSyntheticClassBody(prevSyntheticClassBody);
                 builder.getterBlock(getterBlock);
                 
                 if (Decl.isLocal(declarationModel)) {
@@ -380,7 +503,8 @@ public class CeylonTransformer extends AbstractTransformer {
                         JCBlock setterBlock = makeSetterBlock(setterDecl.getDeclarationModel(),
                                 setterDecl.getBlock(), setterDecl.getSpecifierExpression());
                         builder.setterBlock(setterBlock);
-                        builder.userAnnotationsSetter(expressionGen().transform(setterDecl.getAnnotationList()));
+                        //builder.userAnnotationsSetter(expressionGen().transformAnnotations(true, OutputElement.METHOD, setterDecl));
+                        builder.userAnnotationsSetter(expressionGen().transformAnnotations(OutputElement.SETTER, setterDecl));
                     } else {
                         builder.immutable();
                     }
@@ -388,7 +512,9 @@ public class CeylonTransformer extends AbstractTransformer {
             }
         }
         
-        builder.userAnnotations(expressionGen().transform(annotations));
+        if (annotated != null) {
+            builder.userAnnotations(expressionGen().transformAnnotations(OutputElement.GETTER, annotated));
+        }
         
         if (Decl.isLocal(declarationModel)) {
             if (expressionError != null) {
@@ -399,8 +525,8 @@ public class CeylonTransformer extends AbstractTransformer {
                 builder.valueConstructor();
             JCExpression typeExpr;
             if (declarationModel instanceof Setter 
-                    || (declarationModel instanceof MethodOrValue
-                        && ((MethodOrValue)declarationModel).isParameter())) {
+                    || (declarationModel instanceof FunctionOrValue
+                        && ((FunctionOrValue)declarationModel).isParameter())) {
                 typeExpr = makeQuotedIdent(attrClassName);
             } else {
                 typeExpr = makeJavaType(getGetterInterfaceType(declarationModel));
@@ -464,14 +590,18 @@ public class CeylonTransformer extends AbstractTransformer {
     
     /** Creates a module class in the package, with the Module annotation required by the runtime. */
     public List<JCTree> transformModuleDescriptor(Tree.ModuleDescriptor module) {
-        at(module);
+        at(null);
+        
         ClassDefinitionBuilder builder = ClassDefinitionBuilder
-                .klass(this, Naming.MODULE_DESCRIPTOR_CLASS_NAME, null, false)
-                .modifiers(Flags.FINAL)
-                .constructorModifiers(Flags.PRIVATE)
-                .annotations(makeAtModule(module.getUnit().getPackage().getModule()));
-        builder.annotations(expressionGen().transform(module.getAnnotationList()));
+                .klass(this, Naming.MODULE_DESCRIPTOR_CLASS_NAME, null, false);
+        builder.modifiers(Flags.FINAL)
+                .annotations(makeAtModule(module));
+        builder.getInitBuilder().modifiers(Flags.PRIVATE);
+        builder.annotations(expressionGen().transformAnnotations(OutputElement.TYPE, module));
         for (Tree.ImportModule imported : module.getImportModuleList().getImportModules()) {
+            if (!isForBackend(imported.getAnnotationList(), Backend.Java, imported.getUnit())) {
+                continue;
+            }
             String quotedName;
             if (imported.getImportPath() != null) {
                 StringBuilder sb = new StringBuilder();
@@ -486,10 +616,7 @@ public class CeylonTransformer extends AbstractTransformer {
             } else {
                 throw new BugException(imported, "unhandled module import");
             }
-            if (quotedName.equals("ceylon$language")) {
-                continue;
-            }
-            List<JCAnnotation> importAnnotations = expressionGen().transform(imported.getAnnotationList());
+            List<JCAnnotation> importAnnotations = expressionGen().transformAnnotations(OutputElement.FIELD, imported);
             JCModifiers mods = make().Modifiers(Flags.PUBLIC | Flags.STATIC | Flags.FINAL, importAnnotations);
             Name fieldName = names().fromString(quotedName);
             builder.defs(List.<JCTree>of(make().VarDef(mods, fieldName, make().Type(syms().stringType), makeNull())));
@@ -498,13 +625,13 @@ public class CeylonTransformer extends AbstractTransformer {
     }
 
     public List<JCTree> transformPackageDescriptor(Tree.PackageDescriptor pack) {
-        at(pack);
+        at(null);
         ClassDefinitionBuilder builder = ClassDefinitionBuilder
                 .klass(this, Naming.PACKAGE_DESCRIPTOR_CLASS_NAME, null, false)
                 .modifiers(Flags.FINAL)
-                .constructorModifiers(Flags.PRIVATE)
                 .annotations(makeAtPackage(pack.getUnit().getPackage()));
-        builder.annotations(expressionGen().transform(pack.getAnnotationList()));
+        builder.getInitBuilder().modifiers(Flags.PRIVATE);
+        builder.annotations(expressionGen().transformAnnotations(OutputElement.TYPE, pack));
         return builder.build();
     }
 }

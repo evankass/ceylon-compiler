@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.mcr;
 
-class ClassDefaultMemberClassWithParams implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ClassDefaultMemberClassWithParams implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ClassDefaultMemberClassWithParams() {
     }
@@ -9,7 +9,7 @@ class ClassDefaultMemberClassWithParams implements .com.redhat.ceylon.compiler.j
         return new Member(i);
     }
     
-    public class Member implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    public class Member implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         protected Member(final long i) {
         }
@@ -29,11 +29,6 @@ class ClassDefaultMemberClassWithParams implements .com.redhat.ceylon.compiler.j
             returning Member$new$(arg$0$0);
         );
         return Member$new$(1L);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.mcr.ClassDefaultMemberClassWithParams();
     }
     
     @.java.lang.Override
@@ -74,11 +69,6 @@ class ClassDefaultMemberClassWithParams_sub extends .com.redhat.ceylon.compiler.
             returning Member$new$(arg$1$0);
         );
         return Member$new$(2L);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.mcr.ClassDefaultMemberClassWithParams_sub();
     }
     
     @.java.lang.Override

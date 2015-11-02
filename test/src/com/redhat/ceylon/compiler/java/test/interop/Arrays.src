@@ -10,13 +10,8 @@ final class testFiles_ {
         final .java.io.File[] items = .com.redhat.ceylon.compiler.java.Util.checkNull(f.listFiles());
         final .java.io.File f2 = items[.com.redhat.ceylon.compiler.java.Util.toInt(0L)];
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.testFiles_.testFiles();
-    }
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.Method
 final class booleanArray_ {
     
@@ -25,7 +20,7 @@ final class booleanArray_ {
     
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("java.lang::BooleanArray")
     static boolean[] booleanArray(@.com.redhat.ceylon.compiler.java.metadata.Name("values")
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Iterable<ceylon.language::Boolean,ceylon.language::Null>")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("{ceylon.language::Boolean*}")
     final .ceylon.language.Iterable<? extends .ceylon.language.Boolean, ? extends .java.lang.Object> values) {
         final boolean[] ret = new boolean[.com.redhat.ceylon.compiler.java.Util.toInt(values.getSize())];
         long idx = 0L;
@@ -72,7 +67,7 @@ final class test_booleans_ {
         }
         final .ceylon.language.Iterable<? extends .ceylon.language.Character, ? extends .java.lang.Object> it = .ceylon.language.String.instance("foo");
         java.take_booleans(items);
-        java.take_booleans(.com.redhat.ceylon.compiler.java.test.interop.booleanArray_.booleanArray((.ceylon.language.Sequence<? extends .ceylon.language.Boolean>).ceylon.language.Tuple.instance(.ceylon.language.Boolean.$TypeDescriptor$, new .java.lang.Object[]{
+        java.take_booleans(.com.redhat.ceylon.compiler.java.test.interop.booleanArray_.booleanArray((.ceylon.language.Sequence<? extends .ceylon.language.Boolean>).ceylon.language.Tuple.instance(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.true_.$TypeDescriptor$, .ceylon.language.false_.$TypeDescriptor$), new .java.lang.Object[]{
                 .ceylon.language.Boolean.instance(true),
                 .ceylon.language.Boolean.instance(true),
                 .ceylon.language.Boolean.instance(false)})));
@@ -91,7 +86,7 @@ final class test_booleans_ {
             returning new boolean[arg$12$0];
         );
         new boolean[.com.redhat.ceylon.compiler.java.Util.toInt(2L)];
-        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<boolean[]>(.com.redhat.ceylon.compiler.java.language.BooleanArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Boolean.$TypeDescriptor$), .ceylon.language.Integer.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Empty.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Boolean.$TypeDescriptor$, .ceylon.language.Boolean.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$))), "BooleanArray(Integer, Boolean=)", (short)-1){
+        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<boolean[]>(.com.redhat.ceylon.compiler.java.language.BooleanArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, 1, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Boolean.$TypeDescriptor$), "BooleanArray(Integer, Boolean=)", (short)-1){
             
             @.java.lang.Override
             public boolean[] $call$(final .java.lang.Object $param$0) {
@@ -139,9 +134,9 @@ final class test_booleans_ {
         );
         final boolean[][] matrix = new boolean[.com.redhat.ceylon.compiler.java.Util.toInt(10L)][];
         final long start$15 = .com.redhat.ceylon.compiler.java.Util.toInt(0L);
-        final long end$16 = start$15 + .java.lang.Math.max(0L, matrix.length);
-        loop_1: for (long i$17 = start$15; i$17 < end$16; i$17++) {
-            final long x = i$17;
+        final long length$16 = matrix.length;
+        loop_1: for (long i$17 = 0; i$17 < length$16; i$17++) {
+            final long x = i$17 + start$15;
             matrix[.com.redhat.ceylon.compiler.java.Util.toInt(x)] = new boolean[.com.redhat.ceylon.compiler.java.Util.toInt(2L)];
         }
         final .ceylon.language.Array<boolean[]> boolArray = .com.redhat.ceylon.compiler.java.language.ObjectArray<? extends boolean[]>.getArray(matrix);
@@ -152,18 +147,13 @@ final class test_booleans_ {
         }
         .java.lang.Object o$22;
         if ((o$22 = o) instanceof boolean[][]) {
-            final boolean[][] o$23 = (boolean[][])o$22;
+            final boolean[][] o$23 = (boolean[][])(boolean[][])o$22;
         }
         .java.lang.Object o$25;
         if ((o$25 = o) instanceof .ceylon.language.Boolean[][]) {
-            final .ceylon.language.Boolean[][] o$26 = (.ceylon.language.Boolean[][])o$25;
+            final .ceylon.language.Boolean[][] o$26 = (.ceylon.language.Boolean[][])(.ceylon.language.Boolean[][])o$25;
         }
         final boolean[] cloned = .com.redhat.ceylon.compiler.java.language.BooleanArray.$clone(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_booleans_.test_booleans();
     }
 }
 final class test_JBooleans_ {
@@ -182,11 +172,6 @@ final class test_JBooleans_ {
         }
         java.take_Booleans(items);
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_JBooleans_.test_JBooleans();
-    }
 }
 final class test_bytes_ {
     
@@ -204,7 +189,7 @@ final class test_bytes_ {
         }
         java.take_bytes(items);
         new byte[.com.redhat.ceylon.compiler.java.Util.toInt(2L)];
-        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<byte[]>(.com.redhat.ceylon.compiler.java.language.ByteArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Byte.$TypeDescriptor$), .ceylon.language.Integer.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Empty.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Byte.$TypeDescriptor$, .ceylon.language.Byte.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$))), "ByteArray(Integer, Byte=)", (short)-1){
+        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<byte[]>(.com.redhat.ceylon.compiler.java.language.ByteArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, 1, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Byte.$TypeDescriptor$), "ByteArray(Integer, Byte=)", (short)-1){
             
             @.java.lang.Override
             public byte[] $call$(final .java.lang.Object $param$0) {
@@ -220,11 +205,6 @@ final class test_bytes_ {
             }
         };
         final byte[] cloned = .com.redhat.ceylon.compiler.java.language.ByteArray.$clone(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_bytes_.test_bytes();
     }
 }
 final class test_JBytes_ {
@@ -243,11 +223,6 @@ final class test_JBytes_ {
         }
         java.take_Bytes(items);
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_JBytes_.test_JBytes();
-    }
 }
 final class test_shorts_ {
     
@@ -265,7 +240,7 @@ final class test_shorts_ {
         }
         java.take_shorts(items);
         new short[.com.redhat.ceylon.compiler.java.Util.toInt(2L)];
-        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<short[]>(.com.redhat.ceylon.compiler.java.language.ShortArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Empty.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$))), "ShortArray(Integer, Integer=)", (short)-1){
+        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<short[]>(.com.redhat.ceylon.compiler.java.language.ShortArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, 1, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$), "ShortArray(Integer, Integer=)", (short)-1){
             
             @.java.lang.Override
             public short[] $call$(final .java.lang.Object $param$0) {
@@ -281,11 +256,6 @@ final class test_shorts_ {
             }
         };
         final short[] cloned = .com.redhat.ceylon.compiler.java.language.ShortArray.$clone(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_shorts_.test_shorts();
     }
 }
 final class test_JShorts_ {
@@ -304,11 +274,6 @@ final class test_JShorts_ {
         }
         java.take_Shorts(items);
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_JShorts_.test_JShorts();
-    }
 }
 final class test_ints_ {
     
@@ -326,7 +291,7 @@ final class test_ints_ {
         }
         java.take_ints(items);
         new int[.com.redhat.ceylon.compiler.java.Util.toInt(2L)];
-        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<int[]>(.com.redhat.ceylon.compiler.java.language.IntArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Empty.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$))), "IntArray(Integer, Integer=)", (short)-1){
+        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<int[]>(.com.redhat.ceylon.compiler.java.language.IntArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, 1, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$), "IntArray(Integer, Integer=)", (short)-1){
             
             @.java.lang.Override
             public int[] $call$(final .java.lang.Object $param$0) {
@@ -342,11 +307,6 @@ final class test_ints_ {
             }
         };
         final int[] cloned = .com.redhat.ceylon.compiler.java.language.IntArray.$clone(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_ints_.test_ints();
     }
 }
 final class test_JIntegers_ {
@@ -365,11 +325,6 @@ final class test_JIntegers_ {
         }
         java.take_Integers(items);
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_JIntegers_.test_JIntegers();
-    }
 }
 final class test_longs_ {
     
@@ -387,7 +342,7 @@ final class test_longs_ {
         }
         java.take_longs(items);
         new long[.com.redhat.ceylon.compiler.java.Util.toInt(2L)];
-        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<long[]>(.com.redhat.ceylon.compiler.java.language.LongArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Empty.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$))), "LongArray(Integer, Integer=)", (short)-1){
+        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<long[]>(.com.redhat.ceylon.compiler.java.language.LongArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, 1, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.$TypeDescriptor$), "LongArray(Integer, Integer=)", (short)-1){
             
             @.java.lang.Override
             public long[] $call$(final .java.lang.Object $param$0) {
@@ -403,11 +358,6 @@ final class test_longs_ {
             }
         };
         final long[] cloned = .com.redhat.ceylon.compiler.java.language.LongArray.$clone(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_longs_.test_longs();
     }
 }
 final class test_JLongs_ {
@@ -426,11 +376,6 @@ final class test_JLongs_ {
         }
         java.take_Longs(items);
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_JLongs_.test_JLongs();
-    }
 }
 final class test_floats_ {
     
@@ -448,7 +393,7 @@ final class test_floats_ {
         }
         java.take_floats(items);
         new float[.com.redhat.ceylon.compiler.java.Util.toInt(2L)];
-        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<float[]>(.com.redhat.ceylon.compiler.java.language.FloatArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Float.$TypeDescriptor$), .ceylon.language.Integer.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Empty.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Float.$TypeDescriptor$, .ceylon.language.Float.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$))), "FloatArray(Integer, Float=)", (short)-1){
+        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<float[]>(.com.redhat.ceylon.compiler.java.language.FloatArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, 1, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Float.$TypeDescriptor$), "FloatArray(Integer, Float=)", (short)-1){
             
             @.java.lang.Override
             public float[] $call$(final .java.lang.Object $param$0) {
@@ -464,11 +409,6 @@ final class test_floats_ {
             }
         };
         final float[] cloned = .com.redhat.ceylon.compiler.java.language.FloatArray.$clone(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_floats_.test_floats();
     }
 }
 final class test_JFloats_ {
@@ -487,11 +427,6 @@ final class test_JFloats_ {
         }
         java.take_Floats(items);
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_JFloats_.test_JFloats();
-    }
 }
 final class test_doubles_ {
     
@@ -509,7 +444,7 @@ final class test_doubles_ {
         }
         java.take_doubles(items);
         new double[.com.redhat.ceylon.compiler.java.Util.toInt(2L)];
-        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<double[]>(.com.redhat.ceylon.compiler.java.language.DoubleArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Float.$TypeDescriptor$), .ceylon.language.Integer.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Empty.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Float.$TypeDescriptor$, .ceylon.language.Float.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$))), "DoubleArray(Integer, Float=)", (short)-1){
+        final .ceylon.language.Callable<? extends .java.lang.Object> ctorRef = new .com.redhat.ceylon.compiler.java.language.AbstractCallable<double[]>(.com.redhat.ceylon.compiler.java.language.DoubleArray.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, 1, .ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Float.$TypeDescriptor$), "DoubleArray(Integer, Float=)", (short)-1){
             
             @.java.lang.Override
             public double[] $call$(final .java.lang.Object $param$0) {
@@ -525,11 +460,6 @@ final class test_doubles_ {
             }
         };
         final double[] cloned = .com.redhat.ceylon.compiler.java.language.DoubleArray.$clone(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_doubles_.test_doubles();
     }
 }
 final class test_JDoubles_ {
@@ -547,11 +477,6 @@ final class test_JDoubles_ {
             items[.com.redhat.ceylon.compiler.java.Util.toInt(1L)] = f$65;
         }
         java.take_Doubles(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_JDoubles_.test_JDoubles();
     }
 }
 final class test_chars_ {
@@ -574,11 +499,6 @@ final class test_chars_ {
         final .ceylon.language.Array<.ceylon.language.Character> chars2 = .com.redhat.ceylon.compiler.java.language.IntArray.getCodePointArray(ints);
         final char[] cloned = .com.redhat.ceylon.compiler.java.language.CharArray.$clone(items);
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_chars_.test_chars();
-    }
 }
 final class test_JCharacters_ {
     
@@ -595,11 +515,6 @@ final class test_JCharacters_ {
             items[.com.redhat.ceylon.compiler.java.Util.toInt(1L)] = c$71;
         }
         java.take_Characters(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_JCharacters_.test_JCharacters();
     }
 }
 final class test_Strings_ {
@@ -624,11 +539,6 @@ final class test_Strings_ {
         final .ceylon.language.Array<.java.lang.String> javaStringArray = .com.redhat.ceylon.compiler.java.language.ObjectArray<? extends .java.lang.String>.getArray(items);
         final .java.lang.String[] cloned = .com.redhat.ceylon.compiler.java.language.ObjectArray<? extends .java.lang.String>.$clone(items);
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_Strings_.test_Strings();
-    }
 }
 final class test_Objects_ {
     
@@ -648,10 +558,5 @@ final class test_Objects_ {
         }
         java.take_Objects(items);
         final .java.lang.Object[] cloned = .com.redhat.ceylon.compiler.java.language.ObjectArray<? extends .java.lang.Object>.$clone(items);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_Objects_.test_Objects();
     }
 }

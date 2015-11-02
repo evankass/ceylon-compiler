@@ -11,11 +11,8 @@ final class bug1336_ {
         .ceylon.language.Sequential itemsSequence$1 = null;
         if ((itemsSequence$1 = itemsSequence) instanceof .ceylon.language.Sequence) {
             itemsSequence$2 = (.ceylon.language.Sequence<? extends .java.lang.Object>)itemsSequence$1;
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "nonempty itemsSequence"));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1336_.bug1336();
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "nonempty itemsSequence"));
+        }
     }
 }

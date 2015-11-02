@@ -9,7 +9,7 @@ final class methodSpecifyingTopLevelWithTypeParam_f_ {
         throw new .ceylon.language.Exception(null, null);
     }
 }
-class MethodSpecifyingTopLevelWithTypeParam<S, T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodSpecifyingTopLevelWithTypeParam<S, T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodSpecifyingTopLevelWithTypeParam(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$S, final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T) {
         this.$reified$S = $reified$S;
@@ -24,11 +24,6 @@ class MethodSpecifyingTopLevelWithTypeParam<S, T> implements .com.redhat.ceylon.
     
     private final S bar$priv$(final T y) {
         return .com.redhat.ceylon.compiler.java.test.structure.method.methodSpecifyingTopLevelWithTypeParam_f_.<S, T>methodSpecifyingTopLevelWithTypeParam_f($reified$S, $reified$T, y);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.method.MethodSpecifyingTopLevelWithTypeParam(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
     }
     
     @.java.lang.Override

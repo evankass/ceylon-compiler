@@ -15,8 +15,6 @@ interface Local$local$LI$LII {
 interface Local$local$LI {
     
     public .java.lang.Object LI$impl();
-    
-    public abstract long $default$LIC$j();
 }
 interface Local$C$local2$CL$LCI {
     
@@ -34,7 +32,7 @@ interface Local$I {
     
     public .com.redhat.ceylon.compiler.java.test.structure.nesting.Local.I$impl $com$redhat$ceylon$compiler$java$test$structure$nesting$Local$I$impl();
 }
-class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Local() {
     }
@@ -60,14 +58,14 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
     
     private void local$priv$$canonical$(final long i) {
         
-        final class LC$impl {
+        final class LC$impl implements .java.io.Serializable {
             
             private final long $default$j() {
                 return 0L;
             }
         }
         
-        class LC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+        class LC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
             
             LC() {
                 (
@@ -90,7 +88,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
                 return j;
             }
             
-            final class LCI$impl {
+            final class LCI$impl implements .java.io.Serializable {
                 
                 LCI$impl(.com.redhat.ceylon.compiler.java.test.structure.nesting.Local$local$LC$LCI $this) {
                     this.$this = $this;
@@ -106,7 +104,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
                 return 0L;
             }
             
-            class LCC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$local$LC$LCI {
+            class LCC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$local$LC$LCI, .java.io.Serializable {
                 
                 LCC() {
                     (
@@ -152,14 +150,14 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
             }
         }
         
-        final class LI$impl {
+        final class LI$impl implements .java.io.Serializable {
             
             LI$impl(.com.redhat.ceylon.compiler.java.test.structure.nesting.Local$local$LI $this) {
                 this.$this = $this;
             }
             private final .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$local$LI $this;
             
-            final class LII$impl {
+            final class LII$impl implements .java.io.Serializable {
                 
                 LII$impl(.com.redhat.ceylon.compiler.java.test.structure.nesting.Local$local$LI$LII $this) {
                     this.$this = $this;
@@ -175,7 +173,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
                 return 0L;
             }
             
-            class LIC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$local$LI$LII {
+            class LIC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$local$LI$LII, .java.io.Serializable {
                 
                 LIC() {
                     (
@@ -231,7 +229,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
         return 0L;
     }
     
-    class C implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class C implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         C() {
             (
@@ -270,14 +268,14 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
         
         private void local2$priv$$canonical$(final long j) {
             
-            final class CL$impl {
+            final class CL$impl implements .java.io.Serializable {
                 
                 private final long $default$k() {
                     return 0L;
                 }
             }
             
-            class CL implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+            class CL implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
                 
                 CL() {
                     (
@@ -300,7 +298,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
                     return k;
                 }
                 
-                final class LCI$impl {
+                final class LCI$impl implements .java.io.Serializable {
                     
                     LCI$impl(.com.redhat.ceylon.compiler.java.test.structure.nesting.Local$C$local2$CL$LCI $this) {
                         this.$this = $this;
@@ -316,7 +314,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
                     return 0L;
                 }
                 
-                class CLC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$C$local2$CL$LCI {
+                class CLC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$C$local2$CL$LCI, .java.io.Serializable {
                     
                     CLC() {
                         (
@@ -379,7 +377,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
         }
     }
     
-    final class I$impl {
+    final class I$impl implements .java.io.Serializable {
         
         I$impl(.com.redhat.ceylon.compiler.java.test.structure.nesting.Local$I $this) {
             this.$this = $this;
@@ -403,14 +401,14 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
         
         private void local3$priv$$canonical$(final long i) {
             
-            final class IL$impl {
+            final class IL$impl implements .java.io.Serializable {
                 
                 private final long $default$j() {
                     return 0L;
                 }
             }
             
-            class IL implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+            class IL implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
                 
                 IL() {
                     (
@@ -433,7 +431,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
                     return j;
                 }
                 
-                final class ICI$impl {
+                final class ICI$impl implements .java.io.Serializable {
                     
                     ICI$impl(.com.redhat.ceylon.compiler.java.test.structure.nesting.Local$I$local3$IL$ICI $this) {
                         this.$this = $this;
@@ -449,7 +447,7 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
                     return 0L;
                 }
                 
-                class ILC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$I$local3$IL$ICI {
+                class ILC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.nesting.Local$I$local3$IL$ICI, .java.io.Serializable {
                     
                     ILC() {
                         (
@@ -505,11 +503,6 @@ class Local implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
                 returning null;
             );
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.nesting.Local();
     }
     
     @.java.lang.Override

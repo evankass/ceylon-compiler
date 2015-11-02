@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.selfref;
 
-class ThisReference implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ThisReference implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ThisReference() {
     }
@@ -11,11 +11,6 @@ class ThisReference implements .com.redhat.ceylon.compiler.java.runtime.model.Re
     
     public final void test() {
         this.test();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.selfref.ThisReference();
     }
     
     @.java.lang.Override

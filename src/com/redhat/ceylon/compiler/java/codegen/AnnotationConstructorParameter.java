@@ -1,7 +1,7 @@
 package com.redhat.ceylon.compiler.java.codegen;
 
-import com.redhat.ceylon.compiler.java.codegen.Naming.Prefix;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
+import com.redhat.ceylon.model.loader.NamingBase.Prefix;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
 
 /**
  * A parameter to an annotation constructor, 
@@ -17,7 +17,7 @@ public class AnnotationConstructorParameter implements AnnotationFieldName {
     public AnnotationConstructorParameter() {}
     
     /**
-     * The corresponding parameter of the annotation constructor {@code Method}
+     * The corresponding parameter of the annotation constructor {@code Function}
      * @return
      */
     public Parameter getParameter() {

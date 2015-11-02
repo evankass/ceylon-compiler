@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.loop;
 
-class MethodWhileExistsSequence implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodWhileExistsSequence implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodWhileExistsSequence() {
     }
@@ -8,17 +8,14 @@ class MethodWhileExistsSequence implements .com.redhat.ceylon.compiler.java.runt
     public final long mvar(final .ceylon.language.Sequential<? extends .ceylon.language.Integer> x) {
         loop_0: while (true) {
             .ceylon.language.Integer y$0;
-            if ((y$0 = x.get(.ceylon.language.Integer.instance(0L))) != null) {
+            if ((y$0 = x.getFromFirst(0L)) != null) {
                 final long y$1 = y$0.longValue();
                 return y$1;
-            } else break loop_0;
+            } else {
+                break loop_0;
+            }
         }
         return 0L;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.loop.MethodWhileExistsSequence();
     }
     
     @.java.lang.Override

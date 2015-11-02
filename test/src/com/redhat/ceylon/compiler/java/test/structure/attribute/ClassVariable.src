@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.attribute;
 
-abstract class ClassVariable implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+abstract class ClassVariable implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ClassVariable() {
         .java.lang.String uncapturedvar = null;
@@ -57,11 +57,6 @@ class SubClassVariable extends .com.redhat.ceylon.compiler.java.test.structure.a
     @.java.lang.Override
     public final void setFormalvar(final .java.lang.String formalvar) {
         this.formalvar = formalvar;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.attribute.SubClassVariable();
     }
     
     @.java.lang.Override

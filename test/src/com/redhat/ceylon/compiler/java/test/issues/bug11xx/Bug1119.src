@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug11xx;
 
-abstract class Bug1119Operation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+abstract class Bug1119Operation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1119Operation() {
     }
@@ -17,12 +17,17 @@ abstract class Bug1119Operation implements .com.redhat.ceylon.compiler.java.runt
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug11xx.Bug1119Operation.class);
 }
-final class bug1119Addition_ extends .com.redhat.ceylon.compiler.java.test.issues.bug11xx.Bug1119Operation {
+final class bug1119Addition_ extends .com.redhat.ceylon.compiler.java.test.issues.bug11xx.Bug1119Operation implements .java.io.Serializable {
     
     private bug1119Addition_() {
         super();
         this.string = "+";
     }
+    
+    private .java.lang.Object readResolve() {
+        return .com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_.get_();
+    }
+    public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_.class);
     
     @.java.lang.Override
     public final long evaluate(final long left, final long right) {
@@ -41,27 +46,29 @@ final class bug1119Addition_ extends .com.redhat.ceylon.compiler.java.test.issue
         final boolean b2 = toString().equals(token) || "and".equals(token);
         return b2;
     }
-    private static final .com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_[] value;
+    private static final .com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_ value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new .com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_[]{new .com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_()};
+            value = new .com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_();
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
             value = null;
+            $init$value = false;
         }
     }
     
     static .com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_ get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (bug1119Addition_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'bug1119Addition\' before it was set");
         }
     }
-    public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1119Addition_.class);
     
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {

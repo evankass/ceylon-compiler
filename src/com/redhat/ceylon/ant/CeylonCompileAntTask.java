@@ -70,6 +70,18 @@ public class CeylonCompileAntTask extends LazyCeylonAntTask  {
         }
     }
     
+    public static class SuppressWarning {
+        String value;
+        
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public void addText(String value) {
+            this.value = value;
+        }
+    }
+    
     private static final FileFilter ARTIFACT_FILTER = new FileFilter() {
         @Override
         public boolean accept(File pathname) {
@@ -87,9 +99,12 @@ public class CeylonCompileAntTask extends LazyCeylonAntTask  {
     private FileSet files;
     private List<JavacOption> javacOptions = new ArrayList<JavacOption>(0);
     private Boolean noOsgi;
+    private String osgiProvidedBundles;
     private Boolean noPom;
     private Boolean pack200;
-
+    private List<SuppressWarning> suppressWarnings = new ArrayList<SuppressWarning>(0);
+    private boolean suppressAllWarnings = false;
+    
     private List<File> compileList = new ArrayList<File>(2);
     private Set<Module> modules = null;
     
@@ -106,6 +121,20 @@ public class CeylonCompileAntTask extends LazyCeylonAntTask  {
     
     public boolean getNoOsgi() {
         return noOsgi;
+    }
+
+    /**
+     * Comma-separated list of module names.
+     * The listed modules are expected to be OSGI bundles provided by the framework,
+     * and will be omitted from the 'Required-Bundle' OSGI header in the
+     * manifest of the generated car file.
+     */
+    public void setOsgiProvidedBundles(String osgiProvidedBundles) {
+        this.osgiProvidedBundles = osgiProvidedBundles;
+    }
+    
+    public String getOsgiProvidedBundles() {
+        return osgiProvidedBundles;
     }
 
     /**
@@ -130,6 +159,13 @@ public class CeylonCompileAntTask extends LazyCeylonAntTask  {
         this.pack200 = pack200;
     }
 
+    public void addConfiguredSuppressWarning(SuppressWarning sw) {
+        this.suppressWarnings.add(sw);
+        if (sw.value == null || sw.value.isEmpty()) {
+            suppressAllWarnings = true;
+        }
+    }
+
     /**
      * Set the resource directories to find the resource files.
      * @param res the resource directories as a path
@@ -139,6 +175,15 @@ public class CeylonCompileAntTask extends LazyCeylonAntTask  {
             this.res = res;
         } else {
             this.res.append(res);
+        }
+    }
+
+    public void addConfiguredResource(Src res) {
+        Path p = new Path(getProject(), res.value);
+        if (this.res == null) {
+            this.res = p;
+        } else {
+            this.res.append(p);
         }
     }
 
@@ -435,11 +480,24 @@ public class CeylonCompileAntTask extends LazyCeylonAntTask  {
         if (noOsgi != null && noOsgi.booleanValue())
             appendOption(cmd, "--no-osgi");
 
+        if (osgiProvidedBundles != null && !osgiProvidedBundles.isEmpty())
+            appendOptionArgument(cmd, "--osgi-provided-bundles", osgiProvidedBundles);
+
         if (noPom != null && noPom.booleanValue())
             appendOption(cmd, "--no-pom");
 
         if (pack200!= null && pack200.booleanValue())
             appendOption(cmd, "--pack200");
+        
+        if (suppressWarnings != null) {
+            if (suppressAllWarnings) {
+                appendOption(cmd, "--suppress-warning");
+            } else {
+                for (SuppressWarning sw : suppressWarnings) {
+                    appendOption(cmd, "--suppress-warning=" + sw.value);
+                }
+            }
+        }
         
         if(classpath != null){
             throw new RuntimeException("-classpath not longer supported");

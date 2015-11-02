@@ -25,9 +25,9 @@ import java.util.List;
 
 import javax.lang.model.type.TypeKind;
 
-import com.redhat.ceylon.compiler.loader.mirror.ClassMirror;
-import com.redhat.ceylon.compiler.loader.mirror.TypeMirror;
-import com.redhat.ceylon.compiler.loader.mirror.TypeParameterMirror;
+import com.redhat.ceylon.model.loader.mirror.ClassMirror;
+import com.redhat.ceylon.model.loader.mirror.TypeMirror;
+import com.redhat.ceylon.model.loader.mirror.TypeParameterMirror;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Type.ArrayType;
@@ -48,6 +48,7 @@ public class JavacType implements TypeMirror {
     private boolean declaredClassSet;
     private TypeParameterMirror typeParameter;
     private boolean typeParameterSet;
+    private JavacType qualifyingType;
 
     public JavacType(Type type) {
         this.type = type;
@@ -156,5 +157,16 @@ public class JavacType implements TypeMirror {
             typeParameterSet = true;
         }
         return typeParameter;
+    }
+
+    @Override
+    public TypeMirror getQualifyingType() {
+        if(qualifyingType == null){
+            Type enclosingType = type.getEnclosingType();
+            if(enclosingType != null && enclosingType instanceof Type.ClassType){
+                qualifyingType = new JavacType(enclosingType);
+            }
+        }
+        return qualifyingType;
     }
 }

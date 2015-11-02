@@ -25,9 +25,10 @@ import com.redhat.ceylon.ceylondoc.test.modules.single.a { A1, AliasA2 = A2 }
  * MA  02110-1301, USA.
  */
 "This is `StubClass`"
-see(`interface StubInterface`, `value stubTopLevelAttribute`, `function stubTopLevelMethod`)
+see(`class`, `interface StubInterface`, `value stubTopLevelAttribute`, `function stubTopLevelMethod`, `module com.redhat.ceylon.ceylondoc.test.modules.single`, `package com.redhat.ceylon.ceylondoc.test.modules.single.a`)
 tagged("stubTag1", "stubTag2")
 throws(`class StubException`)
+aliased("StubClassAlias")
 shared class StubClass(
   "Initializer parameter `a`" Integer a,
   "Initializer parameter `b`" Integer b,
@@ -198,6 +199,7 @@ shared class StubClass(
      1. interface StubInterface = [[interface StubInterface]]
      1. StubInnerException = [[StubInnerException]]
      1. stubTopLevelMethod = [[stubTopLevelMethod]]
+     1. stubTopLevelMethod() = [[stubTopLevelMethod()]]
      1. function stubTopLevelMethod = [[function stubTopLevelMethod]]
      1. stubTopLevelAttribute = [[stubTopLevelAttribute]]
      1. value stubTopLevelAttribute = [[value stubTopLevelAttribute]]
@@ -207,6 +209,7 @@ shared class StubClass(
      1. StubInterface with custom name = [[custom stub interface|StubInterface]]
      1. stubObject = [[stubObject]]
      1. stubObject.foo = [[stubObject.foo]]
+     1. stubObject.foo() = [[stubObject.foo()]]
      1. stubObject.stubInnerObject = [[stubObject.stubInnerObject]]
      1. stubObject.stubInnerObject.fooInner = [[stubObject.stubInnerObject.fooInner]]
      1. unresolvable1 = [[unresolvable]]
@@ -218,6 +221,7 @@ shared class StubClass(
      1. StubClassWithGenericTypeParams with custom name = [[custom with type params|StubClassWithGenericTypeParams]]
      1. module = [[module com.redhat.ceylon.ceylondoc.test.modules.single]]
      1. package = [[package com.redhat.ceylon.ceylondoc.test.modules.single]]
+     1. PrivateClass = [[PrivateClass]]
      
      Wiki-style links with full qualified name:
      
@@ -249,8 +253,11 @@ shared class StubClass(
     shared Iterable<Integer> bug968_1() { throw; }
     shared Iterable<Integer, Nothing> bug968_2() { throw; }
     
+    shared void bug2307AliasedName(AliasA2 a) {}
+    
     "This is `StubInnerInterface`"
     tagged("stubInnerTag1")
+    aliased("StubInnerInterfaceAlias")
     shared interface StubInnerInterface {
 
         tagged("stubInnerMethodTag1")
@@ -258,15 +265,21 @@ shared class StubClass(
        
     }
 
+    aliased("StubInnerClassAlias")
     shared class StubInnerClass() satisfies StubInnerInterface {
 
         shared actual void innerMethod() {}
 
     }
     
+    aliased("StubInnerExceptionAlias")
     shared class StubInnerException() extends StubException() {
 
     }
+    
+    aliased("StubInnerAlias")
+    tagged("stubTag1")
+    shared alias StubInnerTypeAlias => StubClass;
     
     "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
@@ -290,6 +303,12 @@ shared class StubClass(
     "[[foo
      bar|StubClass]]"
     shared void bug1619BrokenLinkWithNewLine() {}
+    
+    aliased("firstAlias", "secondAlias")
+    shared Integer aliasedAttribute => 2;
+
+    aliased("methodAlias")
+    shared void aliasedMethod(){}
 }
 
 shared abstract class StubAbstractClass() {}

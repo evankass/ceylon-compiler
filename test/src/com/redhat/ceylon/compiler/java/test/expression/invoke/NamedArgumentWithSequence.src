@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.invoke;
 
-class NamedArgumentWithSequence implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class NamedArgumentWithSequence implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     NamedArgumentWithSequence() {
     }
@@ -115,11 +115,6 @@ class NamedArgumentWithSequence implements .com.redhat.ceylon.compiler.java.runt
             }
             returning null;
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.invoke.NamedArgumentWithSequence();
     }
     
     @.java.lang.Override

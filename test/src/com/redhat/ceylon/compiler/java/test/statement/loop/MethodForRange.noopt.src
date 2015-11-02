@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.loop;
 
-class MethodForRange implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodForRange implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodForRange() {
     }
@@ -13,11 +13,6 @@ class MethodForRange implements .com.redhat.ceylon.compiler.java.runtime.model.R
             if (i > 5L) {
             }
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.loop.MethodForRange();
     }
     
     @.java.lang.Override

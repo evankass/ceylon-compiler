@@ -23,18 +23,19 @@ import static com.redhat.ceylon.ceylondoc.CeylondMessages.msg;
 import static com.redhat.ceylon.ceylondoc.Util.getAnnotation;
 import static com.redhat.ceylon.ceylondoc.Util.isAbbreviatedType;
 import static com.redhat.ceylon.ceylondoc.Util.normalizeSpaces;
-import static com.redhat.ceylon.compiler.typechecker.util.ProducedTypeNamePrinter.abbreviateCallable;
-import static com.redhat.ceylon.compiler.typechecker.util.ProducedTypeNamePrinter.abbreviateEntry;
-import static com.redhat.ceylon.compiler.typechecker.util.ProducedTypeNamePrinter.abbreviateIterable;
-import static com.redhat.ceylon.compiler.typechecker.util.ProducedTypeNamePrinter.abbreviateOptional;
-import static com.redhat.ceylon.compiler.typechecker.util.ProducedTypeNamePrinter.abbreviateSequence;
-import static com.redhat.ceylon.compiler.typechecker.util.ProducedTypeNamePrinter.abbreviateSequential;
-import static com.redhat.ceylon.compiler.typechecker.util.ProducedTypeNamePrinter.abbreviateTuple;
+import static com.redhat.ceylon.model.typechecker.util.TypePrinter.abbreviateCallable;
+import static com.redhat.ceylon.model.typechecker.util.TypePrinter.abbreviateEntry;
+import static com.redhat.ceylon.model.typechecker.util.TypePrinter.abbreviateIterable;
+import static com.redhat.ceylon.model.typechecker.util.TypePrinter.abbreviateOptional;
+import static com.redhat.ceylon.model.typechecker.util.TypePrinter.abbreviateSequence;
+import static com.redhat.ceylon.model.typechecker.util.TypePrinter.abbreviateSequential;
+import static com.redhat.ceylon.model.typechecker.util.TypePrinter.abbreviateTuple;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,33 +44,32 @@ import java.util.List;
 import com.redhat.ceylon.common.Constants;
 import com.redhat.ceylon.common.config.DefaultToolOptions;
 import com.redhat.ceylon.compiler.java.codegen.Decl;
-import com.redhat.ceylon.compiler.loader.AbstractModelLoader;
-import com.redhat.ceylon.compiler.typechecker.model.Annotated;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Element;
-import com.redhat.ceylon.compiler.typechecker.model.IntersectionType;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.NothingType;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.Referenceable;
-import com.redhat.ceylon.compiler.typechecker.model.Scope;
-import com.redhat.ceylon.compiler.typechecker.model.TypeAlias;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.UnionType;
-import com.redhat.ceylon.compiler.typechecker.model.Unit;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
-import com.redhat.ceylon.compiler.typechecker.util.ProducedTypeNamePrinter;
+import com.redhat.ceylon.model.loader.AbstractModelLoader;
+import com.redhat.ceylon.model.typechecker.model.Annotated;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Element;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.NothingType;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.Referenceable;
+import com.redhat.ceylon.model.typechecker.model.Scope;
+import com.redhat.ceylon.model.typechecker.model.TypeAlias;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Unit;
+import com.redhat.ceylon.model.typechecker.model.Value;
+import com.redhat.ceylon.model.typechecker.util.TypePrinter;
 
 public class LinkRenderer {
     
@@ -86,8 +86,10 @@ public class LinkRenderer {
     private boolean printTypeParameterDetail = false;
     private boolean printWikiStyleLinks = false;
     private boolean printLinkDropdownMenu = true;
+    private boolean printParenthesisAfterMethodName = true;
+    private boolean printMemberContainerName = true;
     
-    private final ProducedTypeNamePrinter producedTypeNamePrinter = new ProducedTypeNamePrinter() {
+    private final TypePrinter producedTypeNamePrinter = new TypePrinter() {
         
         @Override
         public String getSimpleDeclarationName(Declaration declaration, Unit unit) {
@@ -95,12 +97,13 @@ public class LinkRenderer {
             
             if (declaration instanceof ClassOrInterface || declaration instanceof NothingType) {
                 TypeDeclaration type = (TypeDeclaration) declaration;
-                String typeUrl = getUrl(type, null);
-                if (typeUrl != null) {
-                    result = buildLinkElement(typeUrl, getLinkText(type), 
-                            "Go to " + type.getQualifiedNameString());
-
-                } else {
+                if (isLinkable(type)) {
+                    String typeUrl = getUrl(type, null);
+                    if (typeUrl != null) {
+                        result = buildLinkElement(typeUrl, getLinkText(type), "Go to " + type.getQualifiedNameString());
+                    }
+                }
+                if( result == null ) {
                     result = buildSpanElementWithNameAndTooltip(declaration);
                 }
             } else if (declaration instanceof TypeParameter) {
@@ -173,18 +176,8 @@ public class LinkRenderer {
         return this;
     }
     
-    public LinkRenderer useScope(Module module) {
-        scope = module;
-        return this;
-    }
-
-    public LinkRenderer useScope(Package pkg) {
-        scope = pkg;
-        return this;
-    }
-
-    public LinkRenderer useScope(Declaration decl) {
-        scope = decl;
+    public LinkRenderer useScope(Referenceable scope) {
+        this.scope = scope;
         return this;
     }
     
@@ -217,6 +210,16 @@ public class LinkRenderer {
         this.printLinkDropdownMenu = printLinkDropdownMenu;
         return this;
     }
+    
+    public LinkRenderer printParenthesisAfterMethodName(boolean printParenthesisAfterMethodName) {
+        this.printParenthesisAfterMethodName = printParenthesisAfterMethodName;
+        return this;
+    }
+    
+    public LinkRenderer printMemberContainerName(boolean printMemberContainerName) {
+        this.printMemberContainerName = printMemberContainerName;
+        return this;
+    }
 
     public String getLink() {
         String link = null;
@@ -226,8 +229,8 @@ public class LinkRenderer {
             } else {
                 link = processAnnotationParam((String) to);
             }
-        } else if (to instanceof ProducedType) {
-            link = processProducedType((ProducedType) to);
+        } else if (to instanceof Type) {
+            link = processProducedType((Type) to);
         } else if (to instanceof Declaration) {
             link = processDeclaration(((Declaration) to));
         } else if (to instanceof Module) {
@@ -280,12 +283,12 @@ public class LinkRenderer {
         }
     }
 
-    private String processProducedType(ProducedType producedType) {
+    private String processProducedType(Type producedType) {
         String result;
         boolean wasWithinText = withinText;
         withinText = false;
         try {
-            result = producedTypeNamePrinter.getProducedTypeName(producedType, null);
+            result = producedTypeNamePrinter.print(producedType, null);
         }
         finally {
             withinText = wasWithinText;
@@ -299,34 +302,37 @@ public class LinkRenderer {
     }
     
     private String processTypedDeclaration(TypedDeclaration decl) {
-        String declName = decl.getName();
+        String declName = Util.getDeclarationName(decl);
         Scope declContainer = decl.getContainer();
         
-        String url = getUrl(declContainer, decl);
-        if( url != null ) {
-            return buildLinkElement(url, getLinkText(decl), "Go to " + decl.getQualifiedNameString());
-        } else {
-            String result = declName;
-            if (withinText) {
-                result = "<code>" + result + "</code>";
+        if( isLinkable(decl) ) {
+            String url = getUrl(declContainer, decl);
+            if( url != null ) {
+                return buildLinkElement(url, getLinkText(decl), "Go to " + decl.getQualifiedNameString());
             }
-            if (customText != null) {
-                result = customText + " (" + result + ")";
-            }
-            return result;
         }
+        
+        String result = declName;
+        if (withinText) {
+            result = "<code>" + result + "</code>";
+        }
+        if (customText != null) {
+            result = customText;
+        }
+        return result;
     }
     
     private String processTypeAlias(TypeAlias alias) {
         String aliasName = alias.getName();
         Scope aliasContainer = alias.getContainer();
-
-        String url = getUrl(aliasContainer, alias);
-        if (url != null) {
-            return buildLinkElement(url, aliasName, "Go to " + alias.getQualifiedNameString());
-        } else {
-            return buildSpanElementWithNameAndTooltip(alias);
+        
+        if (isLinkable(alias)) {
+            String url = getUrl(aliasContainer, alias);
+            if (url != null) {
+                return buildLinkElement(url, aliasName, "Go to " + alias.getQualifiedNameString());
+            }
         }
+        return buildSpanElementWithNameAndTooltip(alias);
     }
 
     private String processWikiLink(final String docLinkText) {
@@ -351,27 +357,72 @@ public class LinkRenderer {
             }
         }
         
-        if (scope instanceof Annotated) {
-            Annotation docAnnotation = getAnnotation(((Annotated) scope).getAnnotations(), "doc");
+        if (docLink != null && scope instanceof Annotated) {
+            Annotation docAnnotation = getAnnotation(scope.getUnit(), ((Annotated) scope).getAnnotations(), "doc");
             if (docAnnotation != null) {
-                ceylonDocTool.warningBrokenLink(docLinkText, scope);
+                ceylonDocTool.warningBrokenLink(docLinkText, docLink, scope);
             }
         }
 
         return getUnresolvableLink(docLinkText);
     }
 
-    private String processAnnotationParam(String declLink) {
+    private String processAnnotationParam(String text) {
+        if( text.equals("module")) {
+            Module mod = getCurrentModule();
+            if( mod != null) {
+                return processModule(mod);
+            }
+        }
+        if (text.startsWith("module ")) {
+            String modName = text.substring(7);
+            for (Module m : ceylonDocTool.getTypeChecker().getContext().getModules().getListOfModules()) {
+                if (m.getNameAsString().equals(modName)) {
+                    return processModule(m);
+                }
+            }
+        }
+        if( text.equals("package")) {
+            Package pkg = getCurrentPackage();
+            if (pkg != null) {
+                return processPackage(pkg);
+            }
+        }
+        if (text.startsWith("package ")) {
+            String pkgName = text.substring(8);
+            for (Module m : ceylonDocTool.getTypeChecker().getContext().getModules().getListOfModules()) {
+                if (pkgName.startsWith(m.getNameAsString() + ".")) {
+                    Package pkg = m.getPackage(pkgName);
+                    if (pkg != null) {
+                        return processPackage(pkg);
+                    }
+                }
+            }
+        }
+        if( text.equals("interface") ) {
+            Interface interf = getCurrentInterface();
+            if( interf != null ) {
+                return processProducedType(interf.getType());
+            }
+        }
+        if( text.equals("class") ) {
+            Class clazz = getCurrentClass();
+            if( clazz != null ) {
+                return processProducedType(clazz.getType());
+            }
+        }
+        
+        
         String declName;
         Scope currentScope;
         
-        int pkgSeparatorIndex = declLink.indexOf("::");
+        int pkgSeparatorIndex = text.indexOf("::");
         if( pkgSeparatorIndex == -1 ) {
-            declName = declLink;
+            declName = text;
             currentScope = resolveScope(scope);
         } else {
-            String pkgName = declLink.substring(0, pkgSeparatorIndex);
-            declName = declLink.substring(pkgSeparatorIndex+2, declLink.length());
+            String pkgName = text.substring(0, pkgSeparatorIndex);
+            declName = text.substring(pkgSeparatorIndex+2, text.length());
             currentScope = ceylonDocTool.getCurrentModule().getPackage(pkgName);
         }
         
@@ -402,8 +453,38 @@ public class LinkRenderer {
                 return processTypedDeclaration((TypedDeclaration) currentDecl);
             }
         } else {
-            return getUnresolvableLink(declLink);
+            return getUnresolvableLink(text);
         }
+    }
+
+    private boolean isLinkable(Declaration decl) {
+        if( decl == null ) {
+            return false;
+        }
+        if( decl.isParameter() ) {
+            return true;
+        }
+        if( !ceylonDocTool.isIncludeNonShared() ) {
+            if( !decl.isShared() ) {
+                return false;
+            }
+            
+            Scope c = decl.getContainer();
+            while(c != null) {
+                boolean isShared = true;
+                if( c instanceof Declaration ) {
+                    isShared = ((Declaration) c).isShared();
+                }
+                if( c instanceof Package ) {
+                    isShared = ((Package) c).isShared();
+                }
+                if( !isShared ) {
+                    return false;
+                }
+                c = c.getContainer();
+            }
+        }
+        return true;
     }
 
     private boolean isValueWithTypeObject(Declaration decl) {
@@ -417,8 +498,8 @@ public class LinkRenderer {
     }
 
     private boolean isParameter(Declaration decl) {
-        return decl instanceof MethodOrValue
-                && ((MethodOrValue)decl).isParameter();
+        return decl instanceof FunctionOrValue
+                && ((FunctionOrValue)decl).isParameter();
     }
     
     private Declaration resolveDeclaration(Scope scope, String declName, boolean isNested) {
@@ -503,21 +584,23 @@ public class LinkRenderer {
             return customText;
         }
         else {
-            String name = decl.getName();
+            String name = Util.getDeclarationName(decl);
+            if( scope != null && scope.getUnit() != null ) {
+                name = scope.getUnit().getAliasedName(decl, name);
+            }
+
             String result;
             if (decl instanceof TypeDeclaration) {
                 result = "<span class='type-identifier'>" + name + "</span>";
             }
             else {
-                if (decl instanceof Method) {
+                if (decl instanceof Function && printParenthesisAfterMethodName) {
                     name = name + "()";
                 }
                 result = "<span class='identifier'>" + name + "</span>";
             }
-            if (decl.isMember() &&
-                    decl.getContainer()!=from) {
-                result = getLinkText((Declaration) decl.getContainer())
-                        + '.' + result;
+            if (printMemberContainerName && decl.isMember() && decl.getContainer() != from) {
+                result = getLinkText((Declaration) decl.getContainer()) + '.' + result;
             }
             return result;
         }
@@ -533,9 +616,9 @@ public class LinkRenderer {
     private String getUrl(Object to, Declaration anchor) {
         String url;
         
-        List<Method> methods = new ArrayList<Method>();
-        while(to instanceof Method){
-            Method method = (Method) to;
+        List<Function> methods = new ArrayList<Function>();
+        while(to instanceof Function){
+            Function method = (Function) to;
             methods.add(method);
             to = method.getContainer();
         }
@@ -554,7 +637,7 @@ public class LinkRenderer {
             StringBuilder fragment = new StringBuilder();
             if(!methods.isEmpty()) {
                 Collections.reverse(methods);
-                for(Method method : methods) {
+                for(Function method : methods) {
                     fragment.append(method.getName());
                     fragment.append("-");
                 }
@@ -709,7 +792,14 @@ public class LinkRenderer {
         Boolean result = ceylonDocTool.getModuleUrlAvailabilityCache().get(moduleUrl);
         if( result == null ) {
             try {
-                HttpURLConnection con = (HttpURLConnection) new URL(moduleUrl + "index.html").openConnection();
+                URL url = new URL(moduleUrl + "index.html");
+                HttpURLConnection con;
+                Proxy proxy = DefaultToolOptions.getDefaultProxy();
+                if (proxy != null) {
+                    con = (HttpURLConnection) url.openConnection(proxy);
+                } else {
+                    con = (HttpURLConnection) url.openConnection();
+                }
                 con.setConnectTimeout((int) DefaultToolOptions.getDefaultTimeout());
                 con.setReadTimeout((int) DefaultToolOptions.getDefaultTimeout() * Constants.READ_TIMEOUT_MULTIPLIER);
                 con.setRequestMethod("HEAD");
@@ -771,12 +861,12 @@ public class LinkRenderer {
         return text;
     }
 
-    private String decorateWithLinkDropdownMenu(String link, ProducedType producedType) {
+    private String decorateWithLinkDropdownMenu(String link, Type producedType) {
         if( !printLinkDropdownMenu || !printAbbreviated || !canLinkToCeylonLanguageModule() ) {
             return link;
         }
         
-        List<ProducedType> producedTypes = new ArrayList<ProducedType>();
+        List<Type> producedTypes = new ArrayList<Type>();
         decompose(producedType, producedTypes);
         
         boolean containsOptional = false;
@@ -787,7 +877,7 @@ public class LinkRenderer {
         boolean containsCallable = false;
         boolean containsTuple = false;
         
-        for (ProducedType pt : producedTypes) {
+        for (Type pt : producedTypes) {
             if (abbreviateOptional(pt)) {
                 containsOptional = true;
             } else if (abbreviateSequential(pt) && !link.contains("'Go to ceylon.language::Sequential'")) {
@@ -856,21 +946,21 @@ public class LinkRenderer {
         }
     }
 
-    private void decompose(ProducedType pt, List<ProducedType> producedTypes) {
+    private void decompose(Type pt, List<Type> producedTypes) {
         if (!producedTypes.contains(pt)) {
             producedTypes.add(pt);
-            TypeDeclaration decl = pt.getDeclaration();
-            if (decl instanceof IntersectionType) {
-                for (ProducedType satisfiedType : pt.getSatisfiedTypes()) {
+            if (pt.isIntersection()) {
+                for (Type satisfiedType : pt.getSatisfiedTypes()) {
                     decompose(satisfiedType, producedTypes);
                 }
-            } else if (decl instanceof UnionType) {
-                for (ProducedType caseType : pt.getCaseTypes()) {
+            }
+            else if (pt.isUnion()) {
+                for (Type caseType : pt.getCaseTypes()) {
                     decompose(caseType, producedTypes);
                 }
             }
             if (!pt.getTypeArgumentList().isEmpty()) {
-                for (ProducedType typeArgument : pt.getTypeArgumentList()) {
+                for (Type typeArgument : pt.getTypeArgumentList()) {
                     decompose(typeArgument, producedTypes);
                 }
             }
@@ -916,4 +1006,54 @@ public class LinkRenderer {
         return docLinks[0];
     }
     
+    private Module getCurrentModule() {
+        if (scope instanceof Module) {
+            return (Module) scope;
+        } else if (scope instanceof Package) {
+            return ((Package) scope).getModule();
+        } else if (scope instanceof Declaration) {
+            return scope.getUnit().getPackage().getModule();
+        }
+        return null;
+    }
+
+    private Package getCurrentPackage() {
+        if (scope instanceof Module) {
+            return ((Module) scope).getRootPackage();
+        } else if (scope instanceof Package) {
+            return (Package) scope;
+        } else if (scope instanceof Declaration) {
+            return scope.getUnit().getPackage();
+        }
+        return null;
+    }
+    
+    private Interface getCurrentInterface() {
+        Object o = scope;
+        while (o != null) {
+            if (o instanceof Interface) {
+                return (Interface) o;
+            } else if (o instanceof Declaration) {
+                o = ((Declaration) o).getContainer();
+            } else {
+                o = null;
+            }
+        }
+        return null;
+    }
+
+    private Class getCurrentClass() {
+        Object o = scope;
+        while (o != null) {
+            if (o instanceof Class) {
+                return (Class) o;
+            } else if (o instanceof Declaration) {
+                o = ((Declaration) o).getContainer();
+            } else {
+                o = null;
+            }
+        }
+        return null;
+    }
+
 }

@@ -1,8 +1,7 @@
 package com.redhat.ceylon.compiler.java.test.annotations;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.ceylon.language.SharedAnnotation$annotation$
-@.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
 @.com.redhat.ceylon.compiler.java.metadata.TypeParameters({
         @.com.redhat.ceylon.compiler.java.metadata.TypeParameter(
                 value = "A",
@@ -14,7 +13,7 @@ package com.redhat.ceylon.compiler.java.test.annotations;
                 variance = .com.redhat.ceylon.compiler.java.metadata.Variance.NONE,
                 satisfies = {},
                 caseTypes = {})})
-public class UseSiteVariance<A, B> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class UseSiteVariance<A, B> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public UseSiteVariance(@.com.redhat.ceylon.compiler.java.metadata.Ignore
     final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$A, @.com.redhat.ceylon.compiler.java.metadata.Ignore
@@ -28,10 +27,9 @@ public class UseSiteVariance<A, B> implements .com.redhat.ceylon.compiler.java.r
     private final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$B;
     
     @.ceylon.language.SharedAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("com.redhat.ceylon.compiler.java.test.annotations::UseSiteVariance<in A,out B>")
     public final .com.redhat.ceylon.compiler.java.test.annotations.UseSiteVariance<? super A, ? extends B> m() {
-        return (.com.redhat.ceylon.compiler.java.test.annotations.UseSiteVariance).ceylon.language.nothing_.get_();
+        return (.com.redhat.ceylon.compiler.java.test.annotations.UseSiteVariance<? super A, ? extends B>).ceylon.language.nothing_.get_();
     }
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore

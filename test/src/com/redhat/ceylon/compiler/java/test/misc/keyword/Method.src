@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.misc.keyword;
 
-class Method implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Method implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Method() {
     }
@@ -84,11 +84,6 @@ class Method implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTy
     }
     
     private final void volatile$priv$() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.misc.keyword.Method();
     }
     
     @.java.lang.Override

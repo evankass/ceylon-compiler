@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.statement.attribute;
 
-class MethodAttributeWithInitializer implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodAttributeWithInitializer implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodAttributeWithInitializer() {
     }
     
     public final void m() {
         final .java.lang.String f = "";
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.attribute.MethodAttributeWithInitializer();
     }
     
     @.java.lang.Override

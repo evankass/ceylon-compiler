@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug06xx;
 
-class Bug620<T extends .ceylon.language.Numeric<T>> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug620<T extends .ceylon.language.Numeric<T>> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug620(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T) {
         this.$reified$T = $reified$T;
@@ -8,13 +8,8 @@ class Bug620<T extends .ceylon.language.Numeric<T>> implements .com.redhat.ceylo
     private final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T;
     
     private final void m$priv$(final .ceylon.language.Numeric<T> init) {
-        T n = (T)init;
-        n = ((.ceylon.language.Summable<T>)(.ceylon.language.Summable)n).plus((T)n);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug620(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
+        T n = (T)(.ceylon.language.Numeric)init;
+        n = ((T)n).plus((T)n);
     }
     
     @.java.lang.Override

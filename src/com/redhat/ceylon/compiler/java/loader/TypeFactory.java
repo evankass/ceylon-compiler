@@ -24,16 +24,15 @@ import java.util.Collections;
 
 import com.redhat.ceylon.compiler.java.tools.LanguageCompiler;
 import com.redhat.ceylon.compiler.typechecker.context.Context;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.IntersectionType;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.UnionType;
-import com.redhat.ceylon.compiler.typechecker.model.Unit;
-import com.redhat.ceylon.compiler.typechecker.model.UnknownType;
-import com.redhat.ceylon.compiler.typechecker.model.Util;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Unit;
+import com.redhat.ceylon.model.typechecker.model.UnknownType;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
 import com.sun.tools.javac.util.List;
 
 public class TypeFactory extends Unit {
@@ -57,46 +56,44 @@ public class TypeFactory extends Unit {
     }
     
     /**
-     * Determines whether the given ProducedType is a union
+     * Determines whether the given Type is a union
      * @param pt 
      * @return whether the type is a union type
      */
-    public boolean isUnion(ProducedType pt) {
+    public boolean isUnion(Type pt) {
         if (pt==null) return false;
-        TypeDeclaration tdecl = pt.getDeclaration();
-        return (tdecl instanceof UnionType && tdecl.getCaseTypes().size() > 1);
+        return pt.isUnion() && pt.getCaseTypes().size() > 1;
     }
 
     /**
-     * Determines whether the given ProducedType is an intersection
+     * Determines whether the given Type is an intersection
      * @param pt 
      * @return whether the type is an intersection type
      */
-    public boolean isIntersection(ProducedType pt) {
+    public boolean isIntersection(Type pt) {
         if (pt==null) return false;
-        TypeDeclaration tdecl = pt.getDeclaration();
-        return (tdecl instanceof IntersectionType && tdecl.getSatisfiedTypes().size() > 1);
+        return pt.isIntersection() && pt.getSatisfiedTypes().size() > 1;
     }
 
     public TypeDeclaration getArraySequenceDeclaration() {
         return (Class) getLanguageModuleDeclaration("ArraySequence");
     }
     
-    public ProducedType getArraySequenceType(ProducedType et) {
-        return Util.producedType(getArraySequenceDeclaration(), et);
+    public Type getArraySequenceType(Type et) {
+        return ModelUtil.appliedType(getArraySequenceDeclaration(), et);
     }
     
     /**
-     * Returns a ProducedType corresponding to {@code Array<T>}
-     * @param et The ProducedType corresponding to {@code T}
-     * @return The ProducedType corresponding to {@code Array<T>}
+     * Returns a Type corresponding to {@code Array<T>}
+     * @param et The Type corresponding to {@code T}
+     * @return The Type corresponding to {@code Array<T>}
      */
-    public ProducedType getArrayType(ProducedType et) {
-        return Util.producedType(getArrayDeclaration(), et);
+    public Type getArrayType(Type et) {
+        return ModelUtil.appliedType(getArrayDeclaration(), et);
     }
 
-    public ProducedType getArrayElementType(ProducedType type) {
-        ProducedType st = type.getSupertype(getArrayDeclaration());
+    public Type getArrayElementType(Type type) {
+        Type st = type.getSupertype(getArrayDeclaration());
         if (st!=null && st.getTypeArguments().size()==1) {
             return st.getTypeArgumentList().get(0);
         }
@@ -105,28 +102,28 @@ public class TypeFactory extends Unit {
         }
     }
     
-    public ProducedType getCallableType(java.util.List<ProducedType> typeArgs) {
+    public Type getCallableType(java.util.List<Type> typeArgs) {
         if (typeArgs.size()!=2) {
             throw new IllegalArgumentException("Callable type always has two arguments: " + typeArgs);
         }
         if (!typeArgs.get(1).isSubtypeOf(
-                getSequentialDeclaration().getProducedType(
-                        null, Collections.singletonList(getAnythingDeclaration().getType())))) {
+                getSequentialDeclaration().appliedType(
+                        null, Collections.singletonList(getAnythingType())))) {
             throw new IllegalArgumentException("Callable's second argument should be sequential " + typeArgs.get(1));
         }
-        return getCallableDeclaration().getProducedType(null, typeArgs);
+        return getCallableDeclaration().appliedType(null, typeArgs);
     }
     
-    public ProducedType getCallableType(ProducedType resultType) {
-        return getCallableType(List.<ProducedType>of(resultType,getEmptyDeclaration().getType()));
+    public Type getCallableType(Type resultType) {
+        return getCallableType(List.<Type>of(resultType,getEmptyType()));
     }
 
-    public ProducedType getUnknownType() {
+    public Type getUnknownType() {
         return new UnknownType(this).getType();
     }
     
-    public ProducedType getIteratedAbsentType(ProducedType type) {
-        ProducedType st = type.getSupertype(getIterableDeclaration());
+    public Type getIteratedAbsentType(Type type) {
+        Type st = type.getSupertype(getIterableDeclaration());
         if (st!=null && st.getTypeArguments().size()>1) {
             return st.getTypeArgumentList().get(1);
         }
@@ -168,4 +165,101 @@ public class TypeFactory extends Unit {
     public TypeDeclaration getAssertionErrorDeclaration() {
         return (TypeDeclaration)getLanguageModuleDeclaration("AssertionError");
     }
+    
+    public Type getReferenceType(Type value) {
+        final Type serializedValueType;
+        TypeDeclaration referenceTypeDecl = (TypeDeclaration)getLanguageModuleSerializationDeclaration("Reference");
+        serializedValueType = referenceTypeDecl.appliedType(null, Collections.singletonList(value));
+        return serializedValueType;
+    }
+    
+    public Type getDeconstructorType() {
+        return ((TypeDeclaration)getLanguageModuleSerializationDeclaration("Deconstructor")).getType();
+    }
+    
+    /**
+     * Copy of Unit.isTupleLengthUnbounded which is more strict on what we consider variadic. For example
+     * we do not consider Args|[] as a variadic tuple in a Callable. See https://github.com/ceylon/ceylon-compiler/issues/1908
+     */
+    public boolean isTupleOfVariadicCallable(Type args) {
+        if (args!=null) {
+            /*Boolean simpleTupleLengthUnbounded = 
+                    isSimpleTupleLengthUnbounded(args);
+            if (simpleTupleLengthUnbounded != null) {
+                return simpleTupleLengthUnbounded.booleanValue();
+            }*/
+            if (isEmptyType(args)) {
+                return false;
+            }
+            else if (isVariadicElement(args)) {
+                return true;
+            }
+            Class td = getTupleDeclaration();
+            Type tuple = 
+                    nonemptyArgs(args)
+                        .getSupertype(td);
+            if (tuple==null) {
+                return false;
+            }
+            else {
+                while (true) {
+                    java.util.List<Type> tal = 
+                            tuple.getTypeArgumentList();
+                    if (tal.size()>=3) {
+                        Type rest = tal.get(2);
+                        if (rest==null) {
+                            return false;
+                        }
+                        else if (isEmptyType(rest)) {
+                            return false;
+                        }
+                        else if (isVariadicElement(rest)) {
+                            return true;
+                        }
+                        else {
+                            tuple = nonemptyArgs(rest)
+                                    .getSupertype(td);
+                            if (tuple==null) {
+                                return false;
+                            }
+                            //else continue the loop!
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isVariadicElement(Type args) {
+        return args.isClassOrInterface() 
+                && (args.isSequential() || args.isSequence());
+    }
+    
+    /**
+     * Get the interface for {@code java.io.Serializable} from
+     * {@code java.base}, or null if it could not be found.
+     * @return
+     */
+    public Interface getJavaIoSerializable() {
+        for (com.redhat.ceylon.model.typechecker.model.Module m : context.getModules().getListOfModules()) {
+            if ("java.base".equals(m.getNameAsString())) {
+                return (Interface)m.getPackage("java.io").getDirectMember("Serializable", null, false);
+            }
+        }
+        return null;
+    }
+    
+    public Type getJavaIoSerializableType() {
+        Interface ser = getJavaIoSerializable();
+        if (ser != null) {
+            return ser.getType();
+        } else {
+            return null;
+        }
+    }
+
 }

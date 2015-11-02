@@ -2,6 +2,10 @@ package com.redhat.ceylon.compiler.java.test.statement.trycatch;
 
 class ThrowExceptionSubclassE extends .ceylon.language.Exception {
     
+    protected ThrowExceptionSubclassE() {
+        super();
+    }
+    
     ThrowExceptionSubclassE(final .ceylon.language.String description, final .java.lang.Exception cause) {
         super(description, cause);
     }
@@ -12,18 +16,13 @@ class ThrowExceptionSubclassE extends .ceylon.language.Exception {
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.statement.trycatch.ThrowExceptionSubclassE.class);
 }
-class ThrowExceptionSubclass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ThrowExceptionSubclass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ThrowExceptionSubclass() {
     }
     
     private final void t$priv$() {
         throw new .com.redhat.ceylon.compiler.java.test.statement.trycatch.ThrowExceptionSubclassE(.ceylon.language.String.instance("Bang!"), null);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.trycatch.ThrowExceptionSubclass();
     }
     
     @.java.lang.Override

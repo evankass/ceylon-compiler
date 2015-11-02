@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug13xx;
 
-public class Bug1395LinkedList<Element> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class Bug1395LinkedList<Element> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public Bug1395LinkedList(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$Element) {
         (
@@ -53,11 +53,6 @@ class Bug1395MyLinkedList<Element> extends .com.redhat.ceylon.compiler.java.test
     
     public static <Element>.ceylon.language.Iterable<? extends Element, ? extends .java.lang.Object> $default$values(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$Element) {
         return (.ceylon.language.Iterable<? extends Element, ? extends .java.lang.Object>)(.ceylon.language.Iterable).ceylon.language.empty_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug13xx.Bug1395MyLinkedList(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
     }
     
     @.java.lang.Override

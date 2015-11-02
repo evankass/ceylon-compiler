@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.swtch;
 
-class SwitchIsExhaustive<TP1 extends .ceylon.language.Float, TP2 extends .ceylon.language.Boolean> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class SwitchIsExhaustive<TP1 extends .ceylon.language.Float, TP2 extends .ceylon.language.Boolean> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     SwitchIsExhaustive(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$TP1, final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$TP2) {
         this.$reified$TP1 = $reified$TP1;
@@ -34,11 +34,6 @@ class SwitchIsExhaustive<TP1 extends .ceylon.language.Float, TP2 extends .ceylon
             } else throw new .com.redhat.ceylon.compiler.java.language.EnumeratedTypeError("Supposedly exhaustive switch was not exhaustive");
         }
         return name;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.swtch.SwitchIsExhaustive(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
     }
     
     @.java.lang.Override

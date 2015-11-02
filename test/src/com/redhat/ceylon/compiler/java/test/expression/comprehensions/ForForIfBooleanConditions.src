@@ -4,11 +4,12 @@ final class forForIfBooleanConditions_ {
     
     private forForIfBooleanConditions_() {
     }
-    private static final .ceylon.language.Sequential<? extends .ceylon.language.Integer>[] value;
+    private static final .ceylon.language.Sequential<? extends .ceylon.language.Integer> value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new .ceylon.language.Sequential[]{new .com.redhat.ceylon.compiler.java.language.AbstractIterable<.ceylon.language.Integer, .java.lang.Object>(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Null.$TypeDescriptor$){
+            value = new .com.redhat.ceylon.compiler.java.language.AbstractIterable<.ceylon.language.Integer, .java.lang.Object>(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Null.$TypeDescriptor$){
                 
                 public final .ceylon.language.Iterator<.ceylon.language.Integer> iterator() {
                     return new .com.redhat.ceylon.compiler.java.language.AbstractIterator<.ceylon.language.Integer>(.ceylon.language.Integer.$TypeDescriptor$){
@@ -35,6 +36,7 @@ final class forForIfBooleanConditions_ {
                             if (y$exhausted$) return false;
                             if ($iterator$1 != null) return true;
                             if (!this.y()) return false;
+                            final .ceylon.language.Integer y = this.y;
                             $iterator$1 = .ceylon.language.span_.<.ceylon.language.Integer>span(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.instance(1L), .ceylon.language.Integer.instance(5L)).iterator();
                             return true;
                         }
@@ -59,8 +61,10 @@ final class forForIfBooleanConditions_ {
                         private final boolean $next$2() {
                             ifcomp_2: while (true) {
                                 if (!this.x()) break ifcomp_2;
-                                if (x.compare(y) == .ceylon.language.larger_.get_()) {
-                                    if (y.compare(.ceylon.language.Integer.instance(2L)) == .ceylon.language.larger_.get_()) {
+                                final .ceylon.language.Integer x = this.x;
+                                final .ceylon.language.Integer y = this.y;
+                                if (.ceylon.language.Integer.compare(x.longValue(), y.longValue()) == .ceylon.language.larger_.get_()) {
+                                    if (y.longValue() > 2L) {
                                         break ifcomp_2;
                                     }
                                 }
@@ -70,25 +74,27 @@ final class forForIfBooleanConditions_ {
                         
                         public final .java.lang.Object next() {
                             if (this.$next$2()) {
-                                final .ceylon.language.Integer y = this.y;
                                 final .ceylon.language.Integer x = this.x;
+                                final .ceylon.language.Integer y = this.y;
                                 return x.times(y);
                             } else return .ceylon.language.finished_.get_();
                         }
                     };
                 }
-            }.sequence()};
+            }.sequence();
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
             value = null;
+            $init$value = false;
         }
     }
     
     public static .ceylon.language.Sequential<? extends .ceylon.language.Integer> get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (forForIfBooleanConditions_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'forForIfBooleanConditions\' before it was set");
         }

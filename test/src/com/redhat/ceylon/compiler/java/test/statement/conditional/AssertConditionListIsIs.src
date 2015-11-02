@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class AssertConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class AssertConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     AssertConditionListIsIs() {
     }
@@ -49,11 +49,6 @@ class AssertConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtim
         }
         if ($ceylontmp$assert$5 != null) throw new .ceylon.language.AssertionError("Assertion failed" + $ceylontmp$assert$5);
         return x$7 == y$9;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.AssertConditionListIsIs();
     }
     
     @.java.lang.Override

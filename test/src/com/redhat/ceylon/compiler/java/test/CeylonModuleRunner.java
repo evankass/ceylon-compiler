@@ -54,26 +54,25 @@ import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 
 import com.redhat.ceylon.cmr.api.ArtifactContext;
-import com.redhat.ceylon.cmr.api.JDKUtils;
 import com.redhat.ceylon.common.FileUtil;
-import com.redhat.ceylon.common.ModuleUtil;
 import com.redhat.ceylon.compiler.java.codegen.Decl;
 import com.redhat.ceylon.compiler.java.runtime.Main;
 import com.redhat.ceylon.compiler.java.runtime.metamodel.Metamodel;
 import com.redhat.ceylon.compiler.java.tools.CeylonLog;
 import com.redhat.ceylon.compiler.java.tools.CeyloncFileManager;
 import com.redhat.ceylon.compiler.java.tools.LanguageCompiler;
-import com.redhat.ceylon.compiler.loader.AbstractModelLoader;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnits;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.AnyClass;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.CompilationUnit;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.CompilerAnnotation;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.Declaration;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.Identifier;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.cmr.JDKUtils;
+import com.redhat.ceylon.model.loader.AbstractModelLoader;
+import com.redhat.ceylon.model.typechecker.model.Module;
 import com.redhat.ceylon.tools.classpath.CeylonClasspathTool;
 import com.sun.tools.javac.util.Context;
 
@@ -123,7 +122,10 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
             
             Set<String> removeAtRuntime = new HashSet<String>();
             Collections.addAll(removeAtRuntime, testModule.removeAtRuntime());
-            compileAndRun(srcDir, resDir, outRepo, modules, testModule.dependencies(), removeAtRuntime);
+            compileAndRun(srcDir, resDir, outRepo, modules, testModule.dependencies(), 
+                          testModule.options(), removeAtRuntime, 
+                          testModule.modulesUsingCheckFunction(),
+                          testModule.modulesUsingCheckModule());
             
             for(ModuleSpecifier module : testModule.runModulesInNewJvm()){
                 makeModuleRunnerInNewJvm(module);
@@ -193,7 +195,9 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
         Assert.assertTrue(exit == 0);
     }
 
-    private void compileAndRun(File srcDir, File resDir, File outRepo, String[] modules, String[] dependencies, Set<String> removeAtRuntime) throws Exception {
+    private void compileAndRun(File srcDir, File resDir, File outRepo, String[] modules, String[] dependencies, 
+            String[] options, Set<String> removeAtRuntime, 
+            String[] modulesUsingCheckFunction, String[] modulesUsingCheckModule) throws Exception {
         // Compile all the .ceylon files into a .car
         Context context = new Context();
         final ErrorCollector listener = new ErrorCollector();
@@ -212,6 +216,9 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
         args.add(resDir.getCanonicalPath());
         args.add("-out");
         args.add(outRepo.getAbsolutePath());
+        for (String option : options) {
+            args.add(option);
+        }
         for(String module : modules)
             args.add(module);
         for(String module : dependencies)
@@ -236,11 +243,13 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
         }
 
         for(String module : modules){
-            postCompile(context, listener, module, srcDir, dependencies, removeAtRuntime);
+            postCompile(context, listener, module, srcDir, dependencies, removeAtRuntime,
+                    modulesUsingCheckFunction, modulesUsingCheckModule);
         }
     }
     
-    private void postCompile(Context context, ErrorCollector listener, String moduleName, File srcDir, String[] dependencies, Set<String> removeAtRuntime) throws Exception {
+    private void postCompile(Context context, ErrorCollector listener, String moduleName, File srcDir, String[] dependencies, Set<String> removeAtRuntime, 
+            String[] modulesUsingCheckFunction, String[] modulesUsingCheckModule) throws Exception {
         // now fetch stuff from the context
         PhasedUnits phasedUnits = LanguageCompiler.getPhasedUnitsInstance(context);
         
@@ -253,7 +262,8 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
         Runnable moduleInitialiser = getModuleInitialiser(moduleName, carUrls, dependencies, removeAtRuntime, cl);
         
         if (cl != null) {
-            loadCompiledTests(moduleRunners, srcDir, cl, phasedUnits, moduleName);
+            loadCompiledTests(moduleRunners, srcDir, cl, phasedUnits, moduleName,
+                    modulesUsingCheckFunction, modulesUsingCheckModule);
         }
         CeylonTestGroup ceylonTestGroup = new CeylonTestGroup(moduleRunners, moduleName, moduleInitialiser);
         children.put(ceylonTestGroup, ceylonTestGroup.getDescription());
@@ -282,15 +292,29 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
         moduleRunners.add(runner);
     }
     
-    private void loadCompiledTests(List<Runner> moduleRunners, File srcDir, URLClassLoader cl, PhasedUnits phasedUnits, String moduleName)
+    private void loadCompiledTests(List<Runner> moduleRunners, File srcDir, URLClassLoader cl, PhasedUnits phasedUnits, String moduleName, 
+            String[] modulesUsingCheckFunction, String[] modulesUsingCheckModule)
                 throws InitializationError {
         Map<String, List<String>> testMethods = testLoader.loadTestMethods(moduleRunners, this, phasedUnits, moduleName);
         if (testMethods.isEmpty() && errorIfNoTests) {
             createFailingTest(moduleRunners, "No tests!", new Exception("contains no tests"));
         }
         Method failureCountGetter = null;
-        if(ModuleUtil.isDefaultModule(moduleName)){
-            failureCountGetter = getFailureCountGetter(moduleRunners, cl);
+        String checkCountName = null;
+        for(String m : modulesUsingCheckFunction){
+            if(moduleName.equals(m)){
+                checkCountName = "failureCount_";
+                break;
+            }
+        }
+        for(String m : modulesUsingCheckModule){
+            if(moduleName.equals(m)){
+                checkCountName = "check.failures_";
+                break;
+            }
+        }
+        if(checkCountName != null){
+            failureCountGetter = getFailureCountGetter(checkCountName, moduleRunners, cl);
             // check if an error was produced
             if(failureCountGetter == null)
                 return;
@@ -317,17 +341,17 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
         }
     }
     
-    private Method getFailureCountGetter(List<Runner> moduleRunners, URLClassLoader cl) {
+    private Method getFailureCountGetter(String className, List<Runner> moduleRunners, URLClassLoader cl) {
         Class<?> failureCountClass;
         try {
-            failureCountClass = cl.loadClass("failureCount_");
+            failureCountClass = cl.loadClass(className);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
             failureCountClass = null;
         }
         if(failureCountClass == null) {
             // Create a fake (failing) test for classes we couldn't find the failure count
-            createFailingTest(moduleRunners, "Initialisation error", new CompilationException("Count not find test.failureCount class"));
+            createFailingTest(moduleRunners, "Initialisation error", new CompilationException("Could not find test.failureCount class"));
             return null;
         }
         // get the method for getting the failure count
@@ -419,10 +443,11 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
             public void run() {
                 // set up the runtime module system
                 Metamodel.resetModuleManager();
-                Metamodel.loadModule(AbstractModelLoader.CEYLON_LANGUAGE, TypeChecker.LANGUAGE_MODULE_VERSION, CompilerTest.makeArtifactResult(new File("../ceylon.language/ide-dist/ceylon.language-"+TypeChecker.LANGUAGE_MODULE_VERSION+".car")), cl);
-                Metamodel.loadModule("com.redhat.ceylon.typechecker", TypeChecker.LANGUAGE_MODULE_VERSION, CompilerTest.makeArtifactResult(new File("../ceylon-dist/dist/repo/com/redhat/ceylon/typechecker/"+TypeChecker.LANGUAGE_MODULE_VERSION+"/com.redhat.ceylon.typechecker-"+TypeChecker.LANGUAGE_MODULE_VERSION+".jar")), cl);
-                Metamodel.loadModule(AbstractModelLoader.JAVA_BASE_MODULE_NAME, JDKUtils.jdk.version, CompilerTest.makeArtifactResult(null), cl);
-                Metamodel.loadModule(moduleName, version, CompilerTest.makeArtifactResult(carFile), cl);
+                Metamodel.loadModule(AbstractModelLoader.CEYLON_LANGUAGE, TypeChecker.LANGUAGE_MODULE_VERSION, CompilerTests.makeArtifactResult(new File("../ceylon.language/ide-dist/ceylon.language-"+TypeChecker.LANGUAGE_MODULE_VERSION+".car")), cl);
+                Metamodel.loadModule("com.redhat.ceylon.typechecker", TypeChecker.LANGUAGE_MODULE_VERSION, CompilerTests.makeArtifactResult(new File("../ceylon-dist/dist/repo/com/redhat/ceylon/typechecker/"+TypeChecker.LANGUAGE_MODULE_VERSION+"/com.redhat.ceylon.typechecker-"+TypeChecker.LANGUAGE_MODULE_VERSION+".jar")), cl);
+                Metamodel.loadModule("com.redhat.ceylon.model", TypeChecker.LANGUAGE_MODULE_VERSION, CompilerTests.makeArtifactResult(new File("../ceylon-dist/dist/repo/com/redhat/ceylon/model/"+TypeChecker.LANGUAGE_MODULE_VERSION+"/com.redhat.ceylon.model-"+TypeChecker.LANGUAGE_MODULE_VERSION+".jar")), cl);
+                Metamodel.loadModule(AbstractModelLoader.JAVA_BASE_MODULE_NAME, JDKUtils.jdk.version, CompilerTests.makeArtifactResult(null), cl);
+                Metamodel.loadModule(moduleName, version, CompilerTests.makeArtifactResult(carFile), cl);
                 // dependencies
                 for (int dep = 0, c = 1; dep < dependencies.length; dep++) {
                     try {
@@ -439,7 +464,7 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
                             version = version.substring(0, version.length()-4);
                         }else
                             throw new RuntimeException("Failed to find dependency module version for "+name);
-                        Metamodel.loadModule(name,  version, CompilerTest.makeArtifactResult(car), cl);
+                        Metamodel.loadModule(name,  version, CompilerTests.makeArtifactResult(car), cl);
                     } catch (URISyntaxException e) {
                         throw new RuntimeException(e);
                     }
@@ -491,12 +516,12 @@ public class CeylonModuleRunner extends ParentRunner<Runner> {
                         for (CompilerAnnotation ca : that.getCompilerAnnotations()) {
                             Identifier identifier = ca.getIdentifier();
                             if ("test".equals(identifier.getToken().getText())) {
-                                final com.redhat.ceylon.compiler.typechecker.model.Declaration decl = that.getDeclarationModel();
+                                final com.redhat.ceylon.model.typechecker.model.Declaration decl = that.getDeclarationModel();
                                 if (moduleName.isEmpty() || Decl.getModule(decl).getNameAsString().equals(moduleName)) {
                                     boolean added = false;
                                     if (testClassName != null || decl.isToplevel()) {
-                                        if (decl instanceof com.redhat.ceylon.compiler.typechecker.model.Method) {
-                                            com.redhat.ceylon.compiler.typechecker.model.Method method = (com.redhat.ceylon.compiler.typechecker.model.Method)decl;
+                                        if (decl instanceof com.redhat.ceylon.model.typechecker.model.Function) {
+                                            com.redhat.ceylon.model.typechecker.model.Function method = (com.redhat.ceylon.model.typechecker.model.Function)decl;
                                             String methodName = method.getName();
                                             if (method.getParameterLists().size() == 1
                                                     && method.getParameterLists().get(0).getParameters().size() == 0) {

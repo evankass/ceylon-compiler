@@ -1,6 +1,13 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug15xx;
 
-class Bug1555<Element extends .ceylon.language.Enumerable<Element>> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1555<Element extends .ceylon.language.Enumerable<Element>> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected Bug1555(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$Element) {
+        super();
+        this.$reified$Element = $reified$Element;
+        this.first = 0L;
+        this.last = 0L;
+    }
     
     Bug1555(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$Element, final long first, final long last) {
         this.$reified$Element = $reified$Element;
@@ -24,7 +31,9 @@ class Bug1555<Element extends .ceylon.language.Enumerable<Element>> implements .
         .java.lang.Object shiftedResult$1 = null;
         if (.com.redhat.ceylon.compiler.java.Util.isReified(shiftedResult$1 = .ceylon.language.span_.<.ceylon.language.Integer>span(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.instance(getFirst() + shift), .ceylon.language.Integer.instance(getLast() + shift)), .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Range.class, $reified$Element))) {
             shiftedResult$2 = shiftedResult$1;
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "is Range<Element> shiftedResult \n                = first+shift..last+shift"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "is Range<Element> shiftedResult \n                = first+shift..last+shift"));
+        }
         return (.ceylon.language.Range<Element>)(.ceylon.language.Range)shiftedResult$2;
     }
     

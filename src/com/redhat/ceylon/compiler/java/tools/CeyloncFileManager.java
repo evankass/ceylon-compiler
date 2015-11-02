@@ -54,7 +54,7 @@ import com.redhat.ceylon.common.FileUtil;
 import com.redhat.ceylon.common.config.Repositories;
 import com.redhat.ceylon.compiler.java.codegen.CeylonFileObject;
 import com.redhat.ceylon.compiler.java.util.Util;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Module;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.main.OptionName;
 import com.sun.tools.javac.util.Context;
@@ -249,18 +249,19 @@ public class CeyloncFileManager extends JavacFileManager implements StandardJava
         String systemRepo = getSystemRepoOption();
         String cacheRepo = getCacheRepoOption();
         String outRepo = getOutputRepoOption();
-        String mavenOverrides = options.get(OptionName.CEYLONMAVENOVERRIDES);
+        String overrides = options.get(OptionName.CEYLONOVERRIDES);
         
         repoManager = CeylonUtils.repoManager()
                 .config(CompilerConfig.instance(context))
                 .cwd(getCurrentWorkingDir())
-                .mavenOverrides(mavenOverrides)
+                .overrides(overrides)
                 .systemRepo(systemRepo)
                 .cacheRepo(cacheRepo)
                 .noDefaultRepos(getNoDefaultRepos())
                 .userRepos(userRepos)
                 .outRepo(outRepo)
                 .offline(getOfflineOption())
+                .timeout(getTimeoutOption())
                 .logger(getLogger())
                 .buildManager();
         
@@ -287,6 +288,7 @@ public class CeyloncFileManager extends JavacFileManager implements StandardJava
                 .logger(getLogger())
                 .user(user)
                 .password(password)
+                .timeout(getTimeoutOption())
                 .buildOutputManager();
         
         return outputRepoManager;
@@ -315,6 +317,14 @@ public class CeyloncFileManager extends JavacFileManager implements StandardJava
 
     private boolean getOfflineOption() {
         return options.get(OptionName.CEYLONOFFLINE) != null;
+    }
+
+    private int getTimeoutOption() {
+        String to = options.get(OptionName.CEYLONTIMEOUT);
+        if(to != null){
+            return Integer.parseInt(to);
+        }
+        return -1;
     }
 
     @Override

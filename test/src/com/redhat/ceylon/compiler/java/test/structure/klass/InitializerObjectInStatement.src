@@ -1,12 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.structure.klass;
 
-class InitializerObjectInStatement implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class InitializerObjectInStatement implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     InitializerObjectInStatement() {
         if (true) {
             final long i = 1L;
             
-            final class foo_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+            final class foo_ implements .java.io.Serializable, .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
                 
                 private foo_() {
                     this.string = .ceylon.language.Integer.toString(i);
@@ -26,11 +26,6 @@ class InitializerObjectInStatement implements .com.redhat.ceylon.compiler.java.r
             final foo_ foo = new foo_();
             final .java.lang.String s = foo.toString();
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.klass.InitializerObjectInStatement();
     }
     
     @.java.lang.Override

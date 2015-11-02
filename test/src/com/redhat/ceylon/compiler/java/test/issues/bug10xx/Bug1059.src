@@ -1,6 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug10xx;
 
-public class Bug1059<SomeType> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class Bug1059<SomeType> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected Bug1059(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$SomeType) {
+        super();
+        this.$reified$SomeType = $reified$SomeType;
+        this.i = null;
+    }
     
     public Bug1059(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$SomeType, final .ceylon.language.Callable<? extends .ceylon.language.Boolean> i) {
         this.$reified$SomeType = $reified$SomeType;
@@ -17,7 +23,8 @@ public class Bug1059<SomeType> implements .com.redhat.ceylon.compiler.java.runti
         if (.com.redhat.ceylon.compiler.java.Util.isReified(getI$priv$(), $reified$SomeType)) {
             return new .ceylon.language.Singleton<SomeType>($reified$SomeType, (SomeType)getI$priv$()).iterator();
         }
-        return (.ceylon.language.Iterator).ceylon.language.nothing_.get_();
+        final .ceylon.language.Callable<? extends .ceylon.language.Boolean> i$2 = (.ceylon.language.Callable)getI$priv$();
+        return (.ceylon.language.Iterator<? extends SomeType>).ceylon.language.nothing_.get_();
     }
     
     @.java.lang.Override

@@ -1,6 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.structure.mcr;
 
-class ClassDefaultMemberClassWithTypeParams<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ClassDefaultMemberClassWithTypeParams<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected ClassDefaultMemberClassWithTypeParams(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T) {
+        super();
+        this.$reified$T = $reified$T;
+        this.tt = null;
+    }
     
     ClassDefaultMemberClassWithTypeParams(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final T tt) {
         this.$reified$T = $reified$T;
@@ -17,7 +23,7 @@ class ClassDefaultMemberClassWithTypeParams<T> implements .com.redhat.ceylon.com
         return new Member<U>($reified$U, t, u);
     }
     
-    public class Member<U> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    public class Member<U> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         protected Member(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$U, final T t, final U u) {
             this.$reified$U = $reified$U;
@@ -49,6 +55,12 @@ class ClassDefaultMemberClassWithTypeParams<T> implements .com.redhat.ceylon.com
     }
 }
 class ClassDefaultMemberClassWithTypeParams_sub<X> extends .com.redhat.ceylon.compiler.java.test.structure.mcr.ClassDefaultMemberClassWithTypeParams<X> {
+    
+    protected ClassDefaultMemberClassWithTypeParams_sub(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$X) {
+        super($reified$X);
+        this.$reified$X = $reified$X;
+        this.xx = null;
+    }
     
     ClassDefaultMemberClassWithTypeParams_sub(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$X, final X xx) {
         super($reified$X, xx);

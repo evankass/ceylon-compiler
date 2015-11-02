@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIf implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIf implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIf() {
     }
@@ -10,11 +10,6 @@ class MethodIf implements .com.redhat.ceylon.compiler.java.runtime.model.Reified
             return 1L;
         }
         return 0L;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIf();
     }
     
     @.java.lang.Override

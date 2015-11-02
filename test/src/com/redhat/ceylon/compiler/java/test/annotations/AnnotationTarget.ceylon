@@ -1,10 +1,10 @@
 
 @nomodel
-final annotation class AnnotationTarget() satisfies Annotation<AnnotationTarget> {}
+final annotation class AnnotationTarget() satisfies OptionalAnnotation<AnnotationTarget,Annotated> {}
 @nomodel
 annotation AnnotationTarget annotationTarget() => AnnotationTarget();
 @nomodel
-final annotation class AnnotationTarget2() satisfies Annotation<AnnotationTarget2> {}
+final annotation class AnnotationTarget2() satisfies OptionalAnnotation<AnnotationTarget2,Annotated> {}
 @nomodel
 annotation AnnotationTarget2 annotationTarget2() => AnnotationTarget2();
 
@@ -86,6 +86,9 @@ interface AnnotationTargetInterface {
     
     annotationTarget
     String attribute => "";
+    
+    annotationTarget
+    shared String sharedAttribute => "";
     
     annotationTarget
     String getter {

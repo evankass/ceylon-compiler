@@ -88,10 +88,6 @@ code {
     font-size: 16px;
 }
 
-.sub-navbar-package .package-identifier .link {
-    vertical-align: top;
-}
-
 .sub-navbar-menu {
 	margin-top: 1em;
 	text-align: center;
@@ -227,6 +223,7 @@ code {
 
 .sub-navbar-name .package-identifier a {
     font-family: 'Source Sans Pro', Arial, 'Helvetica Neue', Helvetica, sans-serif;
+    vertical-align: top;
 }
 
 .modifiers {
@@ -237,7 +234,7 @@ code {
     //color: rgb(102,51,153);
 }
 
-.by, .license {
+.by, .license, .platform {
    font-size: 14px;
 }
 
@@ -362,10 +359,8 @@ div .type-alias-specifier {
 .hierarchy-arrow-right,
 .hierarchy-arrow-down {
 	width: 0;
-	height: 0; 
-	cursor : pointer;
+	height: 0;
 	display: inline-block;
-	cursor: pointer;
 }
 .hierarchy-arrow-right {
 	border-top: 5px solid transparent;
@@ -378,6 +373,11 @@ div .type-alias-specifier {
 	border-right: 5px solid transparent;
 	border-bottom: 5px solid transparent;
 	border-top: 5px solid rgb(80, 80, 80);
+}
+.hierarchy-arrow-container {
+	cursor: pointer;
+	display: inline-block;
+	width: 16px;
 }
 
 td.shrink {
@@ -808,4 +808,8 @@ td .icon-collapse2 {
 .expand-all,
 .collapse-all {
 	padding: 10px 5px 10px !important;
+}
+
+table.rainbow {
+    border-collapse: collapse;
 }

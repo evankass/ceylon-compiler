@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.instantiation;
 
-class SequenceInstantiation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class SequenceInstantiation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     SequenceInstantiation() {
     }
@@ -20,11 +20,6 @@ class SequenceInstantiation implements .com.redhat.ceylon.compiler.java.runtime.
     
     private final long n2$priv$() {
         return 5L;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.instantiation.SequenceInstantiation();
     }
     
     @.java.lang.Override

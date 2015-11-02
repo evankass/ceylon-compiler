@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfIsNullUnion implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfIsNullUnion implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfIsNullUnion() {
     }
@@ -11,11 +11,6 @@ class MethodIfIsNullUnion implements .com.redhat.ceylon.compiler.java.runtime.mo
         if ((nothing$1 = nothing) == null || nothing$1 instanceof .ceylon.language.Character) {
             final .ceylon.language.Character nothing$2 = (.ceylon.language.Character)nothing$1;
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfIsNullUnion();
     }
     
     @.java.lang.Override

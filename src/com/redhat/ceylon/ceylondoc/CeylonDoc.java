@@ -24,25 +24,28 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.redhat.ceylon.compiler.loader.AbstractModelLoader;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Interface;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.ModuleImport;
-import com.redhat.ceylon.compiler.typechecker.model.NothingType;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.Referenceable;
-import com.redhat.ceylon.compiler.typechecker.model.TypeAlias;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.loader.AbstractModelLoader;
+import com.redhat.ceylon.model.typechecker.model.Annotated;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Constructor;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.ModuleImport;
+import com.redhat.ceylon.model.typechecker.model.NothingType;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Referenceable;
+import com.redhat.ceylon.model.typechecker.model.TypeAlias;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
 
 public abstract class CeylonDoc extends Markup {
 
@@ -125,7 +128,8 @@ public abstract class CeylonDoc extends Markup {
         around("i class='module-logo'");
         around("span class='module-label'", "module");
         around("span class='module-name'", module.getNameAsString());
-        around("span class='module-version'", module.getVersion());
+        around("span class='module-version'", module.getVersion() + 
+        		(module.isNative() ? " (" + module.getNativeBackends().names() + ")" : ""));
         close("a");
 
         open("ul class='nav pull-right'");
@@ -134,8 +138,12 @@ public abstract class CeylonDoc extends Markup {
         writeNavBarInfoMenu();
         close("ul"); // nav
         
+        open("ul class='nav pull-right'");
+        write("<li class='divider-vertical' />");
+        writeNavBarIndexMenu();
         writeNavBarSearchMenu();
         writeNavBarFilterMenu();
+        close("ul"); // nav
 
         close("div"); // navbar-inner
         close("div"); // navbar
@@ -177,6 +185,7 @@ public abstract class CeylonDoc extends Markup {
         writeKeyboardShortcutInfo("l", "Jump to aliases");
         writeKeyboardShortcutInfo("n", "Jump to annotations");
         writeKeyboardShortcutInfo("z", "Jump to initializer");
+        writeKeyboardShortcutInfo("t", "Jump to constructors");
         if( getFromObject() instanceof Module || getFromObject() instanceof Package ) {
             writeKeyboardShortcutInfo("v", "Jump to values");
             writeKeyboardShortcutInfo("f", "Jump to functions");
@@ -208,17 +217,16 @@ public abstract class CeylonDoc extends Markup {
         around("span class='info muted'", info);
         close("div");
     }
+    
+    protected void writeNavBarIndexMenu() throws IOException {
+        write("<li><a href='" + linkRenderer().getResourceUrl("../api-index.html") + "' title='Index'></i>Index</a></li>");
+    }
 
     protected void writeNavBarSearchMenu() throws IOException {
-        open("ul class='nav pull-right'");
-        write("<li class='divider-vertical' />");
         write("<li><a href='" + linkRenderer().getResourceUrl("../search.html") + "' title='Search this module [Shortcut: S]'><i class='icon-search'></i>Search</a></li>");
-        close("ul");
     }
     
     protected void writeNavBarFilterMenu() throws IOException {
-        open("ul class='nav pull-right'");
-        write("<li class='divider-vertical' />");
         open("li id='filterDropdown' class='dropdown'");
         write("<a href='#' title='Filter declarations by tags [Shortcut: F]' role='button' class='dropdown-toggle' data-toggle='dropdown'><i class='icon-filter'></i>Filter <span id='filterDropdownLinkInfo'></span> <b class='caret'></b></a>");
         open("ul id='filterDropdownPanel' class='dropdown-menu'");
@@ -234,7 +242,6 @@ public abstract class CeylonDoc extends Markup {
         close("div"); // filterActions
         close("ul"); // filterDropdownPanel
         close("li"); // filterDropdown
-        close("ul"); // nav        
     }
 
     protected final void writeSubNavBarLink(String href, String text, char key, String tooltip) throws IOException {
@@ -358,7 +365,7 @@ public abstract class CeylonDoc extends Markup {
                 icons.add("icon-decoration-deprecated");
             }
 
-            if( decl instanceof ClassOrInterface ) {
+            if( decl instanceof ClassOrInterface || decl instanceof Constructor ) {
                 if (decl instanceof Interface) {
                     icons.add("icon-interface");
                     if (Util.isEnumerated((ClassOrInterface) decl)) {
@@ -381,6 +388,9 @@ public abstract class CeylonDoc extends Markup {
                     if (Util.isEnumerated(klass)) {
                         icons.add("icon-decoration-enumerated");
                     }
+                }
+                if (decl instanceof Constructor) {
+                    icons.add("icon-class");
                 }
                 if (!decl.isShared() ) {
                     icons.add("icon-decoration-local");
@@ -443,6 +453,10 @@ public abstract class CeylonDoc extends Markup {
             }
         }
 
+        if (obj instanceof Module) {
+            icons.add("icon-module");
+        }
+
         return icons;
     }
     
@@ -495,6 +509,7 @@ public abstract class CeylonDoc extends Markup {
         close("td");
 
         open("td");
+        writeTagged(pkg);
         write(Util.getDocFirstLine(pkg, linkRenderer()));
         close("td");
 
@@ -516,16 +531,21 @@ public abstract class CeylonDoc extends Markup {
         }
 
         if (annotationList != null) {
-            annotationList.visit(new WriteAnnotationsVisitor());
+            annotationList.visit(new WriteAnnotationsVisitor(referenceable));
         }
     }
 
     private class WriteAnnotationsVisitor extends Visitor {
     
+        private final Referenceable referenceable;
         private Tree.Annotation annotation;
         private Tree.InvocationExpression invocationExpression;
         private Tree.PositionalArgument positionalArgument;
     
+        public WriteAnnotationsVisitor(Referenceable referenceable) {
+            this.referenceable = referenceable;
+        }
+
         @Override
         public void visit(Tree.AnnotationList that) {
             try {
@@ -575,7 +595,7 @@ public abstract class CeylonDoc extends Markup {
         @Override
         public void visit(Tree.MemberOrTypeExpression that) {
             try {
-                linkRenderer().to(that.getDeclaration()).write();
+                linkRenderer().to(that.getDeclaration()).useScope(referenceable).printParenthesisAfterMethodName(false).write();
                 super.visit(that);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -699,7 +719,7 @@ public abstract class CeylonDoc extends Markup {
                     write("`");
                     around("span class='keyword'", "function ");
                 }
-                linkRenderer().to(that.getDeclaration()).write();
+                linkRenderer().to(that.getDeclaration()).useScope(referenceable).write();
                 write("`");
                 super.visit(that);
             } catch (IOException e) {
@@ -723,7 +743,7 @@ public abstract class CeylonDoc extends Markup {
                     write("`");
                     around("span class='keyword'", "given ");
                 }
-                linkRenderer().to(that.getDeclaration()).write();
+                linkRenderer().to(that.getDeclaration()).useScope(referenceable).write();
                 write("`");
                 super.visit(that);
             } catch (IOException e) {
@@ -736,7 +756,7 @@ public abstract class CeylonDoc extends Markup {
             try {
                 write("`");
                 around("span class='keyword'", "module ");
-                linkRenderer().to(that.getImportPath().getModel()).write();
+                linkRenderer().to(that.getImportPath().getModel()).useScope(referenceable).write();
                 write("`");
                 super.visit(that);
             } catch (IOException e) {
@@ -750,7 +770,7 @@ public abstract class CeylonDoc extends Markup {
                 write("`");
                 around("span class='keyword'", "package");
                 write(" ");
-                linkRenderer().to(that.getImportPath().getModel()).write();
+                linkRenderer().to(that.getImportPath().getModel()).useScope(referenceable).write();
                 write("`");
                 super.visit(that);
             } catch (IOException e) {
@@ -769,6 +789,19 @@ public abstract class CeylonDoc extends Markup {
         }
     
     }    
+
+    protected final <T extends Referenceable & Annotated> void writeTagged(T decl) throws IOException {
+        List<String> tags = Util.getTags(decl);
+        if (!tags.isEmpty()) {
+            open("div class='tags section'");
+            Iterator<String> tagIterator = tags.iterator();
+            while (tagIterator.hasNext()) {
+                String tag = tagIterator.next();
+                write("<a class='tag label' name='" + tag + "' href='javascript:;' title='Enable/disable tag filter'>" + tag + "</a>");
+            }
+            close("div");
+        }
+    }
 
     protected abstract Object getFromObject();    
     

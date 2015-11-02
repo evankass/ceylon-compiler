@@ -20,11 +20,12 @@
 
 package com.redhat.ceylon.compiler.java.codegen;
 
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 /**
  * Visits everything and return true if it finds a non-alias ClassOrInterface or object definition.
@@ -70,6 +71,13 @@ public class HasTypeVisitor extends Visitor {
     @Override
     public void visit(Tree.ObjectArgument that){
         Value model = that.getDeclarationModel();
+        if(model != null)
+            throw new HasTypeException();
+    }
+
+    @Override
+    public void visit(Tree.ObjectExpression that){
+        Class model = that.getAnonymousClass();
         if(model != null)
             throw new HasTypeException();
     }

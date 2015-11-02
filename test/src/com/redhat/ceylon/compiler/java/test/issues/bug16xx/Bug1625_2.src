@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug16xx;
 
-class Bug1625_3Impl2<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1625_3<T> {
+class Bug1625_3Impl2<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1625_3<T>, .java.io.Serializable {
     
     Bug1625_3Impl2(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T) {
         this.$reified$T = $reified$T;
@@ -14,12 +14,7 @@ class Bug1625_3Impl2<T> implements .com.redhat.ceylon.compiler.java.runtime.mode
     
     @.java.lang.Override
     public final .ceylon.language.Sequential<? extends T> getTs() {
-        return (.ceylon.language.Sequential).ceylon.language.nothing_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1625_3Impl2(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
+        return (.ceylon.language.Sequential<? extends T>).ceylon.language.nothing_.get_();
     }
     
     @.java.lang.Override

@@ -1,13 +1,18 @@
 <project name="Ceylon compiler" default="all" basedir=".">
 
+    <property file="../ceylon-common/user-build.properties" />
     <property file="../ceylon-common/common-build.properties" />
     <property file="build.properties" />
 
     <property name="name" value="Ceylon compiler" />
     <property name="ceylon.repo.dir" location="${user.home}/.ceylon/repo" />
+    <property name="ceylon.bin.dir" location="${user.home}/.ceylon/bin" />
     <property name="ceylon.common.dir" value="com/redhat/ceylon/common/${module.com.redhat.ceylon.common.version}" />
     <property name="ceylon.common.jar" value="${ceylon.common.dir}/com.redhat.ceylon.common-${module.com.redhat.ceylon.common.version}.jar" />
     <property name="ceylon.common.lib" location="${ceylon.repo.dir}/${ceylon.common.jar}" />
+    <property name="ceylon.model.dir" value="com/redhat/ceylon/model/${module.com.redhat.ceylon.model.version}" />
+    <property name="ceylon.model.jar" value="${ceylon.model.dir}/com.redhat.ceylon.model-${module.com.redhat.ceylon.model.version}.jar" />
+    <property name="ceylon.model.lib" location="${ceylon.repo.dir}/${ceylon.model.jar}" />
     <property name="ceylon.typechecker.dir" value="com/redhat/ceylon/typechecker/${module.com.redhat.ceylon.typechecker.version}" />
     <property name="ceylon.typechecker.jar" value="${ceylon.typechecker.dir}/com.redhat.ceylon.typechecker-${module.com.redhat.ceylon.typechecker.version}.jar" />
     <property name="ceylon.typechecker.lib" location="${ceylon.repo.dir}/${ceylon.typechecker.jar}" />
@@ -17,10 +22,17 @@
     <property name="ceylon.module-resolver.dir" value="com/redhat/ceylon/module-resolver/${module.com.redhat.ceylon.module-resolver.version}" />
     <property name="ceylon.module-resolver.jar" value="${ceylon.module-resolver.dir}/com.redhat.ceylon.module-resolver-${module.com.redhat.ceylon.module-resolver.version}.jar" />
     <property name="ceylon.module-resolver.lib" location="${ceylon.repo.dir}/${ceylon.module-resolver.jar}" />
+    <property name="ceylon.maven-support.dir" value="com/redhat/ceylon/maven-support/${module.com.redhat.ceylon.maven-support.version}" />
+    <property name="ceylon.maven-support.jar" value="${ceylon.maven-support.dir}/com.redhat.ceylon.maven-support-${module.com.redhat.ceylon.maven-support.version}.jar" />
+    <property name="ceylon.maven-support.lib" location="${ceylon.repo.dir}/${ceylon.maven-support.jar}" />
+    <property name="ceylon.bootstrap.dir" value="ceylon/bootstrap/${module.ceylon.bootstrap.version}" />
+    <property name="ceylon.bootstrap.jar" value="${ceylon.bootstrap.dir}/ceylon.bootstrap-${module.ceylon.bootstrap.version}.jar" />
+    <property name="ceylon.bootstrap.lib" location="${ceylon.repo.dir}/${ceylon.bootstrap.jar}" />
 
     <!-- The Java source files for the compiler -->
     <property name="javac.src" location="langtools/src/share/classes" />
     <property name="ceylonc.src" location="src" />
+    <property name="common.src" location="../ceylon-common/src" />
     <property name="test.src" location="test/src" />
     <property name="test.ceylond.src" location="test/ceylondoc" />
 
@@ -44,15 +56,18 @@
     <property name="ceylon.compiler.dist" value="${build.dist.repo}/${ceylon.compiler.dir}" />
     <property name="ceylon-tests.dir" location="${build.ceylon.cars}/com/redhat/ceylon/compiler/java/test/ceylon/${module.com.redhat.ceylon.compiler.version}" />
     <property name="ceylon-tests.car" location="${ceylon-tests.dir}/com.redhat.ceylon.compiler.java.test.ceylon-${module.com.redhat.ceylon.compiler.version}.car" />
-    <property name="ceylon.bootstrap.lib" location="${build.lib}/ceylon-bootstrap.jar" />
 
     <!-- The directory that parser tests live in, and
        the directory test results get written into -->
     <property name="parser.test.src" location="corpus/tests" />
     <property name="parser.test.dst" location="${build}/test/parser" />
+    <tstamp>
+        <format property="qualifier" timezone="GMT" pattern="'v'yyyyMMdd-HHmm"/>
+    </tstamp>
 
     <path id="compiler.classpath">
         <pathelement path="${ceylon.common.lib}" />
+        <pathelement path="${ceylon.model.lib}" />
         <pathelement path="${ceylon.module-resolver.lib}" />
         <pathelement path="${ceylon.typechecker.lib}" />
         <pathelement path="${ceylon.language.lib}" />
@@ -74,6 +89,7 @@
         <pathelement path="${ceylon.compiler.lib}" />
         <pathelement path="${ceylon.language.lib}" />
         <pathelement path="${ceylon-tests.car}" />
+        <pathelement path="${ceylon.maven-support.lib}" />
         <pathelement path="${shrinkwrap-maven-uberjar.lib}" />
         <pathelement path="${jboss-logmanager.lib}" />
         <pathelement path="${jandex.lib}" />
@@ -84,6 +100,7 @@
         <pathelement path="${httpclient.lib}" />
         <pathelement path="${commons-codec.lib}" />
         <pathelement path="${commons-logging.lib}" />
+        <pathelement path="${json.lib}" />
     </path>
 
     <!-- ################################################################## -->
@@ -110,6 +127,7 @@
 
     <!-- Repository targets -->
     <target name="init.repo" description="Initialize the default local Ceylon module repository">
+        <mkdir dir="${ceylon.bin.dir}" />
         <mkdir dir="${ceylon.compiler.repo}" />
     </target>
     <target name="clean.repo" description="Clean default local Ceylon module repository">
@@ -117,9 +135,6 @@
     </target>
 
     <target name="dist" depends="build" description="Create Ceylon compiler distribution">
-        <antcall target="sha1sum">
-            <param name="file" value="${build.dist.repo}/${ceylon.compiler.jar}" />
-        </antcall>
         <copy file="${txtmark.lib}" tofile="${build.dist.repo}/${txtmark.repo}"/>
     </target>
 
@@ -130,6 +145,9 @@
         <copy todir="${ceylon.repo.dir}" overwrite="true">
             <fileset dir="${build.dist.repo}" />
         </copy>
+        <copy todir="${ceylon.bin.dir}" overwrite="true">
+            <fileset dir="${build.bin}" />
+        </copy>
     </target>
 
     <!-- Rule to compile and test -->
@@ -138,7 +156,7 @@
     <!-- Rule to build compiler classes from their Java sources -->
     <target name="compiler.classes">
         <mkdir dir="${build.classes}" />
-        <javac srcdir="${javac.src}:${ceylonc.src}" destdir="${build.classes}" debug="true" encoding="UTF-8" classpathref="compiler.classpath" includeantruntime="true">
+        <javac srcdir="${javac.src}:${ceylonc.src}" destdir="${build.classes}" debug="true" encoding="UTF-8" classpathref="compiler.classpath" target="${compile.java.target}" source="${compile.java.source}" bootclasspath="${compile.java.bootclasspath}" includeantruntime="true">
             <compilerarg value="-XDignore.symbol.file" />
             <exclude name="**/Java7Checker.java" />
             <exclude name="com/redhat/ceylon/tools/Tool.java" />
@@ -148,6 +166,7 @@
             <include name="com/redhat/**" />
             <include name="com/sun/tools/javac/**" />
             <include name="com/sun/source/**" />
+            <include name="javax/**" />
         </javac>
         <!-- 
           We need a second compilation step to compile entry points compatible with Java 5
@@ -160,12 +179,15 @@
             <include name="com/redhat/ceylon/ant/**" />
             <include name="com/redhat/ceylon/launcher/**" />
         </delete>
-        <javac srcdir="${javac.src}:${ceylonc.src}" destdir="${build.classes}" debug="true" encoding="UTF-8" classpathref="compiler.classpath" target="1.5" source="1.5" includeantruntime="true">
+        <javac srcdir="${javac.src}:${ceylonc.src}:${common.src}" destdir="${build.classes}" debug="true" encoding="UTF-8" classpathref="compiler.classpath" target="1.5" source="1.5" includeantruntime="true">
             <include name="**/Java7Checker.java" />
             <include name="com/redhat/ceylon/tools/Tool.java" />
             <include name="com/redhat/ceylon/tools/Plugin.java" />
             <include name="com/redhat/ceylon/ant/**" />
             <include name="com/redhat/ceylon/launcher/**" />
+            <include name="com/redhat/ceylon/common/*" />
+            <include name="com/redhat/ceylon/common/config/*" />
+            <include name="com/redhat/ceylon/common/tools/ModuleWildcardsHelper.java" />
         </javac>
         <copy todir="${build.classes}">
             <fileset dir="${ceylonc.src}">
@@ -174,6 +196,9 @@
                 <include name="com/redhat/**/*.properties" />
                 <include name="com/redhat/ceylon/ant/antlib.xml" />
                 <include name="META-INF/**" />
+            </fileset>
+            <fileset dir="${common.src}">
+                <include name="com/redhat/ceylon/common/config/**/*.properties" />
             </fileset>
         </copy>
         <native2ascii dest="${build.classes}" src="${ceylonc.src}" encoding="UTF-8" ext=".properties">
@@ -184,13 +209,15 @@
     <!-- Rule to build compiler test classes from their Java sources -->
     <target name="test.classes" depends="compiler.classes">
         <mkdir dir="${build.classes}" />
-        <javac destdir="${build.classes}" debug="true" encoding="UTF-8" classpathref="test.compile.classpath" includeantruntime="false">
+        <javac destdir="${build.classes}" debug="true" encoding="UTF-8" classpathref="test.compile.classpath" target="${compile.java.target}" source="${compile.java.source}" bootclasspath="${compile.java.bootclasspath}" includeantruntime="false">
             <src path="${test.ceylond.src}"/>
             <src path="${test.src}"/>
             <include name="com/redhat/ceylon/compiler/java/test/**" />
             <exclude name="com/redhat/ceylon/compiler/java/test/interop/mixed/**" />
+            <exclude name="com/redhat/ceylon/compiler/java/test/interop/Bug*" />
             <exclude name="com/redhat/ceylon/compiler/java/test/cmr/modules/bug1062/**" />
             <exclude name="com/redhat/ceylon/compiler/java/test/recovery/modules/bug1411/**" />
+            <exclude name="com/redhat/ceylon/compiler/java/test/issues/*/**" />
             <include name="com/redhat/ceylon/tools/**" />
             <exclude name="com/redhat/ceylon/tools/test/bug1183/**" />
             <include name="com/redhat/ceylon/itest/**" />
@@ -200,6 +227,9 @@
         <copy todir="${build.classes}">
             <fileset dir="${test.src}">
                 <include name="META-INF/**" />
+                <include name="**/*.txt" />
+                <include name="**/*.md" />
+                <include name="**/*.properties" />
             </fileset>
         </copy>
     </target>
@@ -207,14 +237,14 @@
     <!-- Rule to build compiler jar -->
     <target name="compiler.jar" depends="compiler.classes">
         <mkdir dir="${build.dist.repo}/${ceylon.compiler.dir}" />
-        <tstamp>
-            <format property="qualifier" timezone="GMT" pattern="'v'yyyyMMdd-HHmm"/>
-        </tstamp>
+        <mkdir dir="${build.bin}" />
         <jar destfile="${build.dist.repo}/${ceylon.compiler.jar}">
             <fileset dir="${build.classes}">
                 <exclude name="ceylon/**" />
+                <exclude name="javax/**" />
                 <exclude name="com/redhat/ceylon/compiler/java/test/**" />
                 <exclude name="com/redhat/ceylon/ant/**" />
+                <exclude name="com/redhat/ceylon/common/**" />
                 <exclude name="com/redhat/ceylon/launcher/**" />
             </fileset>
             <fileset dir="${javac.src}">
@@ -225,32 +255,56 @@
                 <attribute name="Bundle-Version" value="${module.com.redhat.ceylon.compiler.version}.${qualifier}"/>
             </manifest>
         </jar>
+        <antcall target="sha1sum">
+            <param name="file" value="${build.dist.repo}/${ceylon.compiler.jar}" />
+        </antcall>
     </target>
 
     <!-- Rule to build ant jar -->
-    <target name="ant.jar" depends="compiler.classes,bootstrap.jar">
+    <target name="ant.jar" depends="compiler.classes">
         <mkdir dir="${build.lib}" />
         <jar destfile="${build.lib}/ceylon-ant.jar">
             <fileset dir="${build.classes}">
                 <include name="com/redhat/ceylon/ant/**" />
+                <include name="com/redhat/ceylon/common/**" />
+                <include name="com/redhat/ceylon/launcher/**" />
             </fileset>
-            <zipfileset src="${ceylon.bootstrap.lib}" />
         </jar>
     </target>
 
-    <!-- Rule to build runtime jar -->
+    <!-- Rule to build bootstrap jar -->
     <target name="bootstrap.jar" depends="compiler.classes">
         <mkdir dir="${build.lib}" />
         <jar destfile="${build.lib}/ceylon-bootstrap.jar" filesetmanifest="merge">
             <fileset dir="${build.classes}">
-                <include name="com/redhat/ceylon/launcher/**" />
+                <include name="com/redhat/ceylon/launcher/Bootstrap.class" />
+                <include name="com/redhat/ceylon/launcher/CeylonClassLoader.class" />
+                <include name="com/redhat/ceylon/launcher/LauncherUtil.class" />
                 <include name="META-INF/MANIFEST.MF" />
             </fileset>
         </jar>
     </target>
 
+    <!-- Rule to build bootstrap module -->
+    <target name="bootstrap.module" depends="compiler.classes">
+        <mkdir dir="${build.dist.repo}/${ceylon.bootstrap.dir}" />
+        <jar destfile="${build.dist.repo}/${ceylon.bootstrap.jar}">
+            <fileset dir="${build.classes}">
+                <include name="com/redhat/ceylon/launcher/**" />
+                <exclude name="com/redhat/ceylon/launcher/Start.class" />
+            </fileset>
+            <manifest>
+                <attribute name="Bundle-SymbolicName" value="ceylon.bootstrap"/>
+                <attribute name="Bundle-Version" value="${module.ceylon.bootstrap.version}.${qualifier}"/>
+            </manifest>
+        </jar>
+        <antcall target="sha1sum">
+            <param name="file" value="${build.dist.repo}/${ceylon.bootstrap.jar}" />
+        </antcall>
+    </target>
+
     <!-- Rule to build compiler jar -->
-    <target name="build" depends="compiler.jar,ant.jar,bootstrap.jar">
+    <target name="build" depends="compiler.jar,ant.jar,bootstrap.jar,bootstrap.module">
         <mkdir dir="${build.dist}" />
         <mkdir dir="${build.bin}" />
         <mkdir dir="${build.ceylon.cars}" />
@@ -258,6 +312,9 @@
         <copy todir="${build.bin}">
             <fileset dir="${basedir}/bin">
             </fileset>
+            <filterset>
+                <filter token="ceylon-version" value="${ceylon.base.version}"/>
+            </filterset>
         </copy>
         <chmod perm="0755">
             <fileset dir="${build.bin}">
@@ -304,21 +361,44 @@
                     <include name="com/redhat/ceylon/compiler/java/test/ConcurrentTests.java" />
                 </fileset>
             </batchtest>
+        	<!--
+            <test fork="yes" todir="${test.reports}"
+            	name="com.redhat.ceylon.compiler.java.test.model.ModelLoaderTests"
+            	methods="loadJavaKeywords">
+            </test>
+            -->
+
+            <assertions>
+                <enable/>
+            </assertions>
         </junit>
     </target>
 
 	<target name="ide-quick-internal" depends="test.classes">
-        <property name="archivePath" value="${ceylon.compiler.lib}"/>
-        <basename file="${archivePath}" property="archiveFileName"/>
-        <property name="proxy-project" value="../ceylon-ide-eclipse/required-bundle-proxies/${archiveFileName}"/>
-        <mkdir dir="${proxy-project}"/>
-        <delete failonerror="false" dir="${proxy-project}/META-INF"/>
-        <copy toDir="${proxy-project}" overwrite="true">
-            <zipfileset src="${archivePath}" includes="META-INF/**"/>
-            <fileset file="${archivePath}"/>
+        <property name="compilerArchivePath" value="${ceylon.compiler.lib}"/>
+        <basename file="${compilerArchivePath}" property="compilerArchiveFileName"/>
+        <property name="compiler-proxy-project" value="../ceylon-ide-eclipse/required-bundle-proxies/${compilerArchiveFileName}"/>
+        <mkdir dir="${compiler-proxy-project}"/>
+        <delete failonerror="false" dir="${compiler-proxy-project}/META-INF"/>
+        <copy toDir="${compiler-proxy-project}" overwrite="true">
+            <zipfileset src="${compilerArchivePath}" includes="META-INF/**"/>
+            <fileset file="${compilerArchivePath}"/>
         </copy>
-        <manifest file="${proxy-project}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Bundle-Classpath" value="${archiveFileName}"/>
+        <manifest file="${compiler-proxy-project}/META-INF/MANIFEST.MF" mode="update">
+            <attribute name="Bundle-Classpath" value="${compilerArchiveFileName}"/>
+        </manifest>
+
+		<property name="bootstrapArchivePath" value="${ceylon.bootstrap.lib}"/>
+        <basename file="${bootstrapArchivePath}" property="bootstrapArchiveFileName"/>
+        <property name="bootstrap-proxy-project" value="../ceylon-ide-eclipse/required-bundle-proxies/${bootstrapArchiveFileName}"/>
+        <mkdir dir="${bootstrap-proxy-project}"/>
+        <delete failonerror="false" dir="${bootstrap-proxy-project}/META-INF"/>
+        <copy toDir="${bootstrap-proxy-project}" overwrite="true">
+            <zipfileset src="${bootstrapArchivePath}" includes="META-INF/**"/>
+            <fileset file="${bootstrapArchivePath}"/>
+        </copy>
+        <manifest file="${bootstrap-proxy-project}/META-INF/MANIFEST.MF" mode="update">
+            <attribute name="Bundle-Classpath" value="${bootstrapArchiveFileName}"/>
         </manifest>
 
 	    <jar destfile="../ceylon-ide-eclipse/tests/com.redhat.ceylon.eclipse.ui.test/lib/compiler-tests-${module.com.redhat.ceylon.compiler.version}.jar">
@@ -331,7 +411,7 @@
             <fileset dir="${test.src}/com/redhat/ceylon/compiler/java/test/model" includes="*.ceylon" excludes="*test.ceylon,bogus*.ceylon,module.ceylon,package.ceylon" />
         </copy>
         <copy todir="../ceylon-ide-eclipse/tests/com.redhat.ceylon.eclipse.ui.test/resources/model-loader-tests/declarations/src/declarations">
-            <fileset dir="${test.src}/com/redhat/ceylon/compiler/java/test/model" includes="*.java" excludes="?ogus*.java,*Test.java" />
+            <fileset dir="${test.src}/com/redhat/ceylon/compiler/java/test/model" includes="*.java" excludes="?ogus*.java,*Tests.java,*Test.java" />
             <filterset beginToken=" " endToken=";"><filter token="com.redhat.ceylon.compiler.java.test.model" value=" declarations;" /></filterset>
         </copy>
     </target>

@@ -47,7 +47,7 @@ import com.redhat.ceylon.common.Constants;
 import com.redhat.ceylon.common.FileUtil;
 import com.redhat.ceylon.common.log.Logger;
 import com.redhat.ceylon.compiler.java.tools.JarEntryManifestFileObject.OsgiManifest;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Module;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.main.OptionName;
 import com.sun.tools.javac.util.Log;
@@ -121,6 +121,7 @@ public class JarOutputRepositoryManager {
         private Set<String> folders = new HashSet<String>();
         private boolean manifestWritten = false;
         private boolean writeOsgiManifest;
+        private String osgiProvidedBundles;
         private final String resourceRootPath;
         private boolean writeMavenManifest;
         private TaskListener taskListener;
@@ -144,6 +145,7 @@ public class JarOutputRepositoryManager {
                     options.get(OptionName.VERBOSE) != null, cmrLog);
             this.module = module;
             this.writeOsgiManifest = !options.isSet(OptionName.CEYLONNOOSGI);
+            this.osgiProvidedBundles = options.get(OptionName.CEYLONOSGIPROVIDEDBUNDLES);
             this.writeMavenManifest = !options.isSet(OptionName.CEYLONNOPOM);
             
             // Determine the special path that signals that the files it contains
@@ -205,8 +207,8 @@ public class JarOutputRepositoryManager {
                 Set<String> copiedSourceFiles = srcCreator.copy(modifiedSourceFiles);
                 resourceCreator.copy(modifiedResourceFilesFull);
     
-                if (writeOsgiManifest && !manifestWritten) {
-                    Manifest manifest = new OsgiManifest(module, getPreviousManifest()).build();
+                if (writeOsgiManifest && !manifestWritten && !module.isDefault()) {
+                    Manifest manifest = new OsgiManifest(module, getPreviousManifest(), osgiProvidedBundles).build();
                     writeManifestJarEntry(manifest);
                 }
                 if (writeMavenManifest) {
@@ -328,9 +330,9 @@ public class JarOutputRepositoryManager {
             } else {
                 modifiedResourceFilesRel.add(entryName);
                 modifiedResourceFilesFull.add(FileUtil.applyPath(resourceCreator.getPaths(), fileName).getPath());
-                if (writeOsgiManifest && OsgiManifest.isManifestFileName(entryName)) {
+                if (writeOsgiManifest && OsgiManifest.isManifestFileName(entryName) && !module.isDefault()) {
                     this.manifestWritten = true;
-                    return new JarEntryManifestFileObject(outputJarFile.getPath(), jarOutputStream, entryName, module);
+                    return new JarEntryManifestFileObject(outputJarFile.getPath(), jarOutputStream, entryName, module, osgiProvidedBundles);
                 }
             }
             return new JarEntryFileObject(outputJarFile.getPath(), jarOutputStream, entryName);

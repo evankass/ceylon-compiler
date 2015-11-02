@@ -46,7 +46,21 @@ class LitParameterisedClass<T>(T t){
     shared T parameterisedMethod<T>(T s) => s;
     shared class Member<X>(X x){}
 }
-
+class LitClassWithConstructors {
+    shared new (Integer i) {}
+    shared new other(Integer i) {}
+    
+    shared class Member {
+        shared new (Boolean b) {
+        }
+        shared new other(Boolean b) {
+        }
+    }
+}
+class LitParameterisedClassWithConstructors<T> extends LitClassWithConstructors{
+    shared new (T t) extends LitClassWithConstructors(1) {}
+    shared new other(T t) extends LitClassWithConstructors(1) {}
+}
 interface LitInterface{
     shared interface Member{}
 }
@@ -77,6 +91,16 @@ void literals<T>(){
 
     ClassDeclaration parameterisedMemberClassDecl = `class LitParameterisedClass.Member`;
     MemberClass<LitParameterisedClass<Integer>,LitParameterisedClass<Integer>.Member<String>,[String]> parameterisedMemberClassType = `LitParameterisedClass<Integer>.Member<String>`;
+    
+    // constructors
+    assert(is CallableConstructor<LitClassWithConstructors, [Integer]> ctor = `LitClassWithConstructors`.getConstructor(""));
+    ConstructorDeclaration ctorDecl = `new LitClassWithConstructors`;
+    CallableConstructor<LitClassWithConstructors, [Integer]> ctorOther = `LitClassWithConstructors.other`; 
+    ConstructorDeclaration ctorOtherDecl = `new LitClassWithConstructors.other`;
+    assert(is CallableConstructor<LitParameterisedClassWithConstructors<String>, [String]> ctor2 = `LitParameterisedClassWithConstructors<String>`.getConstructor(""));
+    ConstructorDeclaration ctorDecl2 = `new LitParameterisedClassWithConstructors`;
+    CallableConstructor<LitParameterisedClassWithConstructors<String>, [String]> ctorOther2 = `LitParameterisedClassWithConstructors<String>.other`;
+    ConstructorDeclaration ctorDeclOther2 = `new LitParameterisedClassWithConstructors.other`;
     
     // Interfaces
     
@@ -179,10 +203,10 @@ void literals<T>(){
     Type<Anything> tptype = `T`;
     
     ValueDeclaration objectAttribute = `value obj.attribute`;
-    Value<Integer> objectValue = `obj.attribute`;
+    Attribute<\Iobj,Integer> objectValue = `\Iobj.attribute`;
 
     FunctionDeclaration objectMethod = `function obj.method`;
-    Function<Integer,[Integer]> objectFunction = `obj.method<Integer>`;
+    Method<\Iobj,Integer,[Integer]> objectFunction = `\Iobj.method<Integer>`;
 }
 
 shared object obj {

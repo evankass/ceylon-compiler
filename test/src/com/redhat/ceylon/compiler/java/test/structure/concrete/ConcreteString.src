@@ -1,20 +1,19 @@
 package com.redhat.ceylon.compiler.java.test.structure.concrete;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 interface ConcreteString {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString$impl $com$redhat$ceylon$compiler$java$test$structure$concrete$ConcreteString$impl();
     
     @.ceylon.language.SharedAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Anything")
     public void presentYourself();
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString.class);
 }
 @.com.redhat.ceylon.compiler.java.metadata.Ignore
-final class ConcreteString$impl {
+final class ConcreteString$impl implements .java.io.Serializable {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     ConcreteString$impl(.com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString $this) {
@@ -26,16 +25,22 @@ final class ConcreteString$impl {
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public void presentYourself() {
         if ($this.equals($this)) {
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "equals(this)"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "equals(this)"));
+        }
         if (2L == $this.hashCode()) {
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "2 == hash"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "2 == hash"));
+        }
         if ("foo".equals($this.toString())) {
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "\"foo\" == string"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "\"foo\" == string"));
+        }
     }
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.SatisfiedTypes({"com.redhat.ceylon.compiler.java.test.structure.concrete::ConcreteString"})
-class ConcreteStringC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString {
+class ConcreteStringC implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString, .java.io.Serializable {
     
     ConcreteStringC() {
         this.$com$redhat$ceylon$compiler$java$test$structure$concrete$ConcreteString$this$ = new .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString$impl(this);
@@ -57,9 +62,6 @@ class ConcreteStringC implements .com.redhat.ceylon.compiler.java.runtime.model.
     
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.ActualAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("actual")})
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::String")
     @.com.redhat.ceylon.compiler.java.metadata.Transient
@@ -69,9 +71,6 @@ class ConcreteStringC implements .com.redhat.ceylon.compiler.java.runtime.model.
     
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.ActualAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("actual")})
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
     @.com.redhat.ceylon.compiler.java.metadata.Transient
@@ -85,12 +84,6 @@ class ConcreteStringC implements .com.redhat.ceylon.compiler.java.runtime.model.
         );
     }
     
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteStringC();
-    }
-    
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
@@ -99,24 +92,19 @@ class ConcreteStringC implements .com.redhat.ceylon.compiler.java.runtime.model.
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteStringC.class);
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 interface ConcreteString2 {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString2$impl $com$redhat$ceylon$compiler$java$test$structure$concrete$ConcreteString2$impl();
     
     @.ceylon.language.SharedAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Anything")
     public void presentYourself();
     
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.ActualAnnotation$annotation$
     @.ceylon.language.DefaultAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("actual"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("default")})
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::String")
     @.com.redhat.ceylon.compiler.java.metadata.Transient
@@ -125,10 +113,6 @@ interface ConcreteString2 {
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.ActualAnnotation$annotation$
     @.ceylon.language.DefaultAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("actual"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("default")})
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
     @.com.redhat.ceylon.compiler.java.metadata.Transient
@@ -137,7 +121,7 @@ interface ConcreteString2 {
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString2.class);
 }
 @.com.redhat.ceylon.compiler.java.metadata.Ignore
-final class ConcreteString2$impl {
+final class ConcreteString2$impl implements .java.io.Serializable {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     ConcreteString2$impl(.com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString2 $this) {
@@ -149,11 +133,17 @@ final class ConcreteString2$impl {
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public void presentYourself() {
         if ($this.equals($this)) {
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "equals(this)"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "equals(this)"));
+        }
         if (3L == $this.hashCode()) {
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "3 == hash"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "3 == hash"));
+        }
         if ("bar".equals($this.toString())) {
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "\"bar\" == string"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "\"bar\" == string"));
+        }
     }
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
@@ -172,9 +162,9 @@ final class ConcreteString2$impl {
         );
     }
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.SatisfiedTypes({"com.redhat.ceylon.compiler.java.test.structure.concrete::ConcreteString2"})
-class ConcreteStringC2 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString2 {
+class ConcreteStringC2 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString2, .java.io.Serializable {
     
     ConcreteStringC2() {
         this.$com$redhat$ceylon$compiler$java$test$structure$concrete$ConcreteString2$this$ = new .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteString2$impl(this);
@@ -196,9 +186,6 @@ class ConcreteStringC2 implements .com.redhat.ceylon.compiler.java.runtime.model
     
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.ActualAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("actual")})
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::String")
     @.com.redhat.ceylon.compiler.java.metadata.Transient
@@ -208,9 +195,6 @@ class ConcreteStringC2 implements .com.redhat.ceylon.compiler.java.runtime.model
     
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.ActualAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("actual")})
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
     @.com.redhat.ceylon.compiler.java.metadata.Transient
@@ -224,12 +208,6 @@ class ConcreteStringC2 implements .com.redhat.ceylon.compiler.java.runtime.model
         );
     }
     
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteStringC2();
-    }
-    
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
@@ -238,7 +216,7 @@ class ConcreteStringC2 implements .com.redhat.ceylon.compiler.java.runtime.model
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteStringC2.class);
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.Method
 final class concreteString_ {
     
@@ -249,11 +227,5 @@ final class concreteString_ {
     static void concreteString() {
         new .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteStringC().presentYourself();
         new .com.redhat.ceylon.compiler.java.test.structure.concrete.ConcreteStringC2().presentYourself();
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.structure.concrete.concreteString_.concreteString();
     }
 }

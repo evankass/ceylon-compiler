@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.quoting.$goto;
 
-class MangledMembers_class implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MangledMembers_class implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MangledMembers_class() {
     }
@@ -33,29 +33,19 @@ class MangledMembers_class implements .com.redhat.ceylon.compiler.java.runtime.m
         return "";
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.quoting.$goto.MangledMembers_class();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.quoting.$goto.MangledMembers_class.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.quoting.$goto.MangledMembers_class.class);
 }
-class MangledMembers_clone implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MangledMembers_clone implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MangledMembers_clone() {
     }
     
     public final .java.lang.String getClone() {
         return "";
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.quoting.$goto.MangledMembers_clone();
     }
     
     @.java.lang.Override

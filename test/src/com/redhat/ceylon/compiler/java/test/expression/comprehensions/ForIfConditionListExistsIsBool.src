@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.comprehensions;
 
-class ForIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ForIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ForIfConditionListExistsIsBool() {
     }
@@ -23,7 +23,7 @@ class ForIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.java
                         if (x$exhausted$) {
                             return false;
                         } else {
-                            x = (.ceylon.language.Sequential<? extends .java.lang.Object>)$ceylontmp$item$0;
+                            x = (.ceylon.language.Sequential<? extends .java.lang.Object>)(.ceylon.language.Sequential)$ceylontmp$item$0;
                             return true;
                         }
                     }
@@ -33,9 +33,10 @@ class ForIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.java
                     private final boolean $next$1() {
                         ifcomp_1: while (true) {
                             if (!this.x()) break ifcomp_1;
+                            final .ceylon.language.Sequential<? extends .java.lang.Object> x = this.x;
                             .java.lang.Object y$3 = null;
                             .java.lang.Object z$1 = null;
-                            if ((z$1 = x.get(.ceylon.language.Integer.instance(0L))) != null) {
+                            if ((z$1 = x.getFromFirst(0L)) != null) {
                                 z$2 = z$1;
                                 if ((y$3 = z$2) instanceof .ceylon.language.Integer) {
                                     y$4 = ((.ceylon.language.Integer)y$3).longValue();
@@ -50,20 +51,15 @@ class ForIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.java
                     
                     public final .java.lang.Object next() {
                         if (this.$next$1()) {
-                            final .ceylon.language.Sequential<? extends .java.lang.Object> x = this.x;
-                            final long y$4 = this.y$4;
                             final .java.lang.Object z$2 = this.z$2;
+                            final long y$4 = this.y$4;
+                            final .ceylon.language.Sequential<? extends .java.lang.Object> x = this.x;
                             return .ceylon.language.Boolean.instance(y$4 == 1L);
                         } else return .ceylon.language.finished_.get_();
                     }
                 };
             }
         }.sequence();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.comprehensions.ForIfConditionListExistsIsBool();
     }
     
     @.java.lang.Override

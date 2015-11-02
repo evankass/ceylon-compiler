@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.interop;
 
-class SatisfiesFileFilter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.FileFilter {
+class SatisfiesFileFilter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.FileFilter, .java.io.Serializable {
     
     SatisfiesFileFilter() {
     }
@@ -10,18 +10,13 @@ class SatisfiesFileFilter implements .com.redhat.ceylon.compiler.java.runtime.mo
         return true;
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.interop.SatisfiesFileFilter();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.interop.SatisfiesFileFilter.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.interop.SatisfiesFileFilter.class);
 }
-class SatisfiesFilenameFilter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.FilenameFilter {
+class SatisfiesFilenameFilter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.FilenameFilter, .java.io.Serializable {
     
     SatisfiesFilenameFilter() {
     }
@@ -29,11 +24,6 @@ class SatisfiesFilenameFilter implements .com.redhat.ceylon.compiler.java.runtim
     @.java.lang.Override
     public final boolean accept(final .java.io.File dir, final .java.lang.String name) {
         return true;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.interop.SatisfiesFilenameFilter();
     }
     
     @.java.lang.Override
@@ -52,13 +42,8 @@ final class test_ {
         f1.listFiles(new .com.redhat.ceylon.compiler.java.test.interop.SatisfiesFileFilter());
         f1.listFiles(new .com.redhat.ceylon.compiler.java.test.interop.SatisfiesFilenameFilter());
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.interop.test_.test();
-    }
 }
-class JavaInterfaceImpl implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.interop.JavaInterface<.ceylon.language.Boolean, .ceylon.language.Integer> {
+class JavaInterfaceImpl implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.interop.JavaInterface<.ceylon.language.Boolean, .ceylon.language.Integer>, .java.io.Serializable {
     
     JavaInterfaceImpl() {
     }
@@ -126,11 +111,6 @@ class JavaInterfaceImpl implements .com.redhat.ceylon.compiler.java.runtime.mode
     @.java.lang.Override
     public final <M>M methodTypeParamMethod(final M b) {
         return (M).ceylon.language.nothing_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.interop.JavaInterfaceImpl();
     }
     
     @.java.lang.Override

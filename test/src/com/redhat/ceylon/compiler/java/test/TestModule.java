@@ -38,6 +38,8 @@ public @interface TestModule {
     String resDirectory();
     /** Whether the test should fail if there are no tests to run */
     boolean errorIfNoTests() default true;
+    
+    String[] options() default {};
     /** The name of the modules to compile */
     String[] modules() default {};
     
@@ -48,4 +50,7 @@ public @interface TestModule {
     ModuleSpecifier[] runModulesInNewJvm() default {};
     
     String[] removeAtRuntime() default {}; 
+    
+    String[] modulesUsingCheckModule() default {};
+    String[] modulesUsingCheckFunction() default {};
 }

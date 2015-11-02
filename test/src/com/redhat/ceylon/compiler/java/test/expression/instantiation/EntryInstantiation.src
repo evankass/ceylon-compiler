@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.expression.instantiation;
 
-class EntryInstantiation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class EntryInstantiation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     EntryInstantiation() {
     }
     
     public final .java.lang.Object m() {
         return new .ceylon.language.Entry<.ceylon.language.Integer, .ceylon.language.String>(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.String.$TypeDescriptor$, .ceylon.language.Integer.instance(1L), .ceylon.language.String.instance("a"));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.instantiation.EntryInstantiation();
     }
     
     @.java.lang.Override

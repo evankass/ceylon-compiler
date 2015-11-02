@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.structure.importIt;
 
-class ImportTypeAlias implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ImportTypeAlias implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ImportTypeAlias() {
     }
     
     private final void m$priv$() {
         new .com.redhat.ceylon.compiler.java.test.structure.importIt.pkg.C1();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.importIt.ImportTypeAlias();
     }
     
     @.java.lang.Override

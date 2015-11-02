@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.misc.keyword;
 
-class Variable implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Variable implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Variable() {
     }
@@ -33,11 +33,6 @@ class Variable implements .com.redhat.ceylon.compiler.java.runtime.model.Reified
         final boolean $throws = false;
         final boolean $transient = false;
         final boolean $volatile = false;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.misc.keyword.Variable();
     }
     
     @.java.lang.Override

@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class InitializerIf implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class InitializerIf implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     InitializerIf() {
         boolean b = false;
         if (true) {
             b = true;
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.InitializerIf();
     }
     
     @.java.lang.Override

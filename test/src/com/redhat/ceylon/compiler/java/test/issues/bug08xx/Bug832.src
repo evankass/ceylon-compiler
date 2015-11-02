@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug08xx;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 interface Bug832Common {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
@@ -8,9 +8,6 @@ interface Bug832Common {
     
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.DefaultAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("default")})
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
     @.com.redhat.ceylon.compiler.java.metadata.Transient
     public long getSign();
@@ -18,7 +15,7 @@ interface Bug832Common {
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common.class);
 }
 @.com.redhat.ceylon.compiler.java.metadata.Ignore
-final class Bug832Common$impl {
+final class Bug832Common$impl implements .java.io.Serializable {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     Bug832Common$impl(.com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common $this) {
@@ -32,9 +29,9 @@ final class Bug832Common$impl {
         return 0L;
     }
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.SatisfiedTypes({"com.redhat.ceylon.compiler.java.test.issues.bug08xx::Bug832Common"})
-class Bug832Integer implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common {
+class Bug832Integer implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common, .java.io.Serializable {
     
     Bug832Integer() {
         this.$com$redhat$ceylon$compiler$java$test$issues$bug08xx$Bug832Common$this$ = new .com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common$impl(this);
@@ -54,12 +51,6 @@ class Bug832Integer implements .com.redhat.ceylon.compiler.java.runtime.model.Re
         return $com$redhat$ceylon$compiler$java$test$issues$bug08xx$Bug832Common$this$.getSign();
     }
     
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Integer();
-    }
-    
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
@@ -68,9 +59,9 @@ class Bug832Integer implements .com.redhat.ceylon.compiler.java.runtime.model.Re
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Integer.class);
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.SatisfiedTypes({"com.redhat.ceylon.compiler.java.test.issues.bug08xx::Bug832Common"})
-class Bug832Float implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common {
+class Bug832Float implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common, .java.io.Serializable {
     
     Bug832Float() {
         this.$com$redhat$ceylon$compiler$java$test$issues$bug08xx$Bug832Common$this$ = new .com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common$impl(this);
@@ -88,12 +79,6 @@ class Bug832Float implements .com.redhat.ceylon.compiler.java.runtime.model.Reif
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public long getSign() {
         return $com$redhat$ceylon$compiler$java$test$issues$bug08xx$Bug832Common$this$.getSign();
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Float();
     }
     
     @.java.lang.Override
@@ -114,10 +99,5 @@ final class bug832_ {
         final long sign = ((.com.redhat.ceylon.compiler.java.test.issues.bug08xx.Bug832Common)n).getSign();
         final .java.lang.Object l = .ceylon.language.empty_.get_();
         final long s = ((.ceylon.language.Iterable<? extends .java.lang.Object, ? extends .java.lang.Object>)(.ceylon.language.Iterable)l).getSize();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug08xx.bug832_.bug832();
     }
 }

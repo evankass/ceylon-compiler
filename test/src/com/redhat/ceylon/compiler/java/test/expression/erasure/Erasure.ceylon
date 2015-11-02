@@ -74,6 +74,23 @@ interface MyNumeric satisfies Numeric<MyNumeric> & Integral<MyNumeric> & Compara
         & Exponentiable<MyNumeric,MyNumeric> & Scalable<MyNumeric,MyNumeric> {}
 
 @noanno
+interface MyList<out Element=Anything>
+        satisfies Collection<Element> &
+                  Correspondence<MyNumeric,Element> &
+                  Ranged<MyNumeric,Element,MyList<Element>> {}
+
+@noanno
+interface MySequence<out Element=Anything>
+        satisfies MyList<Element> &
+        Ranged<MyNumeric,Element,MySequence<Element>> {}
+
+@noanno
+interface MyEmpty
+        satisfies MyList<Nothing> &
+        Correspondence<MyNumeric,Nothing> &
+        Ranged<MyNumeric,Nothing,MyEmpty> {}
+
+@noanno
 class Test(Integer&EmptyInterface n) {
     
     void takesTop(Top top){}
@@ -86,11 +103,13 @@ class Test(Integer&EmptyInterface n) {
     void testUnion(){
         Left|Right middle = CLeft();
         middle.top();
+        value mtopref = middle.top;
         Integer n1 = middle.topAttribute;
         takesTop(middle);
         if(is Left middle){
             Integer n2 = middle.leftAttribute;
             middle.left();
+            value mleftref = middle.left;
             takesLeft(middle);
         }
     }
@@ -107,9 +126,13 @@ class Test(Integer&EmptyInterface n) {
 
         // invocation
         middle.top();
+        value mtopref = middle.top;
         middle.left();
+        value mlrefref = middle.left;
         middle.right();
+        value mrightref = middle.right;
         givesLeftAndRight().top();
+        value lrtopref = givesLeftAndRight().top;
         CMiddle().top();
         
         // attribute access
@@ -236,28 +259,28 @@ class Test(Integer&EmptyInterface n) {
         sync = p1 is Category;
     }
 
-    void testSequences(Integer&EmptyInterface p1,
-                       Sequence<Left&Right>&EmptyInterface leftsAndRights,
-                       Sequence<Entry<Left&Right,Left&Right>>&EmptyInterface leftsAndRightsEntries,
-                       Null|Sequence<Left&Right>&EmptyInterface topsOrNull){
+    void testSequences<T>(MyNumeric&EmptyInterface p1,
+                       MySequence<Left&Right>&T leftsAndRights,
+                       MySequence<Entry<Left&Right,Left&Right>>&T leftsAndRightsEntries,
+                       Null|MySequence<Left&Right>&EmptyInterface topsOrNull){
         // sequence operators
-        Empty|Sequence<Integer&EmptyInterface> naturals = [p1];
-        Integer? n5 = naturals[p1];
+        MyEmpty|MySequence<MyNumeric&EmptyInterface> naturals = nothing;
+        MyNumeric? n5 = naturals[p1];
         Top? t = leftsAndRights[p1];
-        Empty|Sequence<Integer&EmptyInterface>|Null naturalsOrNull = [p1];
+        MyEmpty|MySequence<MyNumeric&EmptyInterface>|Null naturalsOrNull = nothing;
         
-        variable Empty|Sequence<Integer&EmptyInterface> subrange;
-        subrange = naturals[p1..p1] of Empty|Sequence<Integer&EmptyInterface>;
-        subrange = naturals[p1...] of Empty|Sequence<Integer&EmptyInterface>;
-        subrange = naturals[...p1] of Empty|Sequence<Integer&EmptyInterface>;
+        variable MyEmpty|MySequence<MyNumeric&EmptyInterface> subrange;
+        subrange = naturals[p1..p1] of MyEmpty|MySequence<MyNumeric&EmptyInterface>;
+        subrange = naturals[p1...] of MyEmpty|MySequence<MyNumeric&EmptyInterface>;
+        subrange = naturals[...p1] of MyEmpty|MySequence<MyNumeric&EmptyInterface>;
 
         // sequence expression
-        Integer[] plainIntegers = [p1];
+        MyNumeric[] plainIntegers = [p1];
 
         // iteration
         // FIXME: I couldn't find a way to get a sequence erased to object
-        for(Integer&EmptyInterface it in naturals){
-            Numeric<Integer> n6 = it;
+        for(MyNumeric&EmptyInterface it in naturals){
+            Numeric<MyNumeric> n6 = it;
         }
         for(Left itLeft in leftsAndRights){
             itLeft.top();
@@ -306,11 +329,6 @@ class Test(Integer&EmptyInterface n) {
         sync = naturals.size;
         sync = leftsAndRights.size;
 
-        // nonempty tests
-        if(nonempty naturals){}
-        variable Boolean bSync;
-        bSync = naturals nonempty;
-        
         // spread op
         Left[]&Right[] spreadMember = leftsAndRights*.leftAndRightAttribute;
         variable Left[]&Right[] spreadInvocation;

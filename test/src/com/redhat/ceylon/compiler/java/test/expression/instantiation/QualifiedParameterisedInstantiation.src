@@ -1,13 +1,13 @@
 package com.redhat.ceylon.compiler.java.test.expression.instantiation;
 
-class QualifiedParameterisedInstantiation<G> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class QualifiedParameterisedInstantiation<G> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     QualifiedParameterisedInstantiation(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$G) {
         this.$reified$G = $reified$G;
     }
     private final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$G;
     
-    class Inner<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class Inner<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         Inner(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final .java.lang.String s) {
             this.$reified$T = $reified$T;
@@ -42,11 +42,6 @@ class QualifiedParameterisedInstantiation<G> implements .com.redhat.ceylon.compi
             }
             returning arg$1$callable$.new Inner<.ceylon.language.Integer>(arg$1$reified$0, arg$1$0);
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.instantiation.QualifiedParameterisedInstantiation(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
     }
     
     @.java.lang.Override

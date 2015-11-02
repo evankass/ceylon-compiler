@@ -11,7 +11,7 @@ public interface Bug1151_A {
     public .java.lang.Object methodA(final long a);
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug11xx.Bug1151_A.class);
 }
-public final class Bug1151_A$impl {
+public final class Bug1151_A$impl implements .java.io.Serializable {
     
     public Bug1151_A$impl(.com.redhat.ceylon.compiler.java.test.issues.bug11xx.Bug1151_A $this) {
         this.$this = $this;
@@ -84,7 +84,7 @@ public final class Bug1151_A$impl {
         return methodA3$priv$$canonical$(a);
     }
 }
-public class Bug1151_B implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class Bug1151_B implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public Bug1151_B() {
     }
@@ -219,7 +219,7 @@ public class Bug1151_C extends .com.redhat.ceylon.compiler.java.test.issues.bug1
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug11xx.Bug1151_C.class);
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.Method
 final class bug1151_callsite_ {
     
@@ -231,15 +231,13 @@ final class bug1151_callsite_ {
         final .com.redhat.ceylon.compiler.java.test.issues.bug11xx.Bug1151_C c = new .com.redhat.ceylon.compiler.java.test.issues.bug11xx.Bug1151_C();
         final long ia3 = c.methodA().longValue();
         if (1L == ia3) {
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "1 == ia3"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "1 == ia3"));
+        }
         final long ib3 = c.methodB().longValue();
         if (1L == ib3) {
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "1 == ib3"));
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug11xx.bug1151_callsite_.bug1151_callsite();
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "1 == ib3"));
+        }
     }
 }

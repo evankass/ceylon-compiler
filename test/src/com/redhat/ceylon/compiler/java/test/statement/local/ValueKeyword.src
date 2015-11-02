@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.local;
 
-class ValueKeyword implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ValueKeyword implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ValueKeyword() {
     }
@@ -13,11 +13,6 @@ class ValueKeyword implements .com.redhat.ceylon.compiler.java.runtime.model.Rei
     
     private final long test$priv$() {
         return 0L;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.local.ValueKeyword();
     }
     
     @.java.lang.Override

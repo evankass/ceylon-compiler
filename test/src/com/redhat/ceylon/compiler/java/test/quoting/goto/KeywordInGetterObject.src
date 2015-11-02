@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.quoting.$goto;
 
-class KeywordInGetterObject implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class KeywordInGetterObject implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     KeywordInGetterObject() {
         
@@ -11,7 +11,7 @@ class KeywordInGetterObject implements .com.redhat.ceylon.compiler.java.runtime.
             
             public long get_() {
                 
-                final class goto_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+                final class goto_ implements .java.io.Serializable, .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
                     
                     private goto_() {
                     }
@@ -27,11 +27,6 @@ class KeywordInGetterObject implements .com.redhat.ceylon.compiler.java.runtime.
             }
         }
         final .com.redhat.ceylon.compiler.java.language.GetterLong i$getter$_ = new i$getter$_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.quoting.$goto.KeywordInGetterObject();
     }
     
     @.java.lang.Override

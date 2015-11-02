@@ -17,7 +17,7 @@ final class defaultFunctionReference_ {
     }
     
     public static final .ceylon.language.Callable<? extends .java.lang.Object> defaultFunctionReference$f() {
-        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .ceylon.language.Object.$TypeDescriptor$, .ceylon.language.Object.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$), "Anything(Object)", (short)-1){
+        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, -1, .ceylon.language.Object.$TypeDescriptor$), "Anything(Object)", (short)-1){
             
             @.java.lang.Override
             public .java.lang.Object $call$(final .java.lang.Object $param$0) {
@@ -34,15 +34,10 @@ final class defaultFunctionReference_ {
     }
     
     static void defaultFunctionReference(final .ceylon.language.Callable<? extends .java.lang.Object> f) {
-        f.$call$(.ceylon.language.Integer.instance(1L));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.expression.invoke.defaultFunctionReference_.defaultFunctionReference();
+        f.$call$((.java.lang.Object).ceylon.language.Integer.instance(1L));
     }
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.Method
 final class defaultFunctionReference2_ {
     
@@ -81,7 +76,11 @@ final class defaultFunctionReference2_ {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public static final .ceylon.language.Callable<? extends .java.lang.Object> defaultFunctionReference2$f(final .java.lang.String s) {
-        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Sequential.class, .ceylon.language.Object.$TypeDescriptor$), "Anything(Object*)", (short)0){
+        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Sequential.class, .ceylon.language.Object.$TypeDescriptor$), "Anything(Object*)", (short)0)
+        @.com.redhat.ceylon.compiler.java.metadata.LocalDeclaration
+        @.com.redhat.ceylon.compiler.java.metadata.Name("f")
+        @.com.redhat.ceylon.compiler.java.metadata.Method
+        {
             
             @.java.lang.Override
             @.com.redhat.ceylon.compiler.java.metadata.Ignore
@@ -100,7 +99,7 @@ final class defaultFunctionReference2_ {
             @.java.lang.Override
             @.com.redhat.ceylon.compiler.java.metadata.Ignore
             public .java.lang.Object $call$(final .java.lang.Object $param$0) {
-                final .ceylon.language.Sequential<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), $param$0);
+                final .ceylon.language.Sequential<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{$param$0}, .ceylon.language.empty_.get_());
                 return $calltyped$(o$variadic$);
             }
             
@@ -113,7 +112,9 @@ final class defaultFunctionReference2_ {
             @.java.lang.Override
             @.com.redhat.ceylon.compiler.java.metadata.Ignore
             public .java.lang.Object $call$(final .java.lang.Object $param$0, final .java.lang.Object $param$1) {
-                final .ceylon.language.Sequential<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), $param$0, $param$1);
+                final .ceylon.language.Sequential<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{
+                        $param$0,
+                        $param$1}, .ceylon.language.empty_.get_());
                 return $calltyped$(o$variadic$);
             }
             
@@ -128,7 +129,10 @@ final class defaultFunctionReference2_ {
             @.java.lang.Override
             @.com.redhat.ceylon.compiler.java.metadata.Ignore
             public .java.lang.Object $call$(final .java.lang.Object $param$0, final .java.lang.Object $param$1, final .java.lang.Object $param$2) {
-                final .ceylon.language.Sequential<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), $param$0, $param$1, $param$2);
+                final .ceylon.language.Sequential<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{
+                        $param$0,
+                        $param$1,
+                        $param$2}, .ceylon.language.empty_.get_());
                 return $calltyped$(o$variadic$);
             }
             
@@ -172,18 +176,12 @@ final class defaultFunctionReference2_ {
     final .java.lang.String s, @.com.redhat.ceylon.compiler.java.metadata.Name("f")
     @.com.redhat.ceylon.compiler.java.metadata.FunctionalParameter("!(o*)")
     @.com.redhat.ceylon.compiler.java.metadata.Defaulted
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Callable<ceylon.language::Anything,ceylon.language::Sequential<ceylon.language::Object>>")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Anything(ceylon.language::Object*)")
     final .ceylon.language.Callable<? extends .java.lang.Object> f) {
-        f.$callvariadic$((.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), .ceylon.language.Integer.instance(1L)));
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.expression.invoke.defaultFunctionReference2_.defaultFunctionReference2();
+        f.$callvariadic$((.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{.ceylon.language.Integer.instance(1L)}, .ceylon.language.empty_.get_()));
     }
 }
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.Method
 final class defaultFunctionReference3_ {
     
@@ -222,7 +220,11 @@ final class defaultFunctionReference3_ {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public static final .ceylon.language.Callable<? extends .java.lang.Object> defaultFunctionReference3$f(final .java.lang.String s) {
-        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Sequence.class, .ceylon.language.Object.$TypeDescriptor$), "Anything(Object+)", (short)0){
+        return new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Sequence.class, .ceylon.language.Object.$TypeDescriptor$), "Anything(Object+)", (short)0)
+        @.com.redhat.ceylon.compiler.java.metadata.LocalDeclaration
+        @.com.redhat.ceylon.compiler.java.metadata.Name("f")
+        @.com.redhat.ceylon.compiler.java.metadata.Method
+        {
             
             @.java.lang.Override
             @.com.redhat.ceylon.compiler.java.metadata.Ignore
@@ -234,7 +236,7 @@ final class defaultFunctionReference3_ {
             @.java.lang.Override
             @.com.redhat.ceylon.compiler.java.metadata.Ignore
             public .java.lang.Object $call$(final .java.lang.Object $param$0) {
-                final .ceylon.language.Sequence<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), $param$0);
+                final .ceylon.language.Sequence<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{$param$0}, .ceylon.language.empty_.get_());
                 return $calltyped$(o$variadic$);
             }
             
@@ -247,7 +249,9 @@ final class defaultFunctionReference3_ {
             @.java.lang.Override
             @.com.redhat.ceylon.compiler.java.metadata.Ignore
             public .java.lang.Object $call$(final .java.lang.Object $param$0, final .java.lang.Object $param$1) {
-                final .ceylon.language.Sequence<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), $param$0, $param$1);
+                final .ceylon.language.Sequence<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{
+                        $param$0,
+                        $param$1}, .ceylon.language.empty_.get_());
                 return $calltyped$(o$variadic$);
             }
             
@@ -262,7 +266,10 @@ final class defaultFunctionReference3_ {
             @.java.lang.Override
             @.com.redhat.ceylon.compiler.java.metadata.Ignore
             public .java.lang.Object $call$(final .java.lang.Object $param$0, final .java.lang.Object $param$1, final .java.lang.Object $param$2) {
-                final .ceylon.language.Sequence<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), $param$0, $param$1, $param$2);
+                final .ceylon.language.Sequence<? extends .java.lang.Object> o$variadic$ = (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{
+                        $param$0,
+                        $param$1,
+                        $param$2}, .ceylon.language.empty_.get_());
                 return $calltyped$(o$variadic$);
             }
             
@@ -306,15 +313,9 @@ final class defaultFunctionReference3_ {
     final .java.lang.String s, @.com.redhat.ceylon.compiler.java.metadata.Name("f")
     @.com.redhat.ceylon.compiler.java.metadata.FunctionalParameter("!(o+)")
     @.com.redhat.ceylon.compiler.java.metadata.Defaulted
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Callable<ceylon.language::Anything,ceylon.language::Sequence<ceylon.language::Object>>")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Anything(ceylon.language::Object+)")
     final .ceylon.language.Callable<? extends .java.lang.Object> f) {
-        f.$callvariadic$((.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), .ceylon.language.Integer.instance(1L)));
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.expression.invoke.defaultFunctionReference3_.defaultFunctionReference3();
+        f.$callvariadic$((.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{.ceylon.language.Integer.instance(1L)}, .ceylon.language.empty_.get_()));
     }
 }
 final class defaultFunctionReference_call_ {
@@ -326,10 +327,5 @@ final class defaultFunctionReference_call_ {
         .com.redhat.ceylon.compiler.java.test.expression.invoke.defaultFunctionReference_.defaultFunctionReference();
         .com.redhat.ceylon.compiler.java.test.expression.invoke.defaultFunctionReference2_.defaultFunctionReference2();
         .com.redhat.ceylon.compiler.java.test.expression.invoke.defaultFunctionReference3_.defaultFunctionReference3();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.expression.invoke.defaultFunctionReference_call_.defaultFunctionReference_call();
     }
 }

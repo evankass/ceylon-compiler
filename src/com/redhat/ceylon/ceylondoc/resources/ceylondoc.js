@@ -3,15 +3,41 @@ function enableInfoKeybordShortcut(key) {
 	$("#"+key+" .info").addClass("text-info");
 }
 
+
+/*
+ * HIGHLIGHT LINES IN RAINBOW
+ */
+if( window.Rainbow ) {
+    function highlightLinesInRainbow() {
+        var startend = location.hash.substr(1).split(',');
+        var startLine = parseInt(startend[0]);
+        var endLine = parseInt(startend[1]);
+
+        if( !isNaN(startLine) && !isNaN(endLine) ) {
+            var tr = $('.line-'+startLine);
+            if( tr.length > 0 ) {
+                $(document.body).scrollTop(tr.position().top);
+                for(i = startLine; i <= endLine; i++) {
+                    tr.addClass('highlight');
+                    tr = tr.next();
+                }
+            }
+        }
+    } 
+    window.Rainbow.onLineNumbersComplete = highlightLinesInRainbow;
+}
+
+
 /*
  * COLLAPSIBLE TYPE HIERARCHY
  */
 $(".hierarchy-arrow-down").each(function() {
 	var hierarchyArrow = $(this);
-	var hierarchyLevel = hierarchyArrow.parent();
+	var hierarchyArrowCont = hierarchyArrow.parent();
+	var hierarchyLevel = hierarchyArrowCont.parent();
 	var subhierarchy = $(".subhierarchy", hierarchyLevel);
 
-	hierarchyArrow.click(function() {
+	hierarchyArrowCont.click(function() {
 		hierarchyArrow.toggleClass("hierarchy-arrow-down");
 		hierarchyArrow.toggleClass("hierarchy-arrow-right");
 		subhierarchy.toggle();    
@@ -146,6 +172,7 @@ $(document).ready(function() {
     initFilterActionNone();
     initFilterActionMore();
     initFilterDropdownPanel();
+    initTagsOnClickHandler();
     executeFilter();
 
     function initFilterKeyboardShortcuts() {
@@ -163,6 +190,7 @@ $(document).ready(function() {
         $('#filterActionAll').click(function() {
             $('#filterDropdownPanelTags .tag:visible').addClass('tagSelected');
             $('#filterDropdownPanelTags input[type="checkbox"]:visible').attr('checked', true);
+            $('tbody a.tag').addClass('tagSelected');
             executeFilter();
         });
     };
@@ -171,6 +199,7 @@ $(document).ready(function() {
         $('#filterActionNone').click(function() {
             $('#filterDropdownPanelTags .tag').removeClass('tagSelected');
             $('#filterDropdownPanelTags input[type="checkbox"]').attr('checked', false);
+            $('tbody a.tag').removeClass('tagSelected');
             executeFilter();                    
         });
     };
@@ -209,22 +238,26 @@ $(document).ready(function() {
             var tagCheckbox = $('<input/>').attr('name', tagName).attr('type', 'checkbox').appendTo(tagDiv);
             var tagLabel = $('<a/>').addClass("tag label").attr('name', tagName).append(tagName).appendTo(tagDiv);
             $('<span/>').addClass('tagOccurrenceCount').append(tagOccurrencesCount[tagName]).appendTo(tagDiv);
-            
-            var eventData = {tagLabel: tagLabel, tagCheckbox: tagCheckbox};
+
             var eventHandler = function(event) {
-                var isSelected = event.data.tagLabel.hasClass('tagSelected')
+                var tagName = $(event.target).attr('name');
+                var tagCheckbox = $('#filterDropdownPanelTags input[name="'+tagName+'"]');
+                var tagLabel = $('#filterDropdownPanelTags a[name="'+tagName+'"]');
+                var isSelected = tagLabel.hasClass('tagSelected')
                 if( isSelected ) {
-                    event.data.tagLabel.removeClass('tagSelected');
-                    event.data.tagCheckbox.attr('checked', false);
+                    tagLabel.removeClass('tagSelected');
+                    tagCheckbox.attr('checked', false);
+                    $('tbody a.tag[name="'+tagName+'"]').removeClass('tagSelected');
                 }
                 else {
-                    event.data.tagLabel.addClass('tagSelected');
-                    event.data.tagCheckbox.attr('checked', true);
+                    tagLabel.addClass('tagSelected');
+                    tagCheckbox.attr('checked', true);
+                    $('tbody a.tag[name="'+tagName+'"]').addClass('tagSelected');
                 }
                 executeFilter();
             };
-            tagCheckbox.click(eventData, eventHandler);
-            tagLabel.click(eventData, eventHandler);
+            tagCheckbox.click(eventHandler);
+            tagLabel.click(eventHandler);
             
             if( tagOccurrencesCount[tagName] == 0 ) {
                 tagDiv.addClass('tagOccurrenceZero');
@@ -242,6 +275,16 @@ $(document).ready(function() {
             $('#filterDropdownPanelInfo').html('No tagged declarations on this page.');
         }
     };
+
+    function initTagsOnClickHandler() {
+        $('tbody a.tag').each(function() {
+            var tagLabel = $(this);
+            tagLabel.click(function() {
+                var tagName = tagLabel.attr('name');
+                $('#filterDropdownPanelTags a[name="'+tagName+'"]').click();
+            });
+        });
+    }
     
     function executeFilter() {
         var selectedTags = [];
@@ -387,7 +430,11 @@ function search(q){
         }
         tagsDiv.appendTo(td);
 		
-        var elemLink = jQuery("<a/>").addClass("link").attr("href", elem.url).append(highlightMatch(elem.name, q));
+		var text = highlightMatch(elem.name, q);
+		if(elem.aliasFor){
+		  text = text.append(" → "+elem.aliasFor);
+		}
+        var elemLink = jQuery("<a/>").addClass("link").attr("href", elem.url).append(text);
         elemLink.appendTo(td);
 
 		var elemDesc = jQuery("<div/>").addClass("description").html(elem.doc);
@@ -502,8 +549,9 @@ function getUrlVars() {
 	var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
 	for ( var i = 0; i < hashes.length; i++) {
 		hash = hashes[i].split('=');
-		vars.push(hash[0]);
-		vars[hash[0]] = hash[1];
+		var name = decodeURIComponent(hash[0]);
+		vars.push(name);
+		vars[name] = decodeURIComponent(hash[1]);
 	}
 	return vars;
 }
@@ -534,27 +582,11 @@ $(document).ready(function() {
             if (tr.is('tr') ) {
                 tr.addClass('highlight');
                 if (tr.hasClass('row-collapsible')) {
-					if ($('.description-collapsed', tr).length > 0) {
-						$('.link-collapsible', tr).click();
-						scrollIntoView(tr);
-					}
-				}                
-            }
-        }
-    }
-    
-    function scrollIntoView(element) {
-        var containerTop = $(window).scrollTop();
-        var containerBottom = containerTop + $(window).height();
-        var elementTop = element.offset().top;
-        var elementBottom = elementTop + element.height();
-        if (elementTop < containerTop) {
-            $(window).scrollTop(elementTop);
-        } else if (elementBottom > containerBottom) {
-            if( element.height() > $(window).height() ) {
-                $(window).scrollTop(elementTop);
-            } else {
-                $(window).scrollTop(elementBottom - $(window).height());
+                    if ($('.description-collapsed', tr).length > 0) {
+                        $('.link-collapsible', tr).click();
+                        $(document.body).scrollTop(tr.position().top);
+                    }
+                }
             }
         }
     }

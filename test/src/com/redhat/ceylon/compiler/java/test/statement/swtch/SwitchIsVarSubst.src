@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.swtch;
 
-class SwitchIsVarSubst implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class SwitchIsVarSubst implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     SwitchIsVarSubst() {
     }
@@ -18,11 +18,6 @@ class SwitchIsVarSubst implements .com.redhat.ceylon.compiler.java.runtime.model
             } else throw new .com.redhat.ceylon.compiler.java.language.EnumeratedTypeError("Supposedly exhaustive switch was not exhaustive");
         }
         return name;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.swtch.SwitchIsVarSubst();
     }
     
     @.java.lang.Override

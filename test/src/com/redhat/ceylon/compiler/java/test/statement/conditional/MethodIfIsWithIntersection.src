@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfIsIntersection implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfIsIntersection implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfIsIntersection() {
     }
@@ -21,11 +21,6 @@ class MethodIfIsIntersection implements .com.redhat.ceylon.compiler.java.runtime
             ((.com.redhat.ceylon.compiler.java.test.statement.conditional.Foo)x$4).foo();
             ((.com.redhat.ceylon.compiler.java.test.statement.conditional.BarInterface)x$4).bar();
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfIsIntersection();
     }
     
     @.java.lang.Override

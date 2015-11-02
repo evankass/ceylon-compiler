@@ -21,13 +21,16 @@ package com.redhat.ceylon.compiler.java.tools;
 
 import javax.tools.JavaFileObject;
 
+import com.redhat.ceylon.common.StatusPrinter;
 import com.redhat.ceylon.compiler.java.codegen.CeylonFileObject;
+import com.sun.tools.javac.main.OptionName;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.JCDiagnostic;
 import com.sun.tools.javac.util.DiagnosticSource;
 import com.sun.tools.javac.util.SourceLanguage;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticType;
 import com.sun.tools.javac.util.Log;
+import com.sun.tools.javac.util.Options;
 
 public class CeylonLog extends Log {
 
@@ -48,6 +51,7 @@ public class CeylonLog extends Log {
     private int numNonCeylonErrors;
 
     private SourceLanguage sourceLanguage;
+    private StatusPrinter sp;
     
     /** Get the Log instance for this context. */
     public static Log instance(Context context) {
@@ -69,11 +73,16 @@ public class CeylonLog extends Log {
         });
     }
 
-    private boolean majorVersionWarning = false;
-
     protected CeylonLog(Context context) {
         super(context);
         sourceLanguage = SourceLanguage.instance(context);
+        Options options = Options.instance(context);
+        boolean isProgressPrinted = options.get(OptionName.CEYLONPROGRESS) != null && StatusPrinter.canPrint();
+        if(isProgressPrinted){
+            sp = LanguageCompiler.getStatusPrinterInstance(context);
+        }else{
+            sp = null;
+        }
     }
 
     @Override
@@ -118,14 +127,9 @@ public class CeylonLog extends Log {
 
     @Override
     public void warning(String key, Object... args) {
-        // limit the number of warnings for Java 7 classes
+        // remove warnings for Java 7 classes
         if("big.major.version".equals(key)){
-            // change the key to a more helpful message
-            key = "ceylon.big.major.version";
-            if(!majorVersionWarning )
-                majorVersionWarning = true;
-            else // we already warned once
-                return;
+            return;
         }
         super.warning(key, args);
     }
@@ -173,5 +177,13 @@ public class CeylonLog extends Log {
      */
     public int getCeylonErrorCount(){
         return numCeylonAnalysisErrors;
+    }
+
+    @Override
+    protected void writeDiagnostic(JCDiagnostic diag) {
+        // make sure we clear the progress line if we have one
+        if(sp != null)
+            sp.clearLine();
+        super.writeDiagnostic(diag);
     }
 }

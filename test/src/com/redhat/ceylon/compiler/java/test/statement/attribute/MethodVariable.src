@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.statement.attribute;
 
-class MethodVariable implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodVariable implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodVariable() {
     }
     
     private final void m$priv$() {
         .java.lang.String f = null;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.attribute.MethodVariable();
     }
     
     @.java.lang.Override

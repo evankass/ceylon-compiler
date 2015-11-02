@@ -1,16 +1,11 @@
 package com.redhat.ceylon.compiler.java.test.structure.method;
 
-class PublicMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class PublicMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     PublicMethod() {
     }
     
     public final void f() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.method.PublicMethod();
     }
     
     @.java.lang.Override

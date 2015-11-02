@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.lambda;
 
-class AnonMemberQualClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class AnonMemberQualClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     AnonMemberQualClass() {
     }
@@ -77,11 +77,6 @@ class AnonMemberQualClass implements .com.redhat.ceylon.compiler.java.runtime.mo
             }
             returning null;
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.lambda.AnonMemberQualClass();
     }
     
     @.java.lang.Override

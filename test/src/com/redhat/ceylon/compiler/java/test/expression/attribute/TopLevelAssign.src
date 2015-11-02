@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.attribute;
 
-class TopLevelAssign implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class TopLevelAssign implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     TopLevelAssign() {
     }
@@ -10,11 +10,6 @@ class TopLevelAssign implements .com.redhat.ceylon.compiler.java.runtime.model.R
         .com.redhat.ceylon.compiler.java.test.expression.attribute.topLevelAssignB2_.set_(false);
         .com.redhat.ceylon.compiler.java.test.expression.attribute.topLevelAssignB3_.set_(false);
         .com.redhat.ceylon.compiler.java.test.expression.attribute.topLevelAssignB4_.set_(false);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.attribute.TopLevelAssign();
     }
     
     @.java.lang.Override
@@ -27,58 +22,66 @@ final class topLevelAssignB1_ {
     
     private topLevelAssignB1_() {
     }
-    private static boolean[] value;
+    private static boolean value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new boolean[]{true};
+            value = true;
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
-            value = null;
+            value = false;
+            $init$value = false;
         }
     }
     
     public static boolean get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (topLevelAssignB1_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'topLevelAssignB1\' before it was set");
         }
     }
     
     public static void set_(final boolean topLevelAssignB1) {
-        value[0] = topLevelAssignB1;
+        if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
+        value = topLevelAssignB1;
     }
 }
 public final class topLevelAssignB2_ {
     
     private topLevelAssignB2_() {
     }
-    private static boolean[] value;
+    private static boolean value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new boolean[]{true};
+            value = true;
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
-            value = null;
+            value = false;
+            $init$value = false;
         }
     }
     
     public static boolean get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (topLevelAssignB2_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'topLevelAssignB2\' before it was set");
         }
     }
     
     public static void set_(final boolean topLevelAssignB2) {
-        value[0] = topLevelAssignB2;
+        if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
+        value = topLevelAssignB2;
     }
 }
 final class topLevelAssignB3_ {

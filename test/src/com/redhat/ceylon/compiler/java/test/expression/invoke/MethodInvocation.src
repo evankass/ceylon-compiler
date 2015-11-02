@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.invoke;
 
-class MethodInvocation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodInvocation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodInvocation() {
     }
@@ -21,11 +21,6 @@ class MethodInvocation implements .com.redhat.ceylon.compiler.java.runtime.model
     
     public final void p() {
         return;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.invoke.MethodInvocation();
     }
     
     @.java.lang.Override

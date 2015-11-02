@@ -19,10 +19,10 @@
  */
 package com.redhat.ceylon.compiler.java.codegen;
 
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedReference;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Reference;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
 
 public class CompilerBoxingVisitor extends BoxingVisitor {
     private AbstractTransformer transformer;
@@ -31,6 +31,11 @@ public class CompilerBoxingVisitor extends BoxingVisitor {
         this.transformer = transformer;
     }
 
+    @Override
+    protected boolean willEraseToSequence(Type type) {
+        return transformer.willEraseToSequence(type);
+    }
+    
     @Override
     protected boolean isBooleanTrue(Declaration decl) {
         return transformer.isBooleanTrue(decl);
@@ -42,32 +47,32 @@ public class CompilerBoxingVisitor extends BoxingVisitor {
     }
 
     @Override
-    protected boolean hasErasure(ProducedType type) {
+    protected boolean hasErasure(Type type) {
         return transformer.hasErasure(type);
     }
     
     @Override
-    protected boolean hasErasedTypeParameters(ProducedReference producedReference) {
+    protected boolean hasErasedTypeParameters(Reference producedReference) {
         return transformer.expressionGen().erasesTypeArguments(producedReference);
     }
 
     @Override
-    protected boolean isTypeParameter(ProducedType type) {
+    protected boolean isTypeParameter(Type type) {
         return transformer.isTypeParameter(type);
     }
 
     @Override
-    protected boolean isRaw(ProducedType type) {
+    protected boolean isRaw(Type type) {
         return transformer.isTurnedToRaw(type);
     }
 
     @Override
-    protected boolean needsRawCastForMixinSuperCall(TypeDeclaration declaration, ProducedType type) {
+    protected boolean needsRawCastForMixinSuperCall(TypeDeclaration declaration, Type type) {
         return transformer.needsRawCastForMixinSuperCall(declaration, type);
     }
 
     @Override
-    protected boolean willEraseToObject(ProducedType type) {
+    protected boolean willEraseToObject(Type type) {
         return transformer.willEraseToObject(type);
     }
 }

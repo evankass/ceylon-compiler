@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.expression.optimisations;
 
-class CharacterAsInteger implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class CharacterAsInteger implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     CharacterAsInteger() {
     }
     
     public final void m() {
         final long x = 97;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.optimisations.CharacterAsInteger();
     }
     
     @.java.lang.Override

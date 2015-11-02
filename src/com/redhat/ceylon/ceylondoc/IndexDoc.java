@@ -28,20 +28,21 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.redhat.ceylon.compiler.java.codegen.Decl;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Interface;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.Scope;
-import com.redhat.ceylon.compiler.typechecker.model.Setter;
-import com.redhat.ceylon.compiler.typechecker.model.TypeAlias;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.AttributeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Constructor;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Scope;
+import com.redhat.ceylon.model.typechecker.model.Setter;
+import com.redhat.ceylon.model.typechecker.model.TypeAlias;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 public class IndexDoc extends CeylonDoc {
 
@@ -84,7 +85,9 @@ public class IndexDoc extends CeylonDoc {
                 getType(module), 
                 linkRenderer().to(module).getUrl(), 
                 Util.getDocFirstLine(module, linkRenderer()), 
-                null, null);
+                Util.getTags(module), 
+                getIcons(module), 
+                null);
     }
 
     private void indexPackage(Package pkg) throws IOException {
@@ -93,10 +96,14 @@ public class IndexDoc extends CeylonDoc {
                 getType(pkg), 
                 linkRenderer().to(pkg).getUrl(), 
                 Util.getDocFirstLine(pkg, linkRenderer()), 
-                null, 
-                getIcons(pkg));
+                Util.getTags(pkg), 
+                getIcons(pkg),
+                null);
         write(",\n");
         indexMembers(pkg, pkg.getMembers());
+        
+        List<String> tags = Util.getTags(pkg);
+        tagIndex.addAll(tags);
     }
 
     private void indexMembers(Scope container, List<Declaration> members) throws IOException {
@@ -116,20 +123,23 @@ public class IndexDoc extends CeylonDoc {
 
     private boolean indexDecl(Scope container, Declaration decl) throws IOException {
         String url;
-        String name = decl.getName();
+        String name = Util.getDeclarationName(decl);
+        String qualifier = "";
         
         if (decl instanceof ClassOrInterface) {
             url = linkRenderer().to(decl).getUrl();
-        } else if ((decl instanceof MethodOrValue
+        } else if ((decl instanceof FunctionOrValue
                     && decl instanceof Setter == false
-                    && !((MethodOrValue)decl).isParameter()) 
-                || decl instanceof TypeAlias) {
+                    && !((FunctionOrValue)decl).isParameter()) 
+                || decl instanceof TypeAlias
+                || decl instanceof Constructor) {
             url = tool.getObjectUrl(module, container, false) + "#" + name;
             if (decl.isMember()) {
-                name = ((ClassOrInterface) container).getName() + "." + name;
+                qualifier = ((ClassOrInterface) container).getName() + ".";
+                name = qualifier + name;
             }
         } else if (decl instanceof Setter
-                || (decl instanceof MethodOrValue && ((MethodOrValue)decl).isParameter())
+                || (decl instanceof FunctionOrValue && ((FunctionOrValue)decl).isParameter())
                 || decl instanceof TypeParameter) {
             return false; // ignore
         } else {
@@ -141,12 +151,16 @@ public class IndexDoc extends CeylonDoc {
         List<String> tags = Util.getTags(decl);
         tagIndex.addAll(tags);
         
-        writeIndexElement(name, type, url, doc, tags, getIcons(decl));
+        writeIndexElement(name, type, url, doc, tags, getIcons(decl), null);
+        for(String alias : decl.getAliases()){
+            write(",\n");
+            writeIndexElement(qualifier+alias, type, url, doc, tags, getIcons(decl), name);
+        }
         
         return true;
     }
 
-    private void writeIndexElement(String name, String type, String url, String doc, List<String> tags, List<String> icons) throws IOException {
+    private void writeIndexElement(String name, String type, String url, String doc, List<String> tags, List<String> icons, String aliasFor) throws IOException {
         write("{'name': '");
         write(name);
         write("', 'type': '");
@@ -180,7 +194,13 @@ public class IndexDoc extends CeylonDoc {
                 }
             }        
         }
-        write("]}");
+        write("]");
+        if(aliasFor != null){
+            write(", 'aliasFor': '");
+            write(aliasFor);
+            write("'");
+        }
+        write("}");
     }
 
     private String escapeJSONString(String doc) {
@@ -205,14 +225,14 @@ public class IndexDoc extends CeylonDoc {
     
     private String getType(Object obj) {
         if (obj instanceof Class) {
-            return Character.isUpperCase(((Class)obj).getName().charAt(0)) ? "class" : "object";
+            return !((Class) obj).isAnonymous() ? "class" : "object";
         } else if (obj instanceof Interface) {
             return "interface";
         } else if (obj instanceof TypeAlias) {
             return "alias";
         } else if (obj instanceof AttributeDeclaration || (obj instanceof Declaration && Decl.isGetter((Declaration)obj))) {
             return "attribute";
-        } else if (obj instanceof Method) {
+        } else if (obj instanceof Function) {
             return "function";
         } else if (obj instanceof Value) {
             return "value";
@@ -220,6 +240,8 @@ public class IndexDoc extends CeylonDoc {
             return "package";
         } else if (obj instanceof Module) {
             return "module";
+        } else if (obj instanceof Constructor) {
+            return "constructor";
         }
         throw new RuntimeException(CeylondMessages.msg("error.unexpected", obj));
     }

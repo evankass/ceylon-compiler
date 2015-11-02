@@ -7,7 +7,7 @@ interface Bug633Ranged<Index, Span> {
 interface Bug633Empty extends .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633Ranged<.ceylon.language.Integer, .java.lang.Object> {
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633Empty.class);
 }
-class Bug633EmptyImpl implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633Empty {
+class Bug633EmptyImpl implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633Empty, .java.io.Serializable {
     
     Bug633EmptyImpl() {
     }
@@ -15,11 +15,6 @@ class Bug633EmptyImpl implements .com.redhat.ceylon.compiler.java.runtime.model.
     @.java.lang.Override
     public final .java.lang.Object span(final .ceylon.language.Integer from) {
         return null;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633EmptyImpl();
     }
     
     @.java.lang.Override
@@ -38,10 +33,5 @@ final class bug633_ {
         final .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633Empty b = new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633EmptyImpl();
         final .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633Ranged<? super .ceylon.language.Integer, ? extends .ceylon.language.Integer> c = (.com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633Ranged<? super .ceylon.language.Integer, ? extends .ceylon.language.Integer>)(.com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633Ranged)new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug633EmptyImpl();
         final .ceylon.language.Sequential<? extends .ceylon.language.Integer> seq = (.ceylon.language.Sequential<? extends .ceylon.language.Integer>)(.ceylon.language.Sequential).ceylon.language.empty_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug06xx.bug633_.bug633();
     }
 }

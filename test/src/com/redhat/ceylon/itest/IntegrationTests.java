@@ -27,13 +27,13 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class) 
 @SuiteClasses({
     // Tests of the new-style scripts
-    CeylonCompileScriptTest.class,
-    CeylonDocScriptTest.class,
-    CeylonRunScriptTest.class,
+    CeylonCompileScriptTests.class,
+    CeylonDocScriptTests.class,
+    CeylonRunScriptTests.class,
     // Tests of the ant tasks
-    CeylonCompileAntTest.class,
-    CeylonDocAntTest.class,
-    CeylonRunAntTest.class,
+    CeylonCompileAntTests.class,
+    CeylonDocAntTests.class,
+    CeylonRunAntTests.class,
 })
 public class IntegrationTests {
 

@@ -32,15 +32,16 @@ import com.redhat.ceylon.common.tool.ParsedBy;
 import com.redhat.ceylon.common.tool.RemainingSections;
 import com.redhat.ceylon.common.tool.StandardArgumentParsers;
 import com.redhat.ceylon.common.tool.Summary;
+import com.redhat.ceylon.common.tools.CeylonTool;
 import com.redhat.ceylon.common.tools.ModuleSpec;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnits;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
 import com.redhat.ceylon.compiler.typechecker.parser.CeylonLexer;
 import com.redhat.ceylon.compiler.typechecker.parser.CeylonParser;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.ImportModule;
+import com.redhat.ceylon.model.typechecker.model.Module;
 
 @Summary("Shows and updates version numbers in module descriptors")
 @Description(
@@ -175,12 +176,11 @@ public class CeylonVersionTool extends CeylonBaseTool {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(CeylonTool mainTool) {
     }
     
     @Override
     public void run() throws IOException, RecognitionException {
-        setSystemProperties();
         // TODO if version is empty? Prompt? Or should --set have an optional argument? 
         TypeCheckerBuilder tcb = new TypeCheckerBuilder();
         for (File path: this.sourceFolders) {
@@ -190,7 +190,7 @@ public class CeylonVersionTool extends CeylonBaseTool {
         PhasedUnits pus = tc.getPhasedUnits();
         pus.visitModules();
         
-        ArrayList<Module> moduleList = new ArrayList<Module>(pus.getModuleManager().getCompiledModules());
+        ArrayList<Module> moduleList = new ArrayList<Module>(pus.getModuleSourceMapper().getCompiledModules());
         Collections.sort(moduleList, new Comparator<Module>() {
             @Override
             public int compare(Module m1, Module m2) {

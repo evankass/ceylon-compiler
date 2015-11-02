@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class AssertExistsSequence implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class AssertExistsSequence implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     AssertExistsSequence() {
     }
@@ -8,15 +8,12 @@ class AssertExistsSequence implements .com.redhat.ceylon.compiler.java.runtime.m
     public final long mvar(final .ceylon.language.Sequential<? extends .ceylon.language.Integer> x) {
         final long y$2;
         .ceylon.language.Integer y$1 = null;
-        if ((y$1 = x.get(.ceylon.language.Integer.instance(0L))) != null) {
+        if ((y$1 = x.getFromFirst(0L)) != null) {
             y$2 = y$1.longValue();
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists y=x[0]"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists y=x[0]"));
+        }
         return y$2;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.AssertExistsSequence();
     }
     
     @.java.lang.Override

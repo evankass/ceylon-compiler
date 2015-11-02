@@ -31,11 +31,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.redhat.ceylon.ceylondoc.Util.ModuleImportComparatorByName;
-import com.redhat.ceylon.compiler.loader.AbstractModelLoader;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.ModuleImport;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
+import com.redhat.ceylon.common.Backend;
+import com.redhat.ceylon.common.Backends;
+import com.redhat.ceylon.model.loader.AbstractModelLoader;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.ModuleImport;
+import com.redhat.ceylon.model.typechecker.model.Package;
 
 public class ModuleDoc extends CeylonDoc {
 
@@ -86,14 +88,28 @@ public class ModuleDoc extends CeylonDoc {
         around("div class='doc section'", doc);
 
         writeAnnotations(module);
+        writePlatform(module);
         writeBy(module);
         writeLicense(module);
 
         close("div");
     }
 
+    private void writePlatform(Module module) throws IOException {
+        if(module.isNative()) {
+            List<String> backendNames = new ArrayList<String>();
+            for(Backend backend : module.getNativeBackends()) {
+                backendNames.add(backend.name);
+            }
+            open("div class='platform section'");
+            around("span class='title'", "Platform: ");
+            around("span class='value'", Util.join(", ", backendNames));
+            close("div");
+        }
+    }
+
     private void writeLicense(Module module) throws IOException {
-        Annotation annotation = Util.getAnnotation(module.getAnnotations(),"license");
+        Annotation annotation = Util.getAnnotation(module.getUnit(), module.getAnnotations(),"license");
         if (annotation == null)
             return;
 
@@ -150,6 +166,12 @@ public class ModuleDoc extends CeylonDoc {
         close("span");
         open("code class='decl-label'");
         linkRenderer().to(moduleImport.getModule()).write();
+        Backends backends = moduleImport.getNativeBackends();
+        if(!backends.none()){
+            write(" (");
+            write(backends.names());
+            write(")");
+        }
         close("code");
         close("td");
         

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.operator;
 
-abstract class MyInteger extends .java.lang.Object implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.Integral<.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger>, .ceylon.language.Exponentiable<.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger, .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger> {
+abstract class MyInteger extends .java.lang.Object implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.Integral<.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger>, .ceylon.language.Exponentiable<.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger, .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger>, .java.io.Serializable {
     
     MyInteger() {
         super();
@@ -18,7 +18,12 @@ abstract class MyInteger extends .java.lang.Object implements .com.redhat.ceylon
     }
     
     @.java.lang.Override
-    public final boolean divides(final .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger other) {
+    public .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger modulo(final .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger modulus) {
+        return (.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger)$ceylon$language$Integral$this$.modulo(modulus);
+    }
+    
+    @.java.lang.Override
+    public boolean divides(final .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger other) {
         return $ceylon$language$Integral$this$.divides(other);
     }
     protected final .ceylon.language.Number$impl<.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger> $ceylon$language$Number$this$;
@@ -29,13 +34,13 @@ abstract class MyInteger extends .java.lang.Object implements .com.redhat.ceylon
     }
     
     @.java.lang.Override
-    public .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger getMagnitude() {
-        return (.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger)$ceylon$language$Number$this$.getMagnitude();
+    public long getSign() {
+        return $ceylon$language$Number$this$.getSign();
     }
     
     @.java.lang.Override
-    public long getSign() {
-        return $ceylon$language$Number$this$.getSign();
+    public .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger getMagnitude() {
+        return (.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger)$ceylon$language$Number$this$.getMagnitude();
     }
     protected final .ceylon.language.Invertible$impl<.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger> $ceylon$language$Invertible$this$;
     
@@ -82,13 +87,13 @@ abstract class MyInteger extends .java.lang.Object implements .com.redhat.ceylon
     }
     
     @.java.lang.Override
-    public .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger getSuccessor() {
-        return (.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger)$ceylon$language$Enumerable$this$.getSuccessor();
+    public .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger getPredecessor() {
+        return (.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger)$ceylon$language$Enumerable$this$.getPredecessor();
     }
     
     @.java.lang.Override
-    public .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger getPredecessor() {
-        return (.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger)$ceylon$language$Enumerable$this$.getPredecessor();
+    public .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger getSuccessor() {
+        return (.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger)$ceylon$language$Enumerable$this$.getSuccessor();
     }
     
     @.java.lang.Override
@@ -102,7 +107,19 @@ abstract class MyInteger extends .java.lang.Object implements .com.redhat.ceylon
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger.class);
 }
-class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected ArithmeticOperators() {
+        super();
+        this.initN = null;
+        this.initI = null;
+        this.n1 = 0L;
+        this.n2 = 0L;
+        this.i1 = 0L;
+        this.boxedN1 = null;
+        this.boxedN2 = null;
+        this.boxedI1 = null;
+    }
     
     ArithmeticOperators(final .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger initN, final .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger initI) {
         this.initN = initN;
@@ -243,7 +260,7 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
         setN1(getN1() * getN2());
         setN1(getN1() / getN2());
         setN1(getN1() % getN2());
-        setN1(.ceylon.language.Integer.instance(getN1()).power(.ceylon.language.Integer.instance(getN2())).longValue());
+        setN1(.ceylon.language.Integer.power(getN1(), getN2()));
         (
             let
             {
@@ -318,7 +335,7 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
         setGetterN1(getGetterN1() * getGetterN2());
         setGetterN1(getGetterN1() / getGetterN2());
         setGetterN1(getGetterN1() % getGetterN2());
-        setGetterN1(.ceylon.language.Integer.instance(getGetterN1()).power(.ceylon.language.Integer.instance(getGetterN2())).longValue());
+        setGetterN1(.ceylon.language.Integer.power(getGetterN1(), getGetterN2()));
         (
             let
             {
@@ -397,7 +414,7 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
         this.setN1(this.getN1() * this.getN2());
         this.setN1(this.getN1() / this.getN2());
         this.setN1(this.getN1() % this.getN2());
-        this.setN1(.ceylon.language.Integer.instance(this.getN1()).power(.ceylon.language.Integer.instance(this.getN2())).longValue());
+        this.setN1(.ceylon.language.Integer.power(this.getN1(), this.getN2()));
         (
             let
             {
@@ -480,7 +497,7 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
         this.setGetterN1(this.getGetterN1() * this.getGetterN2());
         this.setGetterN1(this.getGetterN1() / this.getGetterN2());
         this.setGetterN1(this.getGetterN1() % this.getGetterN2());
-        this.setGetterN1(.ceylon.language.Integer.instance(this.getGetterN1()).power(.ceylon.language.Integer.instance(this.getGetterN2())).longValue());
+        this.setGetterN1(.ceylon.language.Integer.power(this.getGetterN1(), this.getGetterN2()));
         (
             let
             {
@@ -619,7 +636,7 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
         n1 = n1 * n2;
         n1 = n1 / n2;
         n1 = n1 % n2;
-        n1 = .ceylon.language.Integer.instance(n1).power(.ceylon.language.Integer.instance(n2)).longValue();
+        n1 = .ceylon.language.Integer.power(n1, n2);
         n1 += n2;
         n1 *= n1;
         n1 /= n2;
@@ -738,7 +755,7 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
         getterN1$setter$_.set_(getterN1$getter$_.get_() * getterN2$getter$_.get_());
         getterN1$setter$_.set_(getterN1$getter$_.get_() / getterN2$getter$_.get_());
         getterN1$setter$_.set_(getterN1$getter$_.get_() % getterN2$getter$_.get_());
-        getterN1$setter$_.set_(.ceylon.language.Integer.instance(getterN1$getter$_.get_()).power(.ceylon.language.Integer.instance(getterN2$getter$_.get_())).longValue());
+        getterN1$setter$_.set_(.ceylon.language.Integer.power(getterN1$getter$_.get_(), getterN2$getter$_.get_()));
         (
             let
             {
@@ -891,7 +908,7 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
         .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.set_(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.get_() * .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN2_.get_());
         .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.set_(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.get_() / .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN2_.get_());
         .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.set_(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.get_() % .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN2_.get_());
-        .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.set_(.ceylon.language.Integer.instance(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.get_()).power(.ceylon.language.Integer.instance(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN2_.get_())).longValue());
+        .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.set_(.ceylon.language.Integer.power(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN1_.get_(), .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelN2_.get_()));
         (
             let
             {
@@ -966,7 +983,7 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
         .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.set_(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.get_() * .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN2_.get_());
         .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.set_(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.get_() / .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN2_.get_());
         .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.set_(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.get_() % .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN2_.get_());
-        .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.set_(.ceylon.language.Integer.instance(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.get_()).power(.ceylon.language.Integer.instance(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN2_.get_())).longValue());
+        .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.set_(.ceylon.language.Integer.power(.com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN1_.get_(), .com.redhat.ceylon.compiler.java.test.expression.operator.toplevelGetterN2_.get_()));
         (
             let
             {
@@ -1008,6 +1025,10 @@ class ArithmeticOperators implements .com.redhat.ceylon.compiler.java.runtime.mo
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.operator.ArithmeticOperators.class);
 }
 class ArithmeticOperatorsSub extends .com.redhat.ceylon.compiler.java.test.expression.operator.ArithmeticOperators {
+    
+    protected ArithmeticOperatorsSub() {
+        super();
+    }
     
     ArithmeticOperatorsSub(final .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger initN, final .com.redhat.ceylon.compiler.java.test.expression.operator.MyInteger initI) {
         super(initN, initI);
@@ -1054,7 +1075,7 @@ class ArithmeticOperatorsSub extends .com.redhat.ceylon.compiler.java.test.expre
         super.setGetterN1(super.getGetterN1() * super.getGetterN2());
         super.setGetterN1(super.getGetterN1() / super.getGetterN2());
         super.setGetterN1(super.getGetterN1() % super.getGetterN2());
-        super.setGetterN1(.ceylon.language.Integer.instance(super.getGetterN1()).power(.ceylon.language.Integer.instance(super.getGetterN2())).longValue());
+        super.setGetterN1(.ceylon.language.Integer.power(super.getGetterN1(), super.getGetterN2()));
         (
             let
             {
@@ -1177,87 +1198,99 @@ final class toplevelN1_ {
     
     private toplevelN1_() {
     }
-    private static long[] value;
+    private static long value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new long[]{0L};
+            value = 0L;
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
-            value = null;
+            value = 0L;
+            $init$value = false;
         }
     }
     
     public static long get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (toplevelN1_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'toplevelN1\' before it was set");
         }
     }
     
     public static void set_(final long toplevelN1) {
-        value[0] = toplevelN1;
+        if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
+        value = toplevelN1;
     }
 }
 final class toplevelN2_ {
     
     private toplevelN2_() {
     }
-    private static long[] value;
+    private static long value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new long[]{0L};
+            value = 0L;
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
-            value = null;
+            value = 0L;
+            $init$value = false;
         }
     }
     
     public static long get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (toplevelN2_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'toplevelN2\' before it was set");
         }
     }
     
     public static void set_(final long toplevelN2) {
-        value[0] = toplevelN2;
+        if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
+        value = toplevelN2;
     }
 }
 final class toplevelI1_ {
     
     private toplevelI1_() {
     }
-    private static long[] value;
+    private static long value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new long[]{0L};
+            value = 0L;
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
-            value = null;
+            value = 0L;
+            $init$value = false;
         }
     }
     
     public static long get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (toplevelI1_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'toplevelI1\' before it was set");
         }
     }
     
     public static void set_(final long toplevelI1) {
-        value[0] = toplevelI1;
+        if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
+        value = toplevelI1;
     }
 }
 final class toplevelGetterN1_ {

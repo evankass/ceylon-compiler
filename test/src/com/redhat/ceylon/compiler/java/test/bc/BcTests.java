@@ -44,10 +44,10 @@ import org.junit.Test;
 
 import com.redhat.ceylon.common.Versions;
 import com.redhat.ceylon.compiler.java.test.CompilerError;
-import com.redhat.ceylon.compiler.java.test.CompilerTest;
+import com.redhat.ceylon.compiler.java.test.CompilerTests;
 import com.redhat.ceylon.compiler.java.util.Util;
 
-public class BcTests extends CompilerTest {
+public class BcTests extends CompilerTests {
     
     private final String providerModuleSrc = "provider/module.ceylon";
     private final String providerPackageSrc = "provider/package.ceylon";
@@ -158,10 +158,11 @@ public class BcTests extends CompilerTest {
         inputStream.close();
         outputStream.close();
         
-        assertErrors("binaryVersion/module", new CompilerError(21, "This module was compiled for an incompatible version of the Ceylon compiler (0.0).\n"
-                +"  This compiler supports "+Versions.JVM_BINARY_MAJOR_VERSION+"."+Versions.JVM_BINARY_MINOR_VERSION+".\n"
-                +"  Please try to recompile your module using a compatible compiler.\n"
-                +"  Binary compatibility will only be supported after Ceylon 1.2."));
+        assertErrors("binaryVersion/module", new CompilerError(21, 
+                "version '1' of module 'com.redhat.ceylon.compiler.java.test.bc.binaryVersionOld' was compiled by"
+                + " an incompatible version of the compiler"
+                +" (binary version 0.0 of module is not compatible with binary version "
+                +Versions.JVM_BINARY_MAJOR_VERSION+"."+Versions.JVM_BINARY_MINOR_VERSION+" of this compiler)"));
     }
 
     // tests after we renamed module_.class to $module_.class
@@ -185,10 +186,11 @@ public class BcTests extends CompilerTest {
         inputStream.close();
         outputStream.close();
         
-        assertErrors("binaryVersion2/module", new CompilerError(21, "This module was compiled for an incompatible version of the Ceylon compiler (0.0).\n"
-                +"  This compiler supports "+Versions.JVM_BINARY_MAJOR_VERSION+"."+Versions.JVM_BINARY_MINOR_VERSION+".\n"
-                +"  Please try to recompile your module using a compatible compiler.\n"
-                +"  Binary compatibility will only be supported after Ceylon 1.2."));
+        assertErrors("binaryVersion2/module", new CompilerError(21, 
+                "version '1' of module 'com.redhat.ceylon.compiler.java.test.bc.binaryVersionOld2' was compiled by"
+                + " an incompatible version of the compiler"
+                +" (binary version 0.0 of module is not compatible with binary version "
+                +Versions.JVM_BINARY_MAJOR_VERSION+"."+Versions.JVM_BINARY_MINOR_VERSION+" of this compiler)"));
     }
 
     private CompilationTask compileJava(String... sourcePaths) {

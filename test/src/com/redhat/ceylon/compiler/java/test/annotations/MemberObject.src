@@ -1,24 +1,29 @@
 package com.redhat.ceylon.compiler.java.test.annotations;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.ceylon.language.SharedAnnotation$annotation$
 @.com.redhat.ceylon.compiler.java.metadata.Members({@.com.redhat.ceylon.compiler.java.metadata.Member(klass = .com.redhat.ceylon.compiler.java.test.annotations.MemberObject.member_.class)})
-@.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-public class MemberObject implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class MemberObject implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public MemberObject() {
-        this.member = new .com.redhat.ceylon.compiler.java.test.annotations.MemberObject.member_();
+        this.member = null;
     }
-    private final .com.redhat.ceylon.compiler.java.test.annotations.MemberObject.member_ member;
+    private transient .com.redhat.ceylon.compiler.java.test.annotations.MemberObject.member_ member;
     
-    @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+    @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
     @.com.redhat.ceylon.compiler.java.metadata.Name("member")
     @.com.redhat.ceylon.compiler.java.metadata.Container(klass = .com.redhat.ceylon.compiler.java.test.annotations.MemberObject.class)
     @.com.redhat.ceylon.compiler.java.metadata.Object
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-    public final class member_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    public final class member_ implements .java.io.Serializable, .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
         
         private member_() {
+        }
+        
+        @.com.redhat.ceylon.compiler.java.metadata.Ignore
+        private final .java.lang.Object writeReplace() {
+            final .java.lang.String $name$;
+            $name$ = "getMember";
+            return new .com.redhat.ceylon.compiler.java.language.SerializationProxy(.com.redhat.ceylon.compiler.java.test.annotations.MemberObject.this, .com.redhat.ceylon.compiler.java.test.annotations.MemberObject.class, $name$);
         }
         
         @.java.lang.Override
@@ -29,9 +34,9 @@ public class MemberObject implements .com.redhat.ceylon.compiler.java.runtime.mo
     }
     
     @.ceylon.language.SharedAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("com.redhat.ceylon.compiler.java.test.annotations::MemberObject.member")
     public final .com.redhat.ceylon.compiler.java.test.annotations.MemberObject.member_ getMember() {
+        if (member == null) member = new .com.redhat.ceylon.compiler.java.test.annotations.MemberObject.member_();
         return member;
     }
     

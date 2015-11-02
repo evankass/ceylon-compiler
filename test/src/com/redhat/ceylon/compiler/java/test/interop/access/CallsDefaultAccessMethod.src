@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.interop.access;
 
-class CallsDefaultAccessMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class CallsDefaultAccessMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     CallsDefaultAccessMethod() {
     }
     
     private final void m$priv$(final .com.redhat.ceylon.compiler.java.test.interop.access.JavaAccessModifiers j) {
         j.defaultAccessMethod();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.interop.access.CallsDefaultAccessMethod();
     }
     
     @.java.lang.Override

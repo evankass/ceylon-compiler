@@ -5,7 +5,7 @@ public interface Bug693_Interface {
     public abstract .ceylon.language.Integer getX();
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug693_Interface.class);
 }
-public class Bug693_Class implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug693_Interface {
+public class Bug693_Class implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug693_Interface, .java.io.Serializable {
     
     public Bug693_Class(final .ceylon.language.Integer x) {
         (
@@ -16,6 +16,11 @@ public class Bug693_Class implements .com.redhat.ceylon.compiler.java.runtime.mo
             }
             returning null;
         );
+    }
+    
+    protected Bug693_Class() {
+        super();
+        this.x = null;
     }
     
     public Bug693_Class(final .ceylon.language.Integer x, final boolean b) {
@@ -45,10 +50,5 @@ final class bug693_ {
     
     static void bug693() {
         final .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug693_Class c = new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug693_Class(.ceylon.language.Integer.instance(0L), true);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug06xx.bug693_.bug693();
     }
 }

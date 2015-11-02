@@ -32,9 +32,11 @@ import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-import com.redhat.ceylon.cmr.api.JDKUtils;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.ModuleImport;
+import com.redhat.ceylon.common.Backend;
+import com.redhat.ceylon.model.cmr.JDKUtils;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.ModuleImport;
 
 /**
  *
@@ -121,6 +123,9 @@ public class MavenPomUtil {
                 out.writeStartElement("dependencies");
 
                 for(ModuleImport dep : imports){
+                    if (!ModelUtil.isForBackend(dep.getNativeBackends(), Backend.Java)) {
+                        continue;
+                    }
                     Module moduleDependency = dep.getModule();
                     
                     String dependencyName = moduleDependency.getNameAsString();

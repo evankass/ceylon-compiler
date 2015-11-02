@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.invoke;
 
-public class KlassMethodTypeParams implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class KlassMethodTypeParams implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public KlassMethodTypeParams() {
     }
@@ -20,7 +20,7 @@ public class KlassMethodTypeParams implements .com.redhat.ceylon.compiler.java.r
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.invoke.KlassMethodTypeParams.class);
 }
-class GenericMethodInvocation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class GenericMethodInvocation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     GenericMethodInvocation() {
     }
@@ -43,11 +43,6 @@ class GenericMethodInvocation implements .com.redhat.ceylon.compiler.java.runtim
             }
             returning arg$0$callable$.<.ceylon.language.String, .ceylon.language.Integer>bar(arg$0$reified$0, arg$0$reified$1, arg$0$0, arg$0$1);
         ).toString();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.invoke.GenericMethodInvocation();
     }
     
     @.java.lang.Override

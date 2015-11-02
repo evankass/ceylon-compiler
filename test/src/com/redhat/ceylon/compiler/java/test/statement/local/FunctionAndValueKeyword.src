@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.local;
 
-class FunctionAndValueKeyword implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class FunctionAndValueKeyword implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     FunctionAndValueKeyword() {
     }
@@ -11,11 +11,6 @@ class FunctionAndValueKeyword implements .com.redhat.ceylon.compiler.java.runtim
     
     private final void m$priv$() {
         final long n = test$priv$();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.local.FunctionAndValueKeyword();
     }
     
     @.java.lang.Override

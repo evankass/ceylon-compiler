@@ -22,6 +22,7 @@ package com.redhat.ceylon.ceylondoc;
 
 import static com.redhat.ceylon.ceylondoc.Util.join;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,42 +55,22 @@ import com.redhat.ceylon.common.config.DefaultToolOptions;
 import com.redhat.ceylon.common.log.Logger;
 import com.redhat.ceylon.common.tool.Argument;
 import com.redhat.ceylon.common.tool.Description;
+import com.redhat.ceylon.common.tool.Hidden;
 import com.redhat.ceylon.common.tool.Option;
 import com.redhat.ceylon.common.tool.OptionArgument;
 import com.redhat.ceylon.common.tool.ParsedBy;
 import com.redhat.ceylon.common.tool.RemainingSections;
 import com.redhat.ceylon.common.tool.StandardArgumentParsers;
 import com.redhat.ceylon.common.tool.Summary;
+import com.redhat.ceylon.common.tools.CeylonTool;
 import com.redhat.ceylon.common.tools.ModuleSpec;
 import com.redhat.ceylon.common.tools.ModuleWildcardsHelper;
-import com.redhat.ceylon.compiler.loader.AbstractModelLoader;
-import com.redhat.ceylon.compiler.loader.SourceDeclarationVisitor;
+import com.redhat.ceylon.compiler.java.loader.SourceDeclarationVisitor;
 import com.redhat.ceylon.compiler.typechecker.TypeChecker;
 import com.redhat.ceylon.compiler.typechecker.TypeCheckerBuilder;
-import com.redhat.ceylon.compiler.typechecker.analyzer.ModuleManager;
+import com.redhat.ceylon.compiler.typechecker.analyzer.ModuleSourceMapper;
 import com.redhat.ceylon.compiler.typechecker.context.Context;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Element;
-import com.redhat.ceylon.compiler.typechecker.model.Interface;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.NothingType;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.Referenceable;
-import com.redhat.ceylon.compiler.typechecker.model.Scope;
-import com.redhat.ceylon.compiler.typechecker.model.TypeAlias;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Unit;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.CompilationUnit;
@@ -98,6 +80,28 @@ import com.redhat.ceylon.compiler.typechecker.tree.Tree.PackageDescriptor;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
 import com.redhat.ceylon.compiler.typechecker.tree.Walker;
 import com.redhat.ceylon.compiler.typechecker.util.ModuleManagerFactory;
+import com.redhat.ceylon.model.loader.AbstractModelLoader;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Element;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.NothingType;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.Referenceable;
+import com.redhat.ceylon.model.typechecker.model.Scope;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeAlias;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.redhat.ceylon.model.typechecker.model.Unit;
+import com.redhat.ceylon.model.typechecker.model.Value;
+import com.redhat.ceylon.model.typechecker.util.ModuleManager;
 
 @Summary("Generates Ceylon API documentation from Ceylon source files")
 @Description("The default module repositories are `modules` and `" +
@@ -153,7 +157,9 @@ public class CeylonDocTool extends OutputRepoUsingTool {
     private boolean ignoreMissingDoc;
     private boolean ignoreMissingThrows;
     private boolean ignoreBrokenLink;
+    private boolean browse;
     private boolean haltOnError = true;
+    private boolean bootstrapCeylon;
     private List<File> sourceFolders = DefaultToolOptions.getCompilerSourceDirs();
     private List<File> docFolders = DefaultToolOptions.getCompilerDocDirs();
     private List<String> moduleSpecs = Arrays.asList("*");
@@ -165,13 +171,13 @@ public class CeylonDocTool extends OutputRepoUsingTool {
     private final List<PhasedUnit> phasedUnits = new LinkedList<PhasedUnit>();
     private final List<Module> modules = new LinkedList<Module>();
     private final List<String> compiledClasses = new LinkedList<String>();
-    private final Map<TypeDeclaration, List<Class>> subclasses = new HashMap<TypeDeclaration, List<Class>>();
-    private final Map<TypeDeclaration, List<ClassOrInterface>> satisfyingClassesOrInterfaces = new HashMap<TypeDeclaration, List<ClassOrInterface>>();
-    private final Map<TypeDeclaration, List<Method>> annotationConstructors = new HashMap<TypeDeclaration, List<Method>>();
-    private final Map<Referenceable, PhasedUnit> modelUnitMap = new HashMap<Referenceable, PhasedUnit>();
-    private final Map<Referenceable, Node> modelNodeMap = new HashMap<Referenceable, Node>();
-    private final Map<Parameter, PhasedUnit> parameterUnitMap = new HashMap<Parameter, PhasedUnit>();
-    private final Map<Parameter, Node> parameterNodeMap = new HashMap<Parameter, Node>();
+    private final Map<TypeDeclaration, List<Class>> subclasses = new IdentityHashMap<TypeDeclaration, List<Class>>();
+    private final Map<TypeDeclaration, List<ClassOrInterface>> satisfyingClassesOrInterfaces = new IdentityHashMap<TypeDeclaration, List<ClassOrInterface>>();
+    private final Map<TypeDeclaration, List<Function>> annotationConstructors = new IdentityHashMap<TypeDeclaration, List<Function>>();
+    private final Map<Referenceable, PhasedUnit> modelUnitMap = new IdentityHashMap<Referenceable, PhasedUnit>();
+    private final Map<Referenceable, Node> modelNodeMap = new IdentityHashMap<Referenceable, Node>();
+    private final Map<Parameter, PhasedUnit> parameterUnitMap = new IdentityHashMap<Parameter, PhasedUnit>();
+    private final Map<Parameter, Node> parameterNodeMap = new IdentityHashMap<Parameter, Node>();
     private final Map<String, Boolean> moduleUrlAvailabilityCache = new HashMap<String, Boolean>();
     private RepositoryManager outputRepositoryManager;
 
@@ -264,6 +270,13 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         this.ignoreBrokenLink = ignoreBrokenLink;
     }
 
+    @Hidden
+    @Option(longName = "bootstrap-ceylon")
+    @Description("Is used when documenting the Ceylon language module.")
+    public void setBootstrapCeylon(boolean bootstrapCeylon) {
+        this.bootstrapCeylon = bootstrapCeylon;
+    }
+
     public void setHaltOnError(boolean haltOnError) {
         this.haltOnError = haltOnError;
     }
@@ -346,7 +359,13 @@ public class CeylonDocTool extends OutputRepoUsingTool {
     public void setOffline(boolean offline) {
         this.offline = offline;
     }
-    
+
+    @Option(longName="browse")
+    @Description("Open module documentation in browser.")
+    public void setBrowse(boolean browse) {
+        this.browse = browse;
+    }
+
     public List<String> getCompiledClasses() {
         return compiledClasses;
     }
@@ -356,8 +375,12 @@ public class CeylonDocTool extends OutputRepoUsingTool {
     }
 
     @Override
-    public void initialize() {
-        setSystemProperties();
+    protected List<File> getSourceDirs() {
+        return sourceFolders;
+    }
+
+    @Override
+    public void initialize(CeylonTool mainTool) {
         TypeCheckerBuilder builder = new TypeCheckerBuilder();
         for(File src : sourceFolders){
             builder.addSrcDirectory(src);
@@ -373,14 +396,19 @@ public class CeylonDocTool extends OutputRepoUsingTool {
 
         // create the actual list of modules to process
         List<File> srcs = FileUtil.applyCwd(cwd, sourceFolders);
-        List<String> expandedModules = ModuleWildcardsHelper.expandWildcards(srcs , moduleSpecs);
+        List<String> expandedModules = ModuleWildcardsHelper.expandWildcards(srcs , moduleSpecs, null);
         final List<ModuleSpec> modules = ModuleSpec.parseEachList(expandedModules);
         
         // we need to plug in the module manager which can load from .cars
         builder.moduleManagerFactory(new ModuleManagerFactory(){
             @Override
             public ModuleManager createModuleManager(Context context) {
-                return new CeylonDocModuleManager(CeylonDocTool.this, context, modules, outputRepositoryManager, log);
+                return new CeylonDocModuleManager(CeylonDocTool.this, context, modules, outputRepositoryManager, bootstrapCeylon, log);
+            }
+
+            @Override
+            public ModuleSourceMapper createModuleManagerUtil(Context context, ModuleManager moduleManager) {
+                return new CeylonDocModuleSourceMapper(context, (CeylonDocModuleManager) moduleManager, CeylonDocTool.this);
             }
         });
         
@@ -388,6 +416,9 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         List<String> moduleFilters = new LinkedList<String>();
         for(ModuleSpec spec : modules){
             moduleFilters.add(spec.getName());
+            if(spec.getName().equals(Module.LANGUAGE_MODULE_NAME) && !bootstrapCeylon){
+                throw new CeylondException("error.languageModuleBootstrapOptionMissing");
+            }
         }
         builder.setModuleFilters(moduleFilters);
         String fileEncoding  = getEncoding();
@@ -588,6 +619,24 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         if (!documentedOne) {
             log.warning(CeylondMessages.msg("warn.couldNotFindAnyDeclaration"));
         }
+
+        if (browse) {
+            for(Module module : modules) {
+                if (isEmpty(module)) {
+                    continue;
+                }
+                ArtifactContext docArtifact = new ArtifactContext(module.getNameAsString(), module.getVersion(), ArtifactContext.DOCS);
+                File docFolder = outputRepositoryManager.getArtifact(docArtifact);
+                File docIndex = new File(docFolder, "api/index.html");
+                if (docIndex.isFile()) {
+                    try {
+                        Desktop.getDesktop().browse(docIndex.toURI());
+                    } catch (Exception e) {
+                        log.error(CeylondMessages.msg("error.unableBrowseModuleDoc", docIndex.toURI()));
+                    }
+                }
+            }
+        }
     }
 
     private void repositoryRemoveArtifact(RepositoryManager outputRepository, ArtifactContext artifactContext) {
@@ -619,6 +668,7 @@ public class CeylonDocTool extends OutputRepoUsingTool {
             clearModuleUrlAvailabilityCache();
             
             doc(module);
+            makeApiIndex(module);
             makeIndex(module);
             makeSearch(module);
             
@@ -632,6 +682,7 @@ public class CeylonDocTool extends OutputRepoUsingTool {
             
             copyResource("resources/ceylon.css", new File(resourcesDir, "ceylon.css"));
             copyResource("resources/rainbow.min.js", new File(resourcesDir, "rainbow.min.js"));
+            copyResource("resources/rainbow.linenumbers.js", new File(resourcesDir, "rainbow.linenumbers.js"));
             copyResource("resources/ceylon.js", new File(resourcesDir, "ceylon.js"));
             
             copyResource("resources/favicon.ico", new File(resourcesDir, "favicon.ico"));
@@ -664,23 +715,25 @@ public class CeylonDocTool extends OutputRepoUsingTool {
                         ClassOrInterface c = (ClassOrInterface) decl;                    
                         // subclasses map
                         if (c instanceof Class) {
-                            ClassOrInterface superclass = c.getExtendedTypeDeclaration();                    
+                            Type superclass = c.getExtendedType();                    
                             if (superclass != null) {
-                                if (subclasses.get(superclass) ==  null) {
-                                    subclasses.put(superclass, new ArrayList<Class>());
+                                TypeDeclaration superdec = superclass.getDeclaration();
+                                if (subclasses.get(superdec) == null) {
+                                    subclasses.put(superdec, new ArrayList<Class>());
                                 }
-                                subclasses.get(superclass).add((Class) c);
+                                subclasses.get(superdec).add((Class) c);
                             }
                         }
 
-                        List<TypeDeclaration> satisfiedTypes = new ArrayList<TypeDeclaration>(c.getSatisfiedTypeDeclarations());                     
+                        List<Type> satisfiedTypes = new ArrayList<Type>(c.getSatisfiedTypes());                     
                         if (satisfiedTypes != null && satisfiedTypes.isEmpty() == false) {
                             // satisfying classes or interfaces map
-                            for (TypeDeclaration satisfiedType : satisfiedTypes) {
-                                if (satisfyingClassesOrInterfaces.get(satisfiedType) ==  null) {
-                                    satisfyingClassesOrInterfaces.put(satisfiedType, new ArrayList<ClassOrInterface>());
+                            for (Type satisfiedType : satisfiedTypes) {
+                                TypeDeclaration superdec = satisfiedType.getDeclaration();
+                                if (satisfyingClassesOrInterfaces.get(superdec) ==  null) {
+                                    satisfyingClassesOrInterfaces.put(superdec, new ArrayList<ClassOrInterface>());
                                 }
-                                satisfyingClassesOrInterfaces.get(satisfiedType).add(c);
+                                satisfyingClassesOrInterfaces.get(superdec).add(c);
                             }
                         }
                     }
@@ -693,12 +746,12 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         for (Module module : modules) {
             for (Package pkg : getPackages(module)) {
                 for (Declaration decl : pkg.getMembers()) {
-                    if (decl instanceof Method && decl.isAnnotation() && shouldInclude(decl)) {
-                        Method annotationCtor = (Method) decl;
+                    if (decl instanceof Function && decl.isAnnotation() && shouldInclude(decl)) {
+                        Function annotationCtor = (Function) decl;
                         TypeDeclaration annotationType = annotationCtor.getTypeDeclaration();
-                        List<Method> annotationConstructorList = annotationConstructors.get(annotationType);
+                        List<Function> annotationConstructorList = annotationConstructors.get(annotationType);
                         if (annotationConstructorList == null) {
-                            annotationConstructorList = new ArrayList<Method>();
+                            annotationConstructorList = new ArrayList<Function>();
                             annotationConstructors.put(annotationType, annotationConstructorList);
                         }
                         annotationConstructorList.add(annotationCtor);
@@ -790,6 +843,7 @@ public class CeylonDocTool extends OutputRepoUsingTool {
                 markup.around("title", pu.getUnit().getFilename());
                 markup.tag("link href='" + getResourceUrl(pkg, "favicon.ico") + "' rel='shortcut icon'");
                 markup.tag("link href='" + getResourceUrl(pkg, "ceylon.css") + "' rel='stylesheet' type='text/css'");
+                markup.tag("link href='" + getResourceUrl(pkg, "ceylondoc.css") + "' rel='stylesheet' type='text/css'");
                 markup.tag("link href='http://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'");
                 
                 markup.open("script type='text/javascript'");
@@ -798,6 +852,7 @@ public class CeylonDocTool extends OutputRepoUsingTool {
                 
                 markup.around("script src='" + getResourceUrl(pkg, "jquery-1.8.2.min.js") + "' type='text/javascript'");
                 markup.around("script src='" + getResourceUrl(pkg, "rainbow.min.js") + "' type='text/javascript'");
+                markup.around("script src='" + getResourceUrl(pkg, "rainbow.linenumbers.js") + "' type='text/javascript'");
                 markup.around("script src='" + getResourceUrl(pkg, "ceylon.js") + "' type='text/javascript'");
                 markup.around("script src='" + getResourceUrl(pkg, "ceylondoc.js") + "' type='text/javascript'"); 
                 markup.close("head");
@@ -885,6 +940,15 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         Writer writer = openWriter(new File(dir, "index.js"));
         try {
             new IndexDoc(this, writer, module).generate();
+        } finally {
+            writer.close();
+        }
+    }
+    
+    private void makeApiIndex(Module module) throws IOException {
+        Writer writer = openWriter(new File(getApiOutputFolder(module), "api-index.html"));
+        try {
+            new IndexApiDoc(this, writer, module).generate();
         } finally {
             writer.close();
         }
@@ -978,8 +1042,14 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         return packages;
     }
 
-    protected boolean shouldInclude(Declaration decl){
-        return includeNonShared || decl.isShared();
+    protected boolean shouldInclude(Declaration decl) {
+        if (!includeNonShared && !decl.isShared()) {
+            return false;
+        }
+        if (decl.isNativeImplementation()) {
+            return false;
+        }
+        return true;
     }
     
     protected boolean shouldInclude(Package pkg) {
@@ -1132,7 +1202,7 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         return parameterNodeMap.get(parameter);
     }
     
-    protected List<Method> getAnnotationConstructors(TypeDeclaration klass) {
+    protected List<Function> getAnnotationConstructors(TypeDeclaration klass) {
         return annotationConstructors.get(klass);
     }
 
@@ -1180,18 +1250,18 @@ public class CeylonDocTool extends OutputRepoUsingTool {
 
     protected void warningMissingDoc(String name, Referenceable scope) {
         if (!ignoreMissingDoc) {
-            log.warning(CeylondMessages.msg("warn.missingDoc", name, getPosition(scope)));
+            log.warning(CeylondMessages.msg("warn.missingDoc", name, getPosition(getNode(scope))));
         }
     }
 
-    protected void warningBrokenLink(String link, Referenceable scope) {
+    protected void warningBrokenLink(String docLinkText, Tree.DocLink docLink, Referenceable scope) {
         if (!ignoreBrokenLink) {
-            log.warning(CeylondMessages.msg("warn.brokenLink", link, getWhere(scope), getPosition(scope)));
+            log.warning(CeylondMessages.msg("warn.brokenLink", docLinkText, getWhere(scope), getPosition(docLink)));
         }
     }
     
-    protected void warningSetterDoc(String name, TypedDeclaration scope) {
-        log.warning(CeylondMessages.msg("warn.setterDoc", name, getPosition(scope)));
+    protected void warningSetterDoc(String name, Declaration scope) {
+        log.warning(CeylondMessages.msg("warn.setterDoc", name, getPosition(getNode(scope))));
     }
 
     protected void warningMissingThrows(Declaration d) {
@@ -1202,11 +1272,11 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         final Scope scope = d.getScope();
         final PhasedUnit unit = getUnit(d);
         final Node node = getNode(d);
-        if (scope == null || unit == null || unit.getUnit() == null || node == null || !(d instanceof MethodOrValue)) {
+        if (scope == null || unit == null || unit.getUnit() == null || node == null || !(d instanceof FunctionOrValue)) {
             return;
         }
         
-        List<ProducedType> documentedExceptions = new ArrayList<ProducedType>();
+        List<Type> documentedExceptions = new ArrayList<Type>();
         for (Annotation annotation : d.getAnnotations()) {
             if (annotation.getName().equals("throws")) {
                 String exceptionName = annotation.getPositionalArguments().get(0);
@@ -1217,7 +1287,7 @@ public class CeylonDocTool extends OutputRepoUsingTool {
             }
         }
         
-        final List<ProducedType> thrownExceptions = new ArrayList<ProducedType>();
+        final List<Type> thrownExceptions = new ArrayList<Type>();
         node.visitChildren(new Visitor() {
             @Override
             public void visit(Tree.Throw that) {
@@ -1225,7 +1295,7 @@ public class CeylonDocTool extends OutputRepoUsingTool {
                 if (expression != null) {
                     thrownExceptions.add(expression.getTypeModel());
                 } else {
-                    thrownExceptions.add(unit.getUnit().getExceptionDeclaration().getType());
+                    thrownExceptions.add(unit.getUnit().getExceptionType());
                 }
             }
             @Override
@@ -1234,16 +1304,16 @@ public class CeylonDocTool extends OutputRepoUsingTool {
             }
         });
 
-        for (ProducedType thrownException : thrownExceptions) {
+        for (Type thrownException : thrownExceptions) {
             boolean isDocumented = false;
-            for (ProducedType documentedException : documentedExceptions) {
+            for (Type documentedException : documentedExceptions) {
                 if (thrownException.isSubtypeOf(documentedException)) {
                     isDocumented = true;
                     break;
                 }
             }
             if (!isDocumented) {
-                log.warning(CeylondMessages.msg("warn.missingThrows", thrownException.getProducedTypeName(), getWhere(d), getPosition(d)));
+                log.warning(CeylondMessages.msg("warn.missingThrows", thrownException.asString(), getWhere(d), getPosition(getNode(d))));
             }
         }
     }
@@ -1262,8 +1332,8 @@ public class CeylonDocTool extends OutputRepoUsingTool {
             where += "type alias ";
         } else if (scope instanceof TypeParameter) {
             where += "type parameter ";
-        } else if (scope instanceof Method) {
-            if (((Method) scope).isToplevel()) {
+        } else if (scope instanceof Function) {
+            if (((Function) scope).isToplevel()) {
                 where += "function ";
             } else {
                 where += "method ";
@@ -1285,8 +1355,7 @@ public class CeylonDocTool extends OutputRepoUsingTool {
         return where;
     }
     
-    private String getPosition(Referenceable scope) {
-        Node node = getNode(scope);
+    private String getPosition(Node node) {
         if (node != null && 
                 node.getToken() != null && 
                 node.getUnit() != null && 
@@ -1294,6 +1363,10 @@ public class CeylonDocTool extends OutputRepoUsingTool {
             return "(" + node.getUnit().getFilename() + ":" + node.getToken().getLine() + ")";
         }
         return "";
+    }
+
+    public ModuleSourceMapper getModuleSourceMapper() {
+        return typeChecker.getPhasedUnits().getModuleSourceMapper();
     }
     
 }

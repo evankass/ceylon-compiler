@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfConditionListExistsIsBool() {
     }
@@ -11,7 +11,7 @@ class MethodIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.j
         final .java.lang.Object z$2;
         .java.lang.Object y$3;
         final long y$4;
-        if ((z$1 = x.get(.ceylon.language.Integer.instance(0L))) != null) {
+        if ((z$1 = x.getFromFirst(0L)) != null) {
             z$2 = z$1;
             if ((y$3 = z$2) instanceof .ceylon.language.Integer) {
                 y$4 = ((.ceylon.language.Integer)y$3).longValue();
@@ -22,19 +22,14 @@ class MethodIfConditionListExistsIsBool implements .com.redhat.ceylon.compiler.j
                 y$4 = 0L;
             }
         } else {
-            y$4 = 0L;
             z$2 = null;
+            y$4 = 0L;
         }
         if ($ceylontmp$if$0) {
             return y$4 == 1L;
         } else {
             return false;
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfConditionListExistsIsBool();
     }
     
     @.java.lang.Override

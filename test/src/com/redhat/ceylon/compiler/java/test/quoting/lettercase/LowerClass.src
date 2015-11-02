@@ -1,10 +1,10 @@
 package com.redhat.ceylon.compiler.java.test.quoting.lettercase;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.Name("c")
 @.com.redhat.ceylon.compiler.java.metadata.Members({@.com.redhat.ceylon.compiler.java.metadata.Member(klass = .com.redhat.ceylon.compiler.java.test.quoting.lettercase.c_.cc_.class)})
 @.com.redhat.ceylon.compiler.java.metadata.LocalDeclarations({"1mc"})
-class c_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class c_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     c_() {
     }
@@ -14,12 +14,11 @@ class c_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
         return new cc_();
     }
     
-    @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+    @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
     @.com.redhat.ceylon.compiler.java.metadata.Name("cc")
     @.ceylon.language.SharedAnnotation$annotation$
     @.com.redhat.ceylon.compiler.java.metadata.Container(klass = .com.redhat.ceylon.compiler.java.test.quoting.lettercase.c_.class)
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-    public class cc_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    public class cc_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         protected cc_() {
         }
@@ -34,10 +33,10 @@ class c_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Anything")
     private final void m$priv$() {
         
-        @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+        @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
         @.com.redhat.ceylon.compiler.java.metadata.Name("mc")
         @.com.redhat.ceylon.compiler.java.metadata.LocalDeclaration(qualifier = "1")
-        class mc_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+        class mc_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
             
             mc_() {
             }
@@ -48,12 +47,6 @@ class c_ implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
                 return .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.member(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.member(.com.redhat.ceylon.compiler.java.test.quoting.lettercase.c_.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.functionOrValue("m")), .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(mc_.class));
             }
         }
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.quoting.lettercase.c_();
     }
     
     @.java.lang.Override

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.codegen;
 
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
+import com.redhat.ceylon.model.typechecker.model.Type;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.JCTree.JCFieldAccess;
 import com.sun.tools.javac.util.List;
@@ -71,6 +71,10 @@ class RuntimeUtil {
         return makeUtilInvocation(null, "toBooleanArray", initialElements.prepend(expr));
     }
 
+    /**
+     * Make a call to 
+     * {@code Util.toJavaStringArray(Iterable<String> tail, java.lang.String... initialElements) }
+     */
     public JCExpression toJavaStringArray(JCExpression expr, List<JCExpression> initialElements) {
         return makeUtilInvocation(null, "toJavaStringArray", initialElements.prepend(expr));
     }
@@ -79,6 +83,10 @@ class RuntimeUtil {
         return makeUtilInvocation(null, "toArray", initialElements.prependList(List.of(expr, klassLiteral)));
     }
     
+    /**
+     * Make a call to 
+     * {@code Util.toArray(List<T> tail, T[] array, T... initialElements) }
+     */
     public JCExpression toArray(JCExpression seq, JCExpression arrayExpr, List<JCExpression> initialElements, JCExpression typeArgs) {
         return makeUtilInvocation(List.of(typeArgs), 
                 "toArray",
@@ -92,7 +100,7 @@ class RuntimeUtil {
     /**
      * Casts a <tt>ceylon.language.Sequential</tt> type to a <tt>ceylon.language.Sequence</tt> type.
      */
-    public JCExpression castSequentialToSequence(JCExpression sequentialExpr, ProducedType iteratedType) {
+    public JCExpression castSequentialToSequence(JCExpression sequentialExpr, Type iteratedType) {
         return makeUtilInvocation(null, "asSequence", List.of(sequentialExpr));
     }
     
@@ -105,7 +113,7 @@ class RuntimeUtil {
     }
     
     public JCExpression isReified(JCExpression varExpr,
-            ProducedType testedType) {
+            Type testedType) {
         return makeUtilInvocation(null, "isReified", List.of(varExpr, this.abstractTransformer.makeReifiedTypeArgument(testedType)));
     }
 
@@ -113,11 +121,28 @@ class RuntimeUtil {
         return makeUtilInvocation(null, "checkNull", List.of(expr));
     }
 
+    /**
+     * Makes a call to 
+     * {@code Util.sequentialCopy($reifiedT, Object[] initial, Sequential rest)} 
+     */
     public JCExpression sequentialInstance(JCExpression typeArgument,
             JCExpression reifiedTypeArgument, 
             JCExpression /*Sequential*/ rest, 
             List<JCExpression> /*T...*/elements) {
-        return makeUtilInvocation(typeArgument != null ? List.of(typeArgument) : null, "sequentialCopy", elements.prepend(rest).prepend(reifiedTypeArgument));
+        // Explicitly box the elements into an Object[] to avoid ambiguous varargs invocation
+        
+        /*
+         * sequentialCopy($reifiedT, 0, 
+                elements.length, elements, rest)
+         */
+        JCExpression array = abstractTransformer.make().NewArray(
+                abstractTransformer.make().Type(abstractTransformer.syms().objectType), 
+                List.<JCExpression>nil(), 
+                elements);
+        return makeUtilInvocation(typeArgument != null ? List.of(typeArgument) : null, "sequentialCopy", 
+                List.<JCExpression>of(reifiedTypeArgument, 
+                        array,
+                        rest));
     }
 
     public JCExpression throwableMessage(JCExpression qualExpr) {
@@ -182,6 +207,10 @@ class RuntimeUtil {
     public JCExpression getByteArray(JCExpression indexable, JCExpression index) {
         return makeUtilInvocation(null, "getByteArray", List.of(indexable, index));
     }
+    
+    public JCExpression getStringArray(JCExpression indexable, JCExpression index) {
+        return makeUtilInvocation(null, "getStringArray", List.of(indexable, index));
+    }
 
     public JCExpression arrayLength(JCExpression array) {
         return makeUtilInvocation(null, "arrayLength", List.of(array));
@@ -197,5 +226,17 @@ class RuntimeUtil {
     
     public JCExpression toInt(JCExpression expr) {
         return makeUtilInvocation(null, "toInt", List.of(expr));
+    }
+    
+    public JCExpression setter(JCExpression lookup, JCExpression fieldName) {
+        return makeUtilInvocation(null, "setter", List.of(lookup, fieldName));
+    }
+
+    public JCExpression unpack(JCExpression expr) {
+        return makeUtilInvocation(null, "unpack", List.of(expr));
+    }
+
+    public JCExpression recover() {
+        return makeUtilInvocation(null, "recover", List.<JCExpression>nil());
     }
 }

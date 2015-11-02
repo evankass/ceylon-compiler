@@ -23,25 +23,27 @@ package com.redhat.ceylon.compiler.java.codegen;
 import static com.sun.tools.javac.code.Flags.FINAL;
 import static com.sun.tools.javac.code.Flags.INTERFACE;
 import static com.sun.tools.javac.code.Flags.PRIVATE;
-import static com.sun.tools.javac.code.Flags.PROTECTED;
 import static com.sun.tools.javac.code.Flags.PUBLIC;
 import static com.sun.tools.javac.code.Flags.STATIC;
 
+import java.util.ArrayList;
+
 import com.redhat.ceylon.compiler.java.codegen.recovery.TransformationPlan;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Interface;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
-import com.redhat.ceylon.compiler.typechecker.tree.Tree.TypeParameterDeclaration;
-import com.redhat.ceylon.compiler.typechecker.tree.Tree.TypeParameterList;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Generic;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.sun.tools.javac.code.BoundKind;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCAnnotation;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
+import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
 import com.sun.tools.javac.tree.JCTree.JCStatement;
-import com.sun.tools.javac.tree.JCTree.JCThrow;
 import com.sun.tools.javac.tree.JCTree.JCTypeParameter;
 import com.sun.tools.javac.tree.JCTree.JCVariableDecl;
 import com.sun.tools.javac.util.List;
@@ -58,21 +60,20 @@ import com.sun.tools.javac.util.Name;
  * 
  * @author Tako Schotanus
  */
-public class ClassDefinitionBuilder 
-        implements ParameterizedBuilder<ClassDefinitionBuilder> {
+public class ClassDefinitionBuilder {
     private final AbstractTransformer gen;
     
     private final String name;
     
     private long modifiers;
-    private long constructorModifiers = -1;
+    
+    private InitializerBuilder initBuilder;
     
     private boolean isAlias = false;
     private boolean isLocal = false;
     
-    private JCExpression extending;
-    private JCStatement superCall;
-
+    private boolean hasConstructors = false;
+    
     /** 
      * Remembers the class which we're defining, because we need this for special
      * cases in the super constructor invocation.
@@ -85,13 +86,12 @@ public class ClassDefinitionBuilder
     
     private final ListBuffer<JCAnnotation> annotations = ListBuffer.lb();
     
-    private final ListBuffer<ParameterDefinitionBuilder> params = ListBuffer.lb();
-    
     private final ListBuffer<MethodDefinitionBuilder> constructors = ListBuffer.lb();
     private final ListBuffer<JCTree> defs = ListBuffer.lb();
     private ClassDefinitionBuilder concreteInterfaceMemberDefs;
-    private final ListBuffer<JCTree> also = ListBuffer.lb();
-    private final ListBuffer<JCStatement> init = ListBuffer.lb();
+    private final ListBuffer<JCTree> before = ListBuffer.lb();
+    private final ListBuffer<JCTree> after = ListBuffer.lb();
+    
 
     private boolean built = false;
     
@@ -101,6 +101,10 @@ public class ClassDefinitionBuilder
 
     private ClassDefinitionBuilder containingClassBuilder;
 
+    private Type extendingType;
+
+    private Type thisType;
+
     public static ClassDefinitionBuilder klass(AbstractTransformer gen, String javaClassName, String ceylonClassName, boolean isLocal) {
         ClassDefinitionBuilder builder = new ClassDefinitionBuilder(gen, javaClassName, ceylonClassName, isLocal);
         builder.setContainingClassBuilder(gen.current());
@@ -108,19 +112,18 @@ public class ClassDefinitionBuilder
         return builder;
     }
     
-
-    public static ClassDefinitionBuilder object(AbstractTransformer gen, String ceylonClassName, boolean isLocal) {
-        return klass(gen, Naming.quoteClassName(ceylonClassName), ceylonClassName, isLocal);
+    public static ClassDefinitionBuilder object(AbstractTransformer gen, String javaClassName, String ceylonClassName, boolean isLocal) {
+        return klass(gen, javaClassName, ceylonClassName, isLocal);
     }
     
     public static ClassDefinitionBuilder methodWrapper(AbstractTransformer gen, String ceylonClassName, boolean shared) {
         final ClassDefinitionBuilder builder = new ClassDefinitionBuilder(gen, Naming.quoteClassName(ceylonClassName), null, false);
         builder.setContainingClassBuilder(gen.current());
         gen.replace(builder);
+        builder.initBuilder.modifiers(PRIVATE);
         return builder
             .annotations(gen.makeAtMethod())
-            .modifiers(FINAL, shared ? PUBLIC : 0)
-            .constructorModifiers(PRIVATE);
+            .modifiers(FINAL | (shared ? PUBLIC : 0));
     }
 
     private ClassDefinitionBuilder(AbstractTransformer gen,  
@@ -128,9 +131,9 @@ public class ClassDefinitionBuilder
             String ceylonClassName,
             boolean isLocal) {
         this.gen = gen;
+        this.initBuilder = new InitializerBuilder(gen);
         this.name = javaClassName;
         this.isLocal = isLocal;
-        extending = getSuperclass(null);
         annotations(gen.makeAtCeylon());
         
         if (ceylonClassName != null){
@@ -147,7 +150,7 @@ public class ClassDefinitionBuilder
     }
     
     public String toString() {
-        return "CDB for " + ((modifiers & INTERFACE) != 0 ? "interface " : "class ") + name;
+        return "CDB for " + (isInterface() ? "interface " : "class ") + name;
     }
 
     ClassDefinitionBuilder getContainingClassBuilder() {
@@ -167,6 +170,7 @@ public class ClassDefinitionBuilder
             throw new BugException("already built");
         }
         built = true;
+        
         ListBuffer<JCTree> defs = ListBuffer.lb();
         appendDefinitionsTo(defs);
         if (!typeParamAnnotations.isEmpty() || typeParams.size() != typeParamAnnotations.size()) {
@@ -177,7 +181,7 @@ public class ClassDefinitionBuilder
                 gen.make().Modifiers(modifiers, getAnnotations()),
                 gen.names().fromString(name),
                 typeParams.toList(),
-                extending,
+                getSuperclass(this.extendingType),
                 satisfies.toList(),
                 defs.toList());
         ListBuffer<JCTree> klasses = ListBuffer.<JCTree>lb();
@@ -185,32 +189,37 @@ public class ClassDefinitionBuilder
         // Generate a companion class if we're building an interface
         // or the companion actually has some content 
         // (e.g. initializer with defaulted params)
-        
-        
-        if ((modifiers & INTERFACE) != 0) {
+        if (isInterface()) {
             if (this == getTopLevelBuilder()) {
-                klasses.appendList(also.toList());
+                klasses.appendList(before.toList());
                 klasses.append(klass);
                 if (hasCompanion()) {
                     klasses.appendList(concreteInterfaceMemberDefs.build());
                 }
+                klasses.appendList(after.toList());
             } else {
                 if (hasCompanion()) {
                     klasses.appendList(concreteInterfaceMemberDefs.build());
                 }
-                getTopLevelBuilder().also(klass);
+                getTopLevelBuilder().before(klass);
             }
         } else {
-            klasses.appendList(also.toList());
+            klasses.appendList(before.toList());
             if (hasCompanion()) {
                 klasses.appendList(concreteInterfaceMemberDefs.build());
             }
             klasses.append(klass);
+            klasses.appendList(after.toList());
         }
         
         gen.replace(getContainingClassBuilder());
         
         return klasses.toList();
+    }
+
+
+    private boolean isInterface() {
+        return (modifiers & INTERFACE) != 0;
     }
 
     String getClassName() {
@@ -220,35 +229,37 @@ public class ClassDefinitionBuilder
     private boolean hasCompanion() {
         return !isAlias
                 && concreteInterfaceMemberDefs != null
-                && (((modifiers & INTERFACE) != 0)
+                && (isInterface()
                     || !(concreteInterfaceMemberDefs.defs.isEmpty()
-                    && concreteInterfaceMemberDefs.init.isEmpty()
+                    && concreteInterfaceMemberDefs.getInitBuilder().isEmptyInit()
                     && concreteInterfaceMemberDefs.constructors.isEmpty()));
     }
 
-    private void also(JCTree also) {
-        this.also.append(also);
+    private void before(JCTree also) {
+        this.before.append(also);
+    }
+    
+    void after(JCTree also) {
+        this.after.append(also);
     }
 
     private void appendDefinitionsTo(ListBuffer<JCTree> defs) {
-        if ((modifiers & INTERFACE) == 0) {
-            if (superCall != null && !isAlias) {
-                init.prepend(superCall);
-            }
-            if (!isCompanion) {
-                createConstructor(init.toList());
-            }
+        if (!isInterface()) {
+            
             for (MethodDefinitionBuilder builder : constructors) {
                 if (noAnnotations || ignoreAnnotations) {
                     builder.noModelAnnotations();
                 }
                 defs.append(builder.build());
             }
+            if (!isCompanion && !hasConstructors) {
+                defs.append(initBuilder.build());
+            }
         }
         defs.appendList(this.defs);
     }
 
-    private JCExpression getSuperclass(ProducedType extendedType) {
+    private JCExpression getSuperclass(Type extendedType) {
         JCExpression superclass;
         if (extendedType != null) {
             superclass = gen.makeJavaType(extendedType, CeylonTransformer.JT_EXTENDS);
@@ -259,7 +270,7 @@ public class ClassDefinitionBuilder
 //                superclass = null;
 //            }
         } else {
-            if ((modifiers & INTERFACE) != 0) {
+            if (isInterface()) {
                 // The VM insists that interfaces have java.lang.Object as their superclass
                 superclass = gen.makeIdent(gen.syms().objectType);
             } else {
@@ -269,41 +280,18 @@ public class ClassDefinitionBuilder
         return superclass;
     }
 
-    private List<JCExpression> transformTypesList(java.util.List<ProducedType> types) {
+    private List<JCExpression> transformTypesList(java.util.List<Type> types) {
         if (types == null) {
             return List.nil();
         }
         ListBuffer<JCExpression> typesList = new ListBuffer<JCExpression>();
-        for (ProducedType t : types) {
+        for (Type t : types) {
             JCExpression jt = gen.makeJavaType(t, CeylonTransformer.JT_SATISFIES);
             if (jt != null) {
                 typesList.append(jt);
             }
         }
         return typesList.toList();
-    }
-
-    private ClassDefinitionBuilder createConstructor(List<JCStatement> body) {
-        long mods = constructorModifiers;
-        if (mods == -1) {
-            // The modifiers were never explicitly set
-            // so we try to come up with some good defaults
-            mods = modifiers & (PUBLIC | PRIVATE | PROTECTED);
-        }
-        int index = 0;
-        for (JCStatement stmt : body) {
-            if (stmt instanceof JCThrow) {
-                ListBuffer<JCStatement> filtered = ListBuffer.<JCStatement>lb();
-                filtered.addAll(body.subList(0, index+1));
-                body = filtered.toList();
-                break;
-            }
-            index++;
-        }
-        addConstructor().modifiers(mods)
-            .parameters(params.toList())
-            .body(body);
-        return this;
     }
     
     public MethodDefinitionBuilder addConstructor() {
@@ -314,7 +302,7 @@ public class ClassDefinitionBuilder
 
     public MethodDefinitionBuilder addConstructorWithInitCode() {
         MethodDefinitionBuilder constructor = addConstructor();
-        constructor.body(init.toList());
+        constructor.body(initBuilder.build().body.stats);
         return constructor;
     }
 
@@ -322,29 +310,17 @@ public class ClassDefinitionBuilder
      * Builder methods - they transform the inner state before doing the final construction
      */
     
-    public ClassDefinitionBuilder modifiers(long... modifiers) {
-        long mods = 0;
-        for (long mod : modifiers) {
-            mods |= mod;
-        }
-        this.modifiers = mods;
+    public ClassDefinitionBuilder modifiers(long modifiers) {
+        this.modifiers = modifiers;
         if (this.concreteInterfaceMemberDefs != null) {
-            this.concreteInterfaceMemberDefs.modifiers((mods & PUBLIC) | FINAL);
+            this.concreteInterfaceMemberDefs.modifiers((modifiers & PUBLIC) | FINAL);
         }
         return this;
     }
 
-    public ClassDefinitionBuilder constructorModifiers(long... constructorModifiers) {
-        long mods = 0;
-        for (long mod : constructorModifiers) {
-            mods |= mod;
-        }
-        this.constructorModifiers = mods;
-        return this;
-    }
 
-    public ClassDefinitionBuilder typeParameter(String name, java.util.List<ProducedType> satisfiedTypes, java.util.List<ProducedType> caseTypes, 
-                                                boolean covariant, boolean contravariant, ProducedType defaultValue, boolean addModelAnnotation) {
+    public ClassDefinitionBuilder typeParameter(String name, java.util.List<Type> satisfiedTypes, java.util.List<Type> caseTypes, 
+                                                boolean covariant, boolean contravariant, Type defaultValue, boolean addModelAnnotation) {
         typeParams.append(typeParam(name, gen.makeTypeParameterBounds(satisfiedTypes)));
         if(addModelAnnotation)
             typeParamAnnotations.append(gen.makeAtTypeParameter(name, satisfiedTypes, caseTypes, covariant, contravariant, defaultValue));
@@ -375,10 +351,11 @@ public class ClassDefinitionBuilder
         return typeParameter(param.getDeclarationModel());
     }
 
-    public ClassDefinitionBuilder extending(ProducedType thisType, ProducedType extendingType) {
+    public ClassDefinitionBuilder extending(Type thisType, Type extendingType) {
         if (!isAlias) {
-            this.extending = getSuperclass(extendingType);
-            annotations(gen.makeAtClass(thisType, extendingType));
+            this.thisType = thisType;
+            this.extendingType = extendingType;
+            this.hasConstructors = ((Class)thisType.getDeclaration()).hasConstructors() || ((Class)thisType.getDeclaration()).hasEnumerated();
         }
         return this;
     }
@@ -387,15 +364,20 @@ public class ClassDefinitionBuilder
         this.satisfies.add(gen.makeReifiedTypeType());
         return this;
     }
+    
+    public ClassDefinitionBuilder serializable() {
+        this.satisfies.add(gen.makeSerializableType());
+        return this;
+    }
 
-    public ClassDefinitionBuilder satisfies(java.util.List<ProducedType> satisfies) {
+    public ClassDefinitionBuilder satisfies(java.util.List<Type> satisfies) {
         this.satisfies.addAll(transformTypesList(satisfies));
         //this.defs.addAll(appendConcreteInterfaceMembers(satisfies));
         annotations(gen.makeAtSatisfiedTypes(satisfies));
         return this;
     }
 
-    public ClassDefinitionBuilder caseTypes(java.util.List<ProducedType> caseTypes, ProducedType ofType) {
+    public ClassDefinitionBuilder caseTypes(java.util.List<Type> caseTypes, Type ofType) {
         if (caseTypes != null || ofType != null) {
             annotations(gen.makeAtCaseTypes(caseTypes, ofType));
         }
@@ -404,6 +386,8 @@ public class ClassDefinitionBuilder
 
     private boolean ignoreAnnotations = false;
     private boolean noAnnotations = false;
+
+    private boolean hasDelegatingConstructors;
 
     /** 
      * The class will be generated with the {@code @Ignore} annotation only
@@ -438,18 +422,22 @@ public class ClassDefinitionBuilder
         }else if (ignoreAnnotations) {
             ret = ret.prependList(gen.makeAtIgnore());
         }else{
+            boolean jpaConstructor = thisType != null && Strategy.generateJpaCtor((Class)thisType.getDeclaration());
+            if (hasConstructors || thisType != null) {
+                Type exType = extendingType;
+                if (extendingType != null
+                        && extendingType.getDeclaration().isNativeHeader()) {
+                    exType = extendingType.getExtendedType();
+                }
+                ret = ret.prependList(gen.makeAtClass(thisType, exType, 
+                        hasConstructors));
+            }
             ret = ret.prependList(this.annotations.toList());
         }
         if (isBroken) {
             ret = ret.prependList(gen.makeAtCompileTimeError());
         }
         return ret;
-    }
-
-    // Create a parameter for the constructor
-    public ClassDefinitionBuilder parameter(ParameterDefinitionBuilder pdb) {
-        params.append(pdb);
-        return this;
     }
 
     /**
@@ -504,53 +492,43 @@ public class ClassDefinitionBuilder
         }
         return this;
     }
-    
-    public ClassDefinitionBuilder init(JCStatement statement) {
-        if (statement != null) {
-            this.init.append(statement);
-        }
-        return this;
-    }
-    
-    public ClassDefinitionBuilder init(List<JCStatement> init) {
-        if (init != null) {
-            this.init.appendList(init);
-        }
-        return this;
-    }
 
     public ClassDefinitionBuilder getCompanionBuilder(TypeDeclaration decl) {
         if (concreteInterfaceMemberDefs == null 
                 // if we want a companion build for a class, allow it
-                && (decl instanceof com.redhat.ceylon.compiler.typechecker.model.Class
+                && (decl instanceof com.redhat.ceylon.model.typechecker.model.Class
                         // if it's an interface, let's first check if we need one
                         || CodegenUtil.isCompanionClassNeeded(decl))) {
             String className = gen.naming.getCompanionClassName(decl, false);//.replaceFirst(".*\\.", "");
             concreteInterfaceMemberDefs = new ClassDefinitionBuilder(gen, className, decl.getName(), isLocal)
                 .ignoreAnnotations();
+            concreteInterfaceMemberDefs.introduce(gen.make().QualIdent(gen.syms().serializableType.tsym));
             concreteInterfaceMemberDefs.isCompanion = true;
         }
         return concreteInterfaceMemberDefs;
     }
     
-    public ClassDefinitionBuilder getCompanionBuilder(TypeDeclaration decl, TypeParameterList typeParameterList) {
+    public ClassDefinitionBuilder getCompanionBuilder2(
+            TypeDeclaration decl) {
+        
         ClassDefinitionBuilder companionBuilder = getCompanionBuilder(decl);
         // if the interface has no need of companion, give up
         if(companionBuilder == null)
             return null;
         // make sure we get fields and init code for reified params
-        if(typeParameterList != null) {
-            companionBuilder.reifiedTypeParameters(typeParameterList);
+        if(decl instanceof Generic) {
+            companionBuilder.reifiedTypeParameters(((Generic)decl).getTypeParameters());
         }
-        ProducedType thisType = decl.getType();
+        Type thisType = decl.getType();
         companionBuilder.field(PRIVATE | FINAL, 
                 "$this", 
                 gen.makeJavaType(thisType), 
                 null, false, gen.makeAtIgnore());
         MethodDefinitionBuilder ctor = companionBuilder.addConstructorWithInitCode();
         ctor.ignoreModelAnnotations();
-        if(typeParameterList != null)
-            ctor.reifiedTypeParameters(gen.classGen().typeParameterListModel(typeParameterList));
+        if(decl instanceof Generic) {
+            ctor.reifiedTypeParameters(((Generic)decl).getTypeParameters());
+        }
         ctor.modifiers(decl.isShared() ? PUBLIC : 0);
         ParameterDefinitionBuilder pdb = ParameterDefinitionBuilder.implicitParameter(gen, "$this");
         pdb.type(gen.makeJavaType(thisType), null);
@@ -563,9 +541,10 @@ public class ClassDefinitionBuilder
                                 gen.naming.makeQuotedThis())));
         ctor.body(bodyStatements.toList());
         
-        if(typeParameterList != null)
-            companionBuilder.addRefineReifiedTypeParametersMethod(typeParameterList);
-        
+        if(decl instanceof Generic
+                && !((Generic)decl).getTypeParameters().isEmpty()) {
+            companionBuilder.addRefineReifiedTypeParametersMethod(((Generic)decl).getTypeParameters());
+        }
         return companionBuilder;
     }
 
@@ -582,13 +561,13 @@ public class ClassDefinitionBuilder
             if (initialValue != null) {
                 // The attribute's initializer gets moved to the constructor
                 // because it might be using locals of the initializer
-                init(gen.make().Exec(gen.make().Assign(gen.makeSelect("this", Naming.quoteFieldName(attrName)), initialValue)));
+                initBuilder.init(gen.make().Exec(gen.make().Assign(gen.makeSelect("this", Naming.quoteFieldName(attrName)), initialValue)));
             }
         } else {
             // Otherwise it's local to the constructor
             // Stef: pretty sure we don't want annotations on a variable defined in a constructor
             Name attrNameNm = gen.names().fromString(Naming.quoteLocalValueName(attrName));
-            init(gen.make().VarDef(gen.make().Modifiers(modifiers), attrNameNm, type, initialValue));
+            initBuilder.init(gen.make().VarDef(gen.make().Modifiers(modifiers), attrNameNm, type, initialValue));
         }
         return this;
     }
@@ -608,15 +587,9 @@ public class ClassDefinitionBuilder
         return this;
     }
 
-    /** Set the expression used to invoke {@code super()} */
-    public ClassDefinitionBuilder superCall(JCStatement superCall) {
-        this.superCall = superCall;
-        return this;
-    }
-
-
     public ClassDefinitionBuilder forDefinition(ClassOrInterface def) {
         this.forDefinition = def;
+        this.hasConstructors = def instanceof Class && (((Class)def).hasConstructors() || ((Class)def).hasEnumerated());
         return this;
     }
 
@@ -625,19 +598,17 @@ public class ClassDefinitionBuilder
         return forDefinition;
     }
 
-    public ClassDefinitionBuilder reifiedTypeParameter(TypeParameterDeclaration param) {
-        String descriptorName = gen.naming.getTypeArgumentDescriptorName(param.getDeclarationModel());
-        parameter(makeReifiedParameter(descriptorName));
-        long flags = PRIVATE;
-        if(!isCompanion)
-            flags |= FINAL;
-        List<JCAnnotation> annotations = gen.makeAtIgnore();
-        JCVariableDecl localVar = gen.make().VarDef(gen.make().Modifiers(flags, annotations), gen.names().fromString(descriptorName), 
-                gen.makeTypeDescriptorType(), null);
-        defs(localVar);
-        init(gen.make().Exec(gen.make().Assign(
-                gen.naming.makeQualIdent(gen.naming.makeThis(), descriptorName), 
-                gen.naming.makeQualIdent(null, descriptorName))));
+    public ClassDefinitionBuilder reifiedTypeParameter(Tree.TypeParameterDeclaration param) {
+        TypeParameter tp = param.getDeclarationModel();
+        return reifiedTypeParameter(tp);
+    }
+
+
+    public ClassDefinitionBuilder reifiedTypeParameter(TypeParameter tp) {
+        String descriptorName = gen.naming.getTypeArgumentDescriptorName(tp);
+        initBuilder.parameter(makeReifiedParameter(descriptorName));
+        defs(gen.makeReifiedTypeParameterVarDecl(tp, isCompanion));
+        initBuilder.init(gen.makeReifiedTypeParameterAssignment(tp));
         return this;
     }
 
@@ -651,8 +622,8 @@ public class ClassDefinitionBuilder
     }
 
 
-    public ClassDefinitionBuilder addGetTypeMethod(ProducedType type){
-        if ((modifiers & INTERFACE) != 0) {
+    public ClassDefinitionBuilder addGetTypeMethod(Type type){
+        if (isInterface()) {
             // interfaces don't have that one
         }else{
             MethodDefinitionBuilder method = MethodDefinitionBuilder.systemMethod(gen, gen.naming.getGetTypeMethodName());
@@ -669,24 +640,40 @@ public class ClassDefinitionBuilder
         return this;
     }
 
+    public ClassDefinitionBuilder addAnnotationTypeMethod(Type type){
+        MethodDefinitionBuilder method = MethodDefinitionBuilder.systemMethod(gen, "annotationType");
+        method.modifiers(PUBLIC);
+        method.resultType(List.<JCAnnotation>nil(), 
+                gen.make().TypeApply(gen.make().QualIdent(gen.syms().classType.tsym), 
+                    List.<JCTree.JCExpression>of(gen.make().Wildcard(gen.make().TypeBoundKind(BoundKind.EXTENDS), gen.make().Type(gen.syms().annotationType)))));
+        method.isOverride(true);
 
-    public void reifiedTypeParameters(TypeParameterList typeParameterList) {
-        for(TypeParameterDeclaration tp : typeParameterList.getTypeParameterDeclarations()){
+        List<JCStatement> body = List.<JCStatement>of(gen.make().Return(gen.makeClassLiteral(type, AbstractTransformer.JT_ANNOTATION)));
+
+        method.body(body);
+        JCMethodDecl build = method.build();
+        defs(build);
+        
+        return this;
+    }
+
+    
+    public void reifiedTypeParameters(java.util.List<TypeParameter> typeParameterList) {
+        for(TypeParameter tp : typeParameterList) {
             reifiedTypeParameter(tp);
         }
     }
-
-    public ClassDefinitionBuilder addRefineReifiedTypeParametersMethod(TypeParameterList typeParameterList) {
+    
+    public ClassDefinitionBuilder addRefineReifiedTypeParametersMethod(java.util.List<TypeParameter> typeParameterList) {
         MethodDefinitionBuilder method = MethodDefinitionBuilder.systemMethod(gen, gen.naming.getRefineTypeParametersMethodName());
         method.modifiers(PUBLIC);
         method.ignoreModelAnnotations();
 
         List<JCStatement> body = List.nil();
-        for(TypeParameterDeclaration tp : typeParameterList.getTypeParameterDeclarations()){
-            String descriptorName = gen.naming.getTypeArgumentDescriptorName(tp.getDeclarationModel());
+        for(TypeParameter tp : typeParameterList){
+            String descriptorName = gen.naming.getTypeArgumentDescriptorName(tp);
             method.parameter(makeReifiedParameter(descriptorName));
-            body = body.prepend(gen.make().Exec(gen.make().Assign(gen.naming.makeQualIdent(gen.naming.makeThis(), descriptorName), 
-                    gen.naming.makeQualIdent(null, descriptorName))));
+            body = body.prepend(gen.makeReifiedTypeParameterAssignment(tp));
         }
         method.body(body);
         defs(method.build());
@@ -694,28 +681,30 @@ public class ClassDefinitionBuilder
     }
 
 
-    public ClassDefinitionBuilder refineReifiedType(ProducedType thisType) {
+    public ClassDefinitionBuilder refineReifiedType(Type thisType) {
         // init: $type$impl.$refine(tp1, tp2...)
         Interface iface = (Interface) thisType.getDeclaration();
         String companion = gen.naming.getCompanionFieldName(iface);
         ListBuffer<JCExpression> typeParameters = new ListBuffer<JCExpression>();
-        for(ProducedType tp : thisType.getTypeArgumentList()){
+        for(Type tp : thisType.getTypeArgumentList()){
             typeParameters.add(gen.makeReifiedTypeArgument(tp));
         }
         JCExpression refine = gen.make().Apply(null, gen.makeSelect(companion, gen.naming.getRefineTypeParametersMethodName()), typeParameters.toList());
-        init(gen.make().Exec(refine));
+        initBuilder.init(gen.make().Exec(refine));
         return this;
     }
 
 
-    public void reifiedAlias(ProducedType type) {
-        JCExpression klass = gen.makeUnerasedClassLiteral(type.getDeclaration());
-        JCExpression classDescriptor = gen.make().Apply(null, gen.makeSelect(gen.makeTypeDescriptorType(), "klass"), List.of(klass));
-        JCVariableDecl varDef = gen.make().VarDef(gen.make().Modifiers(PUBLIC | FINAL | STATIC, gen.makeAtIgnore()), 
-                                                  gen.names().fromString(gen.naming.getTypeDescriptorAliasName()), 
-                                                  gen.makeTypeDescriptorType(), 
-                                                  classDescriptor);
-        defs(varDef);
+    public void reifiedAlias(Type type) {
+        try (AbstractTransformer.SavedPosition savedPos = gen.noPosition()) {
+            JCExpression klass = gen.makeUnerasedClassLiteral(type.getDeclaration());
+            JCExpression classDescriptor = gen.make().Apply(null, gen.makeSelect(gen.makeTypeDescriptorType(), "klass"), List.of(klass));
+            JCVariableDecl varDef = gen.make().VarDef(gen.make().Modifiers(PUBLIC | FINAL | STATIC, gen.makeAtIgnore()), 
+                                                      gen.names().fromString(gen.naming.getTypeDescriptorAliasName()), 
+                                                      gen.makeTypeDescriptorType(), 
+                                                      classDescriptor);
+            defs(varDef);
+        }
     }
     
     public ClassDefinitionBuilder broken() {
@@ -727,5 +716,36 @@ public class ClassDefinitionBuilder
     public void isDynamic(boolean dynamic) {
         if(dynamic)
             annotations(gen.makeAtDynamic());
+    }
+
+    public InitializerBuilder getInitBuilder() {
+        return initBuilder;
+    }
+
+    public boolean isCompanionBuilder(){
+        return isCompanion;
+    }
+
+    public ClassDefinitionBuilder hasDelegatingConstructors(boolean hasDelegatingConstructors) {
+        this.hasDelegatingConstructors = hasDelegatingConstructors;
+        return this;
+    }
+
+    public boolean hasDelegatingConstructors() {
+        return hasDelegatingConstructors;
+    }
+
+    public Iterable<JCVariableDecl> getFields() {
+        ArrayList<JCVariableDecl> result = new ArrayList<JCVariableDecl>();
+        for (JCTree t : defs) {
+            if (t instanceof JCVariableDecl) {
+                result.add((JCVariableDecl)t);
+            }
+        }
+        return result;
+    }
+
+    public void introduce(JCExpression qualIdent) {
+        this.satisfies.add(qualIdent);
     }
 }

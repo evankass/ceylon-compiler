@@ -14,25 +14,17 @@ package com.redhat.ceylon.compiler.java.test.annotations;
 }
 @.ceylon.language.AnnotationAnnotation$annotation$
 @.ceylon.language.FinalAnnotation$annotation$
-final class AnnotationClassFloat implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.SequencedAnnotation<.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat, .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration> {
+final class AnnotationClassFloat implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.SequencedAnnotation<.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat, .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration, .java.lang.Object>, .java.io.Serializable {
+    
+    protected AnnotationClassFloat() {
+        super();
+    }
     
     AnnotationClassFloat(.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat$annotation$ anno) {
         this(anno.f());
     }
     
     AnnotationClassFloat(final double f) {
-        this.$ceylon$language$ConstrainedAnnotation$this$ = new .ceylon.language.ConstrainedAnnotation$impl<.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat, .ceylon.language.Sequential<? extends .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat>, .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration>(.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Sequential.class, .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat.$TypeDescriptor$), .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration.$TypeDescriptor$, this);
-    }
-    protected final .ceylon.language.ConstrainedAnnotation$impl<.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat, .ceylon.language.Sequential<? extends .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat>, .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration> $ceylon$language$ConstrainedAnnotation$this$;
-    
-    @.java.lang.Override
-    public .ceylon.language.ConstrainedAnnotation$impl<? extends .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat, ? extends .ceylon.language.Sequential<? extends .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat>, ? super .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration> $ceylon$language$ConstrainedAnnotation$impl() {
-        return $ceylon$language$ConstrainedAnnotation$this$;
-    }
-    
-    @.java.lang.Override
-    public final boolean occurs(final .ceylon.language.Annotated programElement) {
-        return $ceylon$language$ConstrainedAnnotation$this$.occurs(programElement);
     }
     
     @.java.lang.Override
@@ -40,6 +32,11 @@ final class AnnotationClassFloat implements .com.redhat.ceylon.compiler.java.run
         return .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat.class);
+    
+    @.java.lang.Override
+    public .java.lang.Class<? extends .java.lang.annotation.Annotation> annotationType() {
+        return .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat$annotation$.class;
+    }
 }
 @.java.lang.annotation.Retention(.java.lang.annotation.RetentionPolicy.RUNTIME)
 @.java.lang.annotation.Target({})
@@ -55,7 +52,7 @@ final class AnnotationClassFloat implements .com.redhat.ceylon.compiler.java.run
 }
 @.ceylon.language.AnnotationAnnotation$annotation$
 @.ceylon.language.FinalAnnotation$annotation$
-final class AnnotationClassFloatDefaulted implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.SequencedAnnotation<.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted, .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration> {
+final class AnnotationClassFloatDefaulted implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.SequencedAnnotation<.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted, .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration, .java.lang.Object>, .java.io.Serializable {
     
     AnnotationClassFloatDefaulted() {
         (
@@ -73,27 +70,10 @@ final class AnnotationClassFloatDefaulted implements .com.redhat.ceylon.compiler
     }
     
     AnnotationClassFloatDefaulted(final double f) {
-        this.$ceylon$language$ConstrainedAnnotation$this$ = new .ceylon.language.ConstrainedAnnotation$impl<.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted, .ceylon.language.Sequential<? extends .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted>, .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration>(.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Sequential.class, .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted.$TypeDescriptor$), .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration.$TypeDescriptor$, this);
     }
     
     public static double $default$f() {
         return 3.141;
-    }
-    protected final .ceylon.language.ConstrainedAnnotation$impl<.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted, .ceylon.language.Sequential<? extends .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted>, .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration> $ceylon$language$ConstrainedAnnotation$this$;
-    
-    @.java.lang.Override
-    public .ceylon.language.ConstrainedAnnotation$impl<? extends .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted, ? extends .ceylon.language.Sequential<? extends .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted>, ? super .ceylon.language.meta.declaration.ClassOrInterfaceDeclaration> $ceylon$language$ConstrainedAnnotation$impl() {
-        return $ceylon$language$ConstrainedAnnotation$this$;
-    }
-    
-    @.java.lang.Override
-    public final boolean occurs(final .ceylon.language.Annotated programElement) {
-        return $ceylon$language$ConstrainedAnnotation$this$.occurs(programElement);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted();
     }
     
     @.java.lang.Override
@@ -101,6 +81,11 @@ final class AnnotationClassFloatDefaulted implements .com.redhat.ceylon.compiler
         return .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted.class);
+    
+    @.java.lang.Override
+    public .java.lang.Class<? extends .java.lang.annotation.Annotation> annotationType() {
+        return .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloatDefaulted$annotation$.class;
+    }
 }
 @.com.redhat.ceylon.compiler.java.metadata.AnnotationInstantiation(
         arguments = {0},
@@ -128,10 +113,5 @@ final class annotationClassFloat_ {
     @.ceylon.language.AnnotationAnnotation$annotation$
     static .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat annotationClassFloat(final double f) {
         return new .com.redhat.ceylon.compiler.java.test.annotations.AnnotationClassFloat(f);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.annotations.annotationClassFloat_.annotationClassFloat();
     }
 }

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class AssertIsNullUnion implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class AssertIsNullUnion implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     AssertIsNullUnion() {
     }
@@ -11,12 +11,9 @@ class AssertIsNullUnion implements .com.redhat.ceylon.compiler.java.runtime.mode
         .java.lang.Object nothing$1 = null;
         if ((nothing$1 = nothing) == null || nothing$1 instanceof .ceylon.language.Character) {
             nothing$2 = (.ceylon.language.Character)nothing$1;
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "is Character? nothing"));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.AssertIsNullUnion();
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "is Character? nothing"));
+        }
     }
     
     @.java.lang.Override

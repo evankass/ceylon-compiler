@@ -37,7 +37,7 @@ shared class SetOperators() {
         for (Integer|Float i in x1) {
             if (is Integer i) {
                 Integer s = i + 0;
-            } else if (is Float i) {
+            } else {
                 Float s = i + 0;
             }
         }
@@ -112,9 +112,9 @@ shared class SetOperators() {
 }
 @noanno
 class SetOperatorsSuper(a, b) {
-    shared variable Set<Integer> sync = a;
     shared variable Set<Integer> a;
     shared variable Set<Integer> b; 
+    shared variable Set<Integer> sync = a;
     
     shared default void m() {
         sync = a | b;

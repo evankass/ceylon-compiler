@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.structure.importIt;
 
-class ImportAttrSingle implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ImportAttrSingle implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ImportAttrSingle() {
     }
     
     private final void m$priv$() {
         final boolean b = .com.redhat.ceylon.compiler.java.test.structure.importIt.pkg.f1_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.importIt.ImportAttrSingle();
     }
     
     @.java.lang.Override

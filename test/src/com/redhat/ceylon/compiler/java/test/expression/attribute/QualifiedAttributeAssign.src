@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.attribute;
 
-class QualifiedAttributeAssign implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class QualifiedAttributeAssign implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     QualifiedAttributeAssign() {
         this.b = true;
@@ -40,18 +40,13 @@ class QualifiedAttributeAssign implements .com.redhat.ceylon.compiler.java.runti
         f.setB(f.getB());
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.attribute.QualifiedAttributeAssign();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.expression.attribute.QualifiedAttributeAssign.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.attribute.QualifiedAttributeAssign.class);
 }
-class QualifiedAttributeAssignFoo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class QualifiedAttributeAssignFoo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     QualifiedAttributeAssignFoo() {
         this.b = true;
@@ -64,11 +59,6 @@ class QualifiedAttributeAssignFoo implements .com.redhat.ceylon.compiler.java.ru
     
     public final void setB(final boolean b) {
         this.b = b;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.attribute.QualifiedAttributeAssignFoo();
     }
     
     @.java.lang.Override

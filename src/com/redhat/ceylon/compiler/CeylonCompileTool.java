@@ -26,13 +26,16 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 
 import com.redhat.ceylon.cmr.ceylon.OutputRepoUsingTool;
+import com.redhat.ceylon.common.Backend;
 import com.redhat.ceylon.common.Constants;
 import com.redhat.ceylon.common.config.DefaultToolOptions;
 import com.redhat.ceylon.common.tool.Argument;
 import com.redhat.ceylon.common.tool.Description;
+import com.redhat.ceylon.common.tool.EnumUtil;
 import com.redhat.ceylon.common.tool.Hidden;
 import com.redhat.ceylon.common.tool.Option;
 import com.redhat.ceylon.common.tool.OptionArgument;
@@ -41,10 +44,12 @@ import com.redhat.ceylon.common.tool.RemainingSections;
 import com.redhat.ceylon.common.tool.StandardArgumentParsers;
 import com.redhat.ceylon.common.tool.Summary;
 import com.redhat.ceylon.common.tool.ToolUsageError;
+import com.redhat.ceylon.common.tools.CeylonTool;
 import com.redhat.ceylon.common.tools.ModuleWildcardsHelper;
 import com.redhat.ceylon.common.tools.SourceArgumentsResolver;
 import com.redhat.ceylon.compiler.java.launcher.Main;
 import com.redhat.ceylon.compiler.java.launcher.Main.ExitState.CeylonState;
+import com.redhat.ceylon.compiler.typechecker.analyzer.Warning;
 import com.sun.tools.javac.main.JavacOption;
 import com.sun.tools.javac.main.OptionName;
 import com.sun.tools.javac.main.RecognizedOptions;
@@ -161,21 +166,47 @@ public class CeylonCompileTool extends OutputRepoUsingTool {
     private List<File> resources = DefaultToolOptions.getCompilerResourceDirs();
     private List<String> modulesOrFiles = Arrays.asList("*");
     private boolean continueOnErrors;
+    private boolean progress;
     private List<String> javac = Collections.emptyList();
     private String encoding;
     private String resourceRoot = DefaultToolOptions.getCompilerResourceRootName();
     private boolean noOsgi = DefaultToolOptions.getCompilerNoOsgi();
+    private String osgiProvidedBundles = DefaultToolOptions.getCompilerOsgiProvidedBundles();
     private boolean noPom = DefaultToolOptions.getCompilerNoPom();
     private boolean pack200 = DefaultToolOptions.getCompilerPack200();
+    private EnumSet<Warning> suppressWarnings = EnumUtil.enumsFromStrings(Warning.class, DefaultToolOptions.getCompilerSuppressWarnings());
+    private boolean flatClasspath;
+    private boolean autoExportMavenDependencies;
 
     public CeylonCompileTool() {
         super(CeylonCompileMessages.RESOURCE_BUNDLE);
     }
-    
+
+    @Option(longName="flat-classpath")
+    @Description("Launches the Ceylon module using a flat classpath.")
+    public void setFlatClasspath(boolean flatClasspath) {
+        this.flatClasspath = flatClasspath;
+    }
+
+    @Option(longName="auto-export-maven-dependencies")
+    @Description("When using JBoss Modules (the default), treats all module dependencies between " +
+                 "Maven modules as shared.")
+    public void setAutoExportMavenDependencies(boolean autoExportMavenDependencies) {
+        this.autoExportMavenDependencies = autoExportMavenDependencies;
+    }
+
     @Option(longName="no-osgi")
     @Description("Indicates that the generated car file should not contain OSGi module declarations.")
     public void setNoOsgi(boolean noOsgi) {
         this.noOsgi = noOsgi;
+    }
+
+    @OptionArgument(longName="osgi-provided-bundles", argumentName="modules")
+    @Description("Comma-separated list of module names. "
+            + "The listed modules are expected to be OSGI bundles provided by the framework, "
+            + "and will be omitted from the generated MANIFEST 'Required-Bundle' OSGI header.")
+    public void setOsgiProvidedBundles(String osgiProvidedBundles) {
+        this.osgiProvidedBundles = osgiProvidedBundles;
     }
 
     @Option(longName="no-pom")
@@ -232,6 +263,12 @@ public class CeylonCompileTool extends OutputRepoUsingTool {
         this.continueOnErrors = continueOnErrors;
     }
 
+    @Option(longName="progress")
+    @Description("Print progress information.")
+    public void setProgress(boolean progress) {
+        this.progress = progress;
+    }
+
     @OptionArgument(shortName='E', argumentName="encoding")
     @Description("Sets the encoding used for reading source files" +
             "(default: platform-specific).")
@@ -259,11 +296,32 @@ public class CeylonCompileTool extends OutputRepoUsingTool {
     public void setJavac(List<String> javac) {
         this.javac = javac;
     }
+    
+    @Option(shortName='W')
+    @OptionArgument(argumentName = "warnings")
+    @Description("Suppress the reporting of the given warnings. " +
+            "If no `warnings` are given then suppresss the reporting of all warnings, " +
+            "otherwise just suppresss those which are present. " +
+            "Allowed flags include: " +
+            "`filenameNonAscii`, `filenameCaselessCollision`, `deprecation`, "+
+            "`compilerAnnotation`, `doclink`, `expressionTypeNothing`, "+
+            "`unusedDeclaration`, `unusedImport`, `ceylonNamespace`, "+
+            "`javaNamespace`, `suppressedAlready`, `suppressesNothing`, "+
+            "`unknownWarning`, `ambiguousAnnotation`, `similarModule`, "+
+            "`importsOtherJdk`, `javaAnnotationElement`.")
+    public void setSuppressWarning(EnumSet<Warning> warnings) {
+        this.suppressWarnings = warnings;
+    }
 
     private List<String> arguments;
     
     private Main compiler;
     
+    @Override
+    protected List<File> getSourceDirs() {
+        return sources;
+    }
+
     private static void validateWithJavac(Options options, JavacOption encodingOpt, String option, String argument, String key) {
         if (!encodingOpt.matches(option)) {
             throw new IllegalArgumentException(CeylonCompileMessages.msg(key, option));
@@ -283,8 +341,7 @@ public class CeylonCompileTool extends OutputRepoUsingTool {
     }
     
     @Override
-    public void initialize() throws IOException {
-        setSystemProperties();
+    public void initialize(CeylonTool mainTool) throws IOException {
         compiler = new Main("ceylon compile");
         Options options = Options.instance(new Context());
         
@@ -322,22 +379,45 @@ public class CeylonCompileTool extends OutputRepoUsingTool {
         if (continueOnErrors) {
             arguments.add("-continue");
         }
-        
+
+        if (progress) {
+            arguments.add("-progress");
+        }
+
         if (offline) {
             arguments.add("-offline");
         }
-        
-        if (mavenOverrides != null) {
-            arguments.add("-maven-overrides");
-            if (mavenOverrides.startsWith("classpath:")) {
-                arguments.add(mavenOverrides);
+
+        if (timeout != -1) {
+            arguments.add("-timeout");
+            arguments.add(String.valueOf(timeout));
+        }
+
+        if (flatClasspath) {
+            arguments.add("-flat-classpath");
+        }
+
+        if (autoExportMavenDependencies) {
+            arguments.add("-auto-export-maven-dependencies");
+        }
+
+        if (overrides != null) {
+            arguments.add("-overrides");
+            if (overrides.startsWith("classpath:")) {
+                arguments.add(overrides);
             } else {
-                arguments.add(applyCwd(new File(mavenOverrides)).getPath());
+                arguments.add(applyCwd(new File(overrides)).getPath());
             }
         }
 
         if (noOsgi) {
             arguments.add("-noosgi");
+        }
+
+        if (osgiProvidedBundles != null
+                && ! osgiProvidedBundles.isEmpty()) {
+            arguments.add("-osgi-provided-bundles");
+            arguments.add(osgiProvidedBundles);
         }
 
         if (noPom) {
@@ -402,10 +482,15 @@ public class CeylonCompileTool extends OutputRepoUsingTool {
             }
         }
         
+        if (suppressWarnings != null) {
+            arguments.add("-suppress-warnings");
+            arguments.add(EnumUtil.enumsToString(suppressWarnings));
+        }
+        
         addJavacArguments(arguments);
         
         List<File> srcs = applyCwd(this.sources);
-        List<String> expandedModulesOrFiles = ModuleWildcardsHelper.expandWildcards(srcs , this.modulesOrFiles);
+        List<String> expandedModulesOrFiles = ModuleWildcardsHelper.expandWildcards(srcs , this.modulesOrFiles, Backend.Java);
         if (expandedModulesOrFiles.isEmpty()) {
             throw new ToolUsageError("No modules or source files to compile");
         }
@@ -521,7 +606,5 @@ public class CeylonCompileTool extends OutputRepoUsingTool {
                 arguments.add(value);
             }
         }
-        
-    
     }
 }

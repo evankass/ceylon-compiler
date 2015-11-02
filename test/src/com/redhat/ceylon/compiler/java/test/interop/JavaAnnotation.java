@@ -1,5 +1,8 @@
 package com.redhat.ceylon.compiler.java.test.interop;
 
+import java.lang.annotation.Target;
+import java.lang.annotation.ElementType;
+
 @interface JavaAnnotationPrimitives {
     boolean b();
     byte o();
@@ -40,4 +43,40 @@ package com.redhat.ceylon.compiler.java.test.interop;
 
     JavaAnnotationEnum annotation();
     JavaAnnotationEnum[] annotations();
+}
+
+@interface JAVAAnnotationAcronym {}
+@interface javaAnnotationLowercase {}
+
+@interface JavaAnnotationDefaultTarget {}
+@Target({})
+@interface JavaAnnotationNoTarget {}
+@Target({
+    ElementType.ANNOTATION_TYPE,
+    ElementType.CONSTRUCTOR,
+    ElementType.FIELD,
+    ElementType.LOCAL_VARIABLE,
+    ElementType.METHOD,
+    ElementType.PACKAGE,
+    ElementType.PARAMETER,
+    ElementType.TYPE,
+})
+@interface JavaAnnotationOnEveryTarget {}
+
+@Target({ElementType.TYPE})
+@interface JavaAnnotationTypeTarget {}
+@Target({ElementType.CONSTRUCTOR})
+@interface JavaAnnotationCtorTarget {}
+@Target({ElementType.TYPE, ElementType.CONSTRUCTOR})
+@interface JavaAnnotationTypeCtorTarget {}
+
+@Target({ElementType.FIELD})
+@interface JavaAnnotationFieldTarget {}
+@Target({ElementType.FIELD, ElementType.METHOD})
+@interface JavaAnnotationFieldMethodTarget {}
+@Target({ElementType.METHOD})
+@interface JavaAnnotationMethodTarget {}
+
+@interface JavaAnnotationClass2 {
+    java.lang.Class<?> clas();
 }

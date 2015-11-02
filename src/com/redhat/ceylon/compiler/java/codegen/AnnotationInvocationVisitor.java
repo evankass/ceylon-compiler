@@ -28,21 +28,21 @@ import java.util.Map;
 import java.util.Set;
 
 import com.redhat.ceylon.compiler.java.codegen.AbstractTransformer.BoxingStrategy;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Functional;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.PositionalArgument;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Functional;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 import com.sun.tools.javac.tree.JCTree.JCAnnotation;
 import com.sun.tools.javac.tree.JCTree.JCAssign;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
@@ -54,11 +54,11 @@ class AnnotationInvocationVisitor extends Visitor {
     public static Class annoClass(Tree.InvocationExpression invocation) {
         Declaration declaration = ((Tree.BaseMemberOrTypeExpression)invocation.getPrimary()).getDeclaration();
         Set<Declaration> ctors = new HashSet<Declaration>();
-        while (declaration instanceof Method) {
+        while (declaration instanceof Function) {
             if (!ctors.add(declaration)) {
-                throw new BugException(invocation, "Recursive annotation constructor");
+                throw new BugException(invocation, "recursive annotation constructor");
             }
-            declaration = ((AnnotationInvocation)((Method)declaration).getAnnotationConstructor()).getPrimary();
+            declaration = ((AnnotationInvocation)((Function)declaration).getAnnotationConstructor()).getPrimary();
         } 
         
         if (declaration instanceof Class) {
@@ -68,21 +68,21 @@ class AnnotationInvocationVisitor extends Visitor {
         }
     }
     
-    public static Method annoCtor(Tree.InvocationExpression invocation) {
+    public static Function annoCtor(Tree.InvocationExpression invocation) {
         Declaration declaration = ((Tree.BaseMemberOrTypeExpression)invocation.getPrimary()).getDeclaration();
-        if (declaration instanceof Method) {
-            return (Method)declaration;
+        if (declaration instanceof Function) {
+            return (Function)declaration;
         } else if (declaration instanceof Class) {
             return null;
         } else {
-            throw new BugException(invocation, "compiler bug: invocation primary has unexpected declaration: " + declaration);
+            throw new BugException(invocation, "invocation primary has unexpected declaration: " + declaration);
         }
     }
     
     public static AnnotationInvocation annoCtorModel(Tree.InvocationExpression invocation) {
         Declaration declaration = ((Tree.BaseMemberOrTypeExpression)invocation.getPrimary()).getDeclaration();
-        if (declaration instanceof Method) {
-            return (AnnotationInvocation)((Method)declaration).getAnnotationConstructor();
+        if (declaration instanceof Function) {
+            return (AnnotationInvocation)((Function)declaration).getAnnotationConstructor();
         } else if (declaration instanceof Class) {
             // TODO Why doesn't the AnnotationModelVisitor do this? I guess because
             // an annotation Class's doesn't have a body, so there's no need for Visitor
@@ -114,7 +114,7 @@ class AnnotationInvocationVisitor extends Visitor {
     
     
     private Parameter parameter;
-    private ProducedType expectedType;
+    private Type expectedType;
     private ListBuffer<JCExpression> arrayExprs = null;
     private JCExpression argumentExpr;
 
@@ -158,7 +158,7 @@ class AnnotationInvocationVisitor extends Visitor {
                 append(transformConstructor(exprGen, invocation));
             } else if (primary instanceof Tree.BaseTypeExpression) {
                 Tree.BaseTypeExpression bte = (Tree.BaseTypeExpression)primary;
-                if (exprGen.typeFact().getByteDeclaration().equals(bte.getDeclaration())) {
+                if (((TypeDeclaration) bte.getDeclaration()).isByte()) {
                     // Special case for "Byte(x)" where we make use of the fact that it looks
                     // like an annotation class instantiation but is in fact a byte literal
                     PositionalArgument arg = invocation.getPositionalArgumentList().getPositionalArguments().get(0);
@@ -248,7 +248,7 @@ class AnnotationInvocationVisitor extends Visitor {
                     continue outer;
                 }
             } else {
-                Method ac2 = (Method)ai.getPrimary();
+                Function ac2 = (Function)ai.getPrimary();
                 AnnotationInvocation i = (AnnotationInvocation)ac2.getAnnotationConstructor();
                 for (AnnotationArgument aa : i.getAnnotationArguments()) {
                     if (aa.getParameter().equals(classParameter)) {
@@ -317,7 +317,7 @@ class AnnotationInvocationVisitor extends Visitor {
             ParameterAnnotationTerm parameterArgument = (ParameterAnnotationTerm)term;
             Parameter sp = parameterArgument.getSourceParameter();
             int argumentIndex = ((Functional)sp.getDeclaration())
-                    .getParameterLists().get(0).getParameters()
+                    .getFirstParameterList().getParameters()
                     .indexOf(sp);
             if (invocation.getPositionalArgumentList() != null) {
                 java.util.List<Tree.PositionalArgument> positionalArguments = invocation.getPositionalArgumentList().getPositionalArguments();
@@ -494,7 +494,7 @@ class AnnotationInvocationVisitor extends Visitor {
                 ExpressionTransformer.EXPR_UNSAFE_PRIMITIVE_TYPECAST_OK));
     }
 
-    private ProducedType expectedType() {
+    private Type expectedType() {
         return this.expectedType != null ?  this.expectedType : this.parameter.getType();
     }
     
@@ -524,7 +524,9 @@ class AnnotationInvocationVisitor extends Visitor {
                         exprGen.makeJavaType(((ClassOrInterface)decl).getType()),
                         "class"));
             } else if (decl instanceof Value) {
-                append(exprGen.transformExpression(term));
+                append(exprGen.transformExpression(term, BoxingStrategy.UNBOXED, term.getTypeModel(),
+                        // target doesn't actually accept null, but we can't put a checkNull() call in there.
+                        exprGen.EXPR_TARGET_ACCEPTS_NULL));
             }
         } else {
             append(exprGen.make().Literal(term.getDeclaration().getQualifiedNameString()));
@@ -538,7 +540,7 @@ class AnnotationInvocationVisitor extends Visitor {
                     && tl.getDeclaration().isAnonymous())){
             if (anno.isInterop()) {
                 append(exprGen.naming.makeQualIdent(
-                        exprGen.makeJavaType(tl.getType().getTypeModel(), AbstractTransformer.JT_RAW),
+                        exprGen.makeJavaType(tl.getType().getTypeModel(), AbstractTransformer.JT_NO_PRIMITIVES | AbstractTransformer.JT_RAW),
                         "class"));
             } else {
                 append(exprGen.makeMetaLiteralStringLiteralForAnnotation(tl));

@@ -24,18 +24,17 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Interface;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.Setter;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
-import com.redhat.ceylon.compiler.typechecker.tree.NaturalVisitor;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.Setter;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 /**
  * Visits everything, stops at types (aliases, objects, class, interface) and collects
@@ -43,7 +42,7 @@ import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
  * 
  * @author Stéphane Épardaud <stef@epardaud.fr>
  */
-public class LocalTypeVisitor extends Visitor implements NaturalVisitor {
+public class LocalTypeVisitor extends Visitor {
 
     private HasTypeVisitor hasTypeVisitor = new HasTypeVisitor();
     
@@ -68,8 +67,9 @@ public class LocalTypeVisitor extends Visitor implements NaturalVisitor {
     }
 
     private void collect(Node that, Declaration model) {
-        if(model != null && !model.isMember()){
-            String name = model.getName();
+        if(model != null && (!model.isMember() 
+                || Decl.isObjectExpressionType(model))){
+            String name = Naming.escapeClassName(model.getName());
             Set<String> locals = this.locals;
             // FIXME: better name processing
             if(model instanceof Value
@@ -98,7 +98,7 @@ public class LocalTypeVisitor extends Visitor implements NaturalVisitor {
 
     @Override
     public void visit(Tree.AnyMethod that){
-        Method model = that.getDeclarationModel();
+        Function model = that.getDeclarationModel();
         int mpl = model.getParameterLists().size();
         String prefix = null;
         if(mpl > 1){
@@ -199,7 +199,8 @@ public class LocalTypeVisitor extends Visitor implements NaturalVisitor {
     public void visit(Tree.BaseMemberOrTypeExpression that) {
         Declaration model = that.getDeclaration();
         if(model != null
-                && (model instanceof Method || model instanceof Class)
+                && (model instanceof Function || model instanceof Class)
+                && !model.isParameter() // if it's a parameter we don't need to wrap it in a class
                 && !that.getDirectlyInvoked()){
             String prefix = this.prefix;
             enterAnonymousClass();
@@ -213,11 +214,16 @@ public class LocalTypeVisitor extends Visitor implements NaturalVisitor {
     
     @Override
     public void visit(Tree.SequenceEnumeration that) {
-        String prefix = this.prefix;
-        enterAnonymousClass();
-        super.visit(that);
-        exitAnonymousClass();
-        this.prefix = prefix;
+        if(that.getSequencedArgument() == null){
+            // empty literals do not generate any class
+            super.visit(that);
+        }else{
+            String prefix = this.prefix;
+            enterAnonymousClass();
+            super.visit(that);
+            exitAnonymousClass();
+            this.prefix = prefix;
+        }
     }
 
     @Override
@@ -265,5 +271,45 @@ public class LocalTypeVisitor extends Visitor implements NaturalVisitor {
         Value model = that.getDeclarationModel();
         if(model != null)
             collect(that, model.getTypeDeclaration());
+    }
+
+    @Override
+    public void visit(Tree.ObjectExpression that){
+        Class model = that.getAnonymousClass();
+        if(model != null)
+            collect(that, model);
+    }
+
+    @Override
+    public void visit(Tree.AttributeArgument that){
+        // if there's a block we end up generating an @Attribute class so we can stop there
+        if(that.getBlock() != null){
+            Value model = that.getDeclarationModel();
+            if(model != null)
+                collect(that, model);
+        }else{
+            super.visit(that);
+        }
+    }
+
+    public void startFrom(Node tree) {
+        int mpl = 0;
+        String prefix = null;
+        // make sure we start with the right number of anonymous classes for methods with MPL before we visit the children
+        if(tree instanceof Tree.AnyMethod){
+            Function model = ((Tree.AnyMethod)tree).getDeclarationModel();
+            mpl = model.getParameterLists().size();
+            if(mpl > 1){
+                prefix = this.prefix;
+                for(int i=1;i<mpl;i++)
+                    enterAnonymousClass();
+            }
+        }
+        tree.visitChildren(this);
+        if(mpl > 1){
+            for(int i=1;i<mpl;i++)
+                exitAnonymousClass();
+            this.prefix = prefix;
+        }
     }
 }

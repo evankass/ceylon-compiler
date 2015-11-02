@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.nesting;
 
-class C1 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class C1 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     C1() {
         (
@@ -20,18 +20,13 @@ class C1 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
         return 1L;
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.nesting.C1();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.structure.nesting.C1.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.nesting.C1.class);
 }
-class C3 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class C3 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     C3() {
         (
@@ -67,18 +62,13 @@ class C3 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
         return 2L * i;
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.nesting.C3();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.structure.nesting.C3.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.nesting.C3.class);
 }
-class C4 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class C4 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     C4(final long i) {
         (
@@ -89,6 +79,10 @@ class C4 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
             }
             returning null;
         );
+    }
+    
+    protected C4() {
+        super();
     }
     
     C4(final long i, final long n) {
@@ -104,7 +98,7 @@ class C4 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.nesting.C4.class);
 }
-class C5<U> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class C5<U> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     C5(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$U, final long i) {
         (
@@ -115,6 +109,11 @@ class C5<U> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTyp
             }
             returning null;
         );
+    }
+    
+    protected C5(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$U) {
+        super();
+        this.$reified$U = $reified$U;
     }
     
     C5(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$U, final long i, final U u) {
@@ -146,11 +145,6 @@ final class positional_ {
         new .com.redhat.ceylon.compiler.java.test.structure.nesting.C4(1L, 2L);
         new .com.redhat.ceylon.compiler.java.test.structure.nesting.C5<.ceylon.language.String>(.ceylon.language.String.$TypeDescriptor$, 1L);
         new .com.redhat.ceylon.compiler.java.test.structure.nesting.C5<.ceylon.language.String>(.ceylon.language.String.$TypeDescriptor$, 1L, .ceylon.language.String.instance(""));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.structure.nesting.positional_.positional();
     }
 }
 final class named_ {
@@ -256,10 +250,5 @@ final class named_ {
             }
             returning new .com.redhat.ceylon.compiler.java.test.structure.nesting.C5<.ceylon.language.String>(arg$17$reified$0, arg$17$0, arg$17$1);
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.structure.nesting.named_.named();
     }
 }

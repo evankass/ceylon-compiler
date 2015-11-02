@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfElseIf implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfElseIf implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfElseIf() {
     }
@@ -15,11 +15,6 @@ class MethodIfElseIf implements .com.redhat.ceylon.compiler.java.runtime.model.R
                 return 3L;
             }
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfElseIf();
     }
     
     @.java.lang.Override

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.quoting.$goto;
 
-class KeywordInClassValue implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class KeywordInClassValue implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     KeywordInClassValue() {
         this.$goto = "";
@@ -35,11 +35,6 @@ class KeywordInClassValue implements .com.redhat.ceylon.compiler.java.runtime.mo
     public final void m() {
         setAbstract("");
         setImplements$priv$("");
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.quoting.$goto.KeywordInClassValue();
     }
     
     @.java.lang.Override

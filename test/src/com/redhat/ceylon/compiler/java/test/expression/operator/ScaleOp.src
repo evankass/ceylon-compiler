@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.operator;
 
-class ScaleOp implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.Scalable<.ceylon.language.Float, .com.redhat.ceylon.compiler.java.test.expression.operator.ScaleOp> {
+class ScaleOp implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.Scalable<.ceylon.language.Float, .com.redhat.ceylon.compiler.java.test.expression.operator.ScaleOp>, .java.io.Serializable {
     
     ScaleOp() {
     }
@@ -27,11 +27,6 @@ class ScaleOp implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedT
             }
             returning scalable$2.scale(scale$3);
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.operator.ScaleOp();
     }
     
     @.java.lang.Override

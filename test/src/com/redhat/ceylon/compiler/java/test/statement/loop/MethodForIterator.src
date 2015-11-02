@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.loop;
 
-class MethodForIterator implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodForIterator implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodForIterator() {
     }
@@ -41,7 +41,7 @@ class MethodForIterator implements .com.redhat.ceylon.compiler.java.runtime.mode
             final .java.lang.String s = ((.ceylon.language.String)elem$3).toString();
         }
         .java.lang.Object elem$5;
-        .ceylon.language.Iterator<? extends .ceylon.language.String> s$iterator$$6 = new .com.redhat.ceylon.compiler.java.language.LazyIterable<.ceylon.language.String, .java.lang.Object>(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.String.$TypeDescriptor$, .ceylon.language.Null.$TypeDescriptor$), .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType, 3, false){
+        .ceylon.language.Iterator<? extends .ceylon.language.String> s$iterator$$6 = new .com.redhat.ceylon.compiler.java.language.LazyIterable<.ceylon.language.String, .java.lang.Object>(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.String.$TypeDescriptor$, .ceylon.language.null_.$TypeDescriptor$), .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType, 3, false){
             
             @.java.lang.Override
             protected final .java.lang.Object $evaluate$(int $index$) {
@@ -89,7 +89,7 @@ class MethodForIterator implements .com.redhat.ceylon.compiler.java.runtime.mode
             final long n = ((.ceylon.language.Integer)elem$7).longValue();
         }
         .java.lang.Object elem$9;
-        .ceylon.language.Iterator<? extends .ceylon.language.Integer> n$iterator$$10 = new .com.redhat.ceylon.compiler.java.language.LazyIterable<.ceylon.language.Integer, .java.lang.Object>(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Null.$TypeDescriptor$), .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType, 3, false){
+        .ceylon.language.Iterator<? extends .ceylon.language.Integer> n$iterator$$10 = new .com.redhat.ceylon.compiler.java.language.LazyIterable<.ceylon.language.Integer, .java.lang.Object>(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.null_.$TypeDescriptor$), .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType, 3, false){
             
             @.java.lang.Override
             protected final .java.lang.Object $evaluate$(int $index$) {
@@ -118,11 +118,6 @@ class MethodForIterator implements .com.redhat.ceylon.compiler.java.runtime.mode
             final int c = s$11.codePointAt(index$13);
             index$13 += .java.lang.Character.charCount(c);
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.loop.MethodForIterator();
     }
     
     @.java.lang.Override

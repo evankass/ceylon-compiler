@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.structure.importIt;
 
-class ImportMethodSingle implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ImportMethodSingle implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ImportMethodSingle() {
     }
     
     private final void m$priv$() {
         .com.redhat.ceylon.compiler.java.test.structure.importIt.pkg.m1_.m1();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.importIt.ImportMethodSingle();
     }
     
     @.java.lang.Override

@@ -20,9 +20,12 @@
 
 package com.redhat.ceylon.ceylondoc;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,23 +35,34 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.html.HTML.Tag;
+import javax.swing.text.html.HTMLEditorKit.ParserCallback;
+import javax.swing.text.html.parser.DTD;
+import javax.swing.text.html.parser.DocumentParser;
+import javax.swing.text.html.parser.ParserDelegator;
+
 import com.github.rjeschke.txtmark.BlockEmitter;
 import com.github.rjeschke.txtmark.Configuration;
 import com.github.rjeschke.txtmark.Processor;
 import com.github.rjeschke.txtmark.SpanEmitter;
 import com.redhat.ceylon.compiler.java.codegen.Decl;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.ModuleImport;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.Referenceable;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
+import com.redhat.ceylon.model.typechecker.model.Annotated;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Import;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.ModuleImport;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Referenceable;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Unit;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 public class Util {
     
@@ -92,32 +106,182 @@ public class Util {
     }
 
     public static String getDoc(Module module, LinkRenderer linkRenderer) {
-        return wikiToHTML(getRawDoc(module.getAnnotations()), linkRenderer.useScope(module));
+        return wikiToHTML(getRawDoc(module.getUnit(), module.getAnnotations()), linkRenderer.useScope(module));
     }
     
     public static String getDoc(ModuleImport moduleImport, LinkRenderer linkRenderer) {
-        return wikiToHTML(getRawDoc(moduleImport.getAnnotations()), linkRenderer);
+        return wikiToHTML(getRawDoc(moduleImport.getModule().getUnit(), moduleImport.getAnnotations()), linkRenderer);
     }
 
     public static String getDoc(Package pkg, LinkRenderer linkRenderer) {
-        return wikiToHTML(getRawDoc(pkg.getAnnotations()), linkRenderer.useScope(pkg));
+        return wikiToHTML(getRawDoc(pkg.getUnit(), pkg.getAnnotations()), linkRenderer.useScope(pkg));
     }
 
     public static String getDocFirstLine(Declaration decl, LinkRenderer linkRenderer) {
-        return wikiToHTML(getFirstLine(getRawDoc(decl)), linkRenderer.useScope(decl));
+        return getDocFirstLine(getRawDoc(decl), linkRenderer.useScope(decl));
     }
-
+    
     public static String getDocFirstLine(Package pkg, LinkRenderer linkRenderer) {
-        return wikiToHTML(getFirstLine(getRawDoc(pkg.getAnnotations())), linkRenderer.useScope(pkg));
+        return getDocFirstLine(getRawDoc(pkg.getUnit(), pkg.getAnnotations()), linkRenderer.useScope(pkg));
     }
 
     public static String getDocFirstLine(Module module, LinkRenderer linkRenderer) {
-        return wikiToHTML(getFirstLine(getRawDoc(module.getAnnotations())), linkRenderer.useScope(module));
+        return getDocFirstLine(getRawDoc(module.getUnit(), module.getAnnotations()), linkRenderer.useScope(module));
     }
     
-    public static List<String> getTags(Declaration decl) {
+    public static String getDocFirstLine(String text, LinkRenderer linkRenderer) {
+        String html = wikiToHTML(text, linkRenderer);
+        FirstLineParser parser = new FirstLineParser();
+        return parser.parseFirstLine(html);
+    }
+    
+    private static class FirstLineParser extends DocumentParser {
+        
+        private boolean done = false;
+        private boolean dots = false;
+        private int lastPosition = 0;
+        private List<Tag> impliedTags = new ArrayList<Tag>();
+        private List<Tag> openedTags = new ArrayList<Tag>();
+        private StringBuilder textBuilder = new StringBuilder();
+        
+        private class FirstLineParserCallback extends ParserCallback {
+            
+            @Override
+            public void handleStartTag(Tag t, MutableAttributeSet a, int pos) {
+                if( done ) {
+                    return;
+                }
+                if (a.isDefined(IMPLIED)) {
+                    impliedTags.add(t);
+                    return;
+                }
+                if( t.isBlock() && textBuilder.length() > 0 ) {
+                    done = true;
+                    return;
+                }
+                openedTags.add(t);
+                lastPosition = getCurrentPos();
+            }
+            
+            @Override
+            public void handleEndTag(Tag t, int pos) {
+                if( done ) {
+                    return;
+                }
+                if( impliedTags.contains(t) ) {
+                    impliedTags.remove(t);
+                    return;
+                }
+                int lastIndexOf = openedTags.lastIndexOf(t);
+                if( lastIndexOf != -1 ) {
+                    openedTags.remove(lastIndexOf);
+                }
+                lastPosition = getCurrentPos();
+            }
+            
+            @Override
+            public void handleSimpleTag(Tag t, MutableAttributeSet a, int pos) {
+                if( done ) {
+                    return;
+                }
+                lastPosition = getCurrentPos();
+            }
+            
+            @Override
+            public void handleText(char[] data, int pos) {
+                if( done ) {
+                    return;
+                }
+                
+                textBuilder.append(data);
+                
+                String text = textBuilder.toString().replaceAll("\\s*$", "");
+                String firstLine = trimFirstLine(text);
+                if( !text.equals(firstLine) ) {
+                    done = true;
+                    lastPosition = pos + (data.length - (text.length() - firstLine.length()));
+                    return;
+                }
+                
+                lastPosition = getCurrentPos();
+            }
+            
+            private String trimFirstLine(String text) {
+                // be lenient for Package and Module
+                if(text == null)
+                    return "";
+                // First try to get the first sentence
+                BreakIterator breaker = BreakIterator.getSentenceInstance();
+                breaker.setText(text);
+                breaker.first();
+                int dot = breaker.next();
+                // First sentence is sufficiently short
+                if (dot != BreakIterator.DONE
+                        && dot <= FIRST_LINE_MAX_SIZE) {
+                    return text.substring(0, dot).replaceAll("\\s*$", "");
+                }
+                if (text.length() <= FIRST_LINE_MAX_SIZE) {
+                    return text;
+                }
+                // First sentence is really long, to try to break on a word
+                breaker = BreakIterator.getWordInstance();
+                breaker.setText(text);
+                int pos = breaker.first();
+                while (pos < FIRST_LINE_MAX_SIZE
+                        && pos != BreakIterator.DONE) {
+                    pos = breaker.next();
+                }
+                if (pos != BreakIterator.DONE
+                        && breaker.previous() != BreakIterator.DONE) {
+                    dots = true;
+                    return text.substring(0, breaker.current()).replaceAll("\\s*$", "");
+                }
+                dots = true;
+                return text.substring(0, FIRST_LINE_MAX_SIZE-1);
+            }
+            
+        };
+
+        private static DTD getDTD() {
+            try {
+                new ParserDelegator(); // initialize DTD
+                return DTD.getDTD("html32");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private FirstLineParser() {
+            super(getDTD());
+        }
+
+        private String parseFirstLine(String html) {
+            try {
+                parse(new StringReader(html), new FirstLineParserCallback(), true);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            
+            StringBuilder result = new StringBuilder();
+            result.append(html.substring(0, lastPosition).replaceAll("\\s*$", ""));
+            if( dots ) {
+                result.append("…");
+            }
+            if( !openedTags.isEmpty() ) {
+                Collections.reverse(openedTags);
+                for(Tag t : openedTags) {
+                    result.append("</").append(t).append(">");
+                }
+            }
+            
+            return result.toString();
+        }
+
+    }
+    
+    public static <T extends Referenceable & Annotated> List<String> getTags(T decl) {
         List<String> tags = new ArrayList<String>();
-        Annotation tagged = Util.getAnnotation(decl.getAnnotations(), "tagged");
+        Annotation tagged = Util.getAnnotation(decl.getUnit(), decl.getAnnotations(), "tagged");
         if (tagged != null) {
             tags.addAll(tagged.getPositionalArguments());
         }
@@ -138,38 +302,6 @@ public class Util {
         return Processor.process(text, config);
     }
 
-    private static String getFirstLine(String text) {
-        // be lenient for Package and Module
-        if(text == null)
-            return "";
-        // First try to get the first sentence
-        BreakIterator breaker = BreakIterator.getSentenceInstance();
-        breaker.setText(text);
-        breaker.first();
-        int dot = breaker.next();
-        // First sentence is sufficiently short
-        if (dot != BreakIterator.DONE
-                && dot <= FIRST_LINE_MAX_SIZE) {
-            return text.substring(0, dot).replaceAll("\\s*$", "");
-        }
-        if (text.length() <= FIRST_LINE_MAX_SIZE) {
-            return text;
-        }
-        // First sentence is really long, to try to break on a word
-        breaker = BreakIterator.getWordInstance();
-        breaker.setText(text);
-        int pos = breaker.first();
-        while (pos < FIRST_LINE_MAX_SIZE
-                && pos != BreakIterator.DONE) {
-            pos = breaker.next();
-        }
-        if (pos != BreakIterator.DONE
-                && breaker.previous() != BreakIterator.DONE) {
-            return text.substring(0, breaker.current()).replaceAll("\\s*$", "") + "…";
-        }
-        return text.substring(0, FIRST_LINE_MAX_SIZE-1) + "…";
-    }
-
     private static String getRawDoc(Declaration decl) {
         Annotation a = findAnnotation(decl, "doc");
         if (a != null) {
@@ -178,27 +310,32 @@ public class Util {
         return "";
     }
     
-    public static String getRawDoc(List<Annotation> anns) {
-        for (Annotation a : anns) {
-            if (a.getName().equals("doc") && a.getPositionalArguments() != null && !a.getPositionalArguments().isEmpty()) {
-                return a.getPositionalArguments().get(0);
-            }
+    public static String getRawDoc(Unit unit, List<Annotation> anns) {
+        Annotation a = getAnnotation(unit, anns, "doc");
+        if (a != null && a.getPositionalArguments() != null && !a.getPositionalArguments().isEmpty()) {
+            return a.getPositionalArguments().get(0);
         }
         return "";
     }
 
     public static Annotation getAnnotation(ModuleImport moduleImport, String name) {
-        for (Annotation a : moduleImport.getAnnotations()) {
-            if (a.getName().equals(name))
-                return a;
-        }
-        return null;
+        return getAnnotation(moduleImport.getModule().getUnit(), moduleImport.getAnnotations(), name);
     }
     
-    public static Annotation getAnnotation(List<Annotation> annotations, String name) {
+    public static Annotation getAnnotation(Unit unit, List<Annotation> annotations, String name) {
+        String aliasedName = resolveAliasedName(unit, name);
+        
+        // check that documentation annotation is not hidden by custom annotation
+        if( name.equals(aliasedName) && unit != null ) {
+            Declaration importedDeclaration = unit.getImportedDeclaration(name, null, false);
+            if( importedDeclaration != null && !importedDeclaration.getNameAsString().startsWith("ceylon.language::") ) {
+                return null;
+            }
+        }
+        
         if (annotations != null) {
             for (Annotation a : annotations) {
-                if (a.getName().equals(name))
+                if (a.getName().equals(aliasedName))
                     return a;
             }
         }
@@ -206,12 +343,23 @@ public class Util {
     }
     
     public static Annotation findAnnotation(Declaration decl, String name) {
-        Annotation a = getAnnotation(decl.getAnnotations(), name);
+        Annotation a = getAnnotation(decl.getUnit(), decl.getAnnotations(), name);
         if (a == null && decl.isActual() && decl.getRefinedDeclaration() != decl) {
             // keep looking up
             a = findAnnotation(decl.getRefinedDeclaration(), name);
         }
         return a;
+    }
+    
+    private static String resolveAliasedName(Unit unit, String name) {
+        if (unit != null) {
+            for (Import i : unit.getImports()) {
+                if (!i.isAmbiguous() && i.getDeclaration().getQualifiedNameString().equals("ceylon.language::" + name)) {
+                    return i.getAlias();
+                }
+            }
+        }
+        return name;
     }
     
     public static String capitalize(String text) {
@@ -263,35 +411,34 @@ public class Util {
 
     public static List<TypeDeclaration> getAncestors(TypeDeclaration decl) {
         List<TypeDeclaration> ancestors = new ArrayList<TypeDeclaration>();
-        TypeDeclaration ancestor = decl.getExtendedTypeDeclaration();
+        Type ancestor = decl.getExtendedType();
         while (ancestor != null) {
-            ancestors.add(ancestor);
-            ancestor = ancestor.getExtendedTypeDeclaration();
+            ancestors.add(ancestor.getDeclaration());
+            ancestor = ancestor.getExtendedType();
         }
         return ancestors;
     }
 
-    public static List<ProducedType> getSuperInterfaces(TypeDeclaration decl) {
-        Set<ProducedType> superInterfaces = new HashSet<ProducedType>();
-        List<ProducedType> satisfiedTypes = decl.getSatisfiedTypes();
-        for (ProducedType satisfiedType : satisfiedTypes) {
-            superInterfaces.add(satisfiedType);
+    public static List<TypeDeclaration> getSuperInterfaces(TypeDeclaration decl) {
+        Set<TypeDeclaration> superInterfaces = new HashSet<TypeDeclaration>();
+        for (Type satisfiedType : decl.getSatisfiedTypes()) {
+            superInterfaces.add(satisfiedType.getDeclaration());
             superInterfaces.addAll(getSuperInterfaces(satisfiedType.getDeclaration()));
         }
-        ArrayList<ProducedType> list = new ArrayList<ProducedType>();
+        List<TypeDeclaration> list = new ArrayList<TypeDeclaration>();
         list.addAll(superInterfaces);
         removeDuplicates(list);
         return list;
     }
 
-    private static void removeDuplicates(List<ProducedType> superInterfaces) {
+    private static void removeDuplicates(List<TypeDeclaration> superInterfaces) {
         OUTER: for (int i = 0; i < superInterfaces.size(); i++) {
-            ProducedType pt1 = superInterfaces.get(i);
+            TypeDeclaration decl1 = superInterfaces.get(i);
             // compare it with each type after it
             for (int j = i + 1; j < superInterfaces.size(); j++) {
-                ProducedType pt2 = superInterfaces.get(j);
-                if (pt1.getDeclaration().equals(pt2.getDeclaration())) {
-                    if (pt1.isSubtypeOf(pt2)) {
+                TypeDeclaration decl2 = superInterfaces.get(j);
+                if (decl1.equals(decl2)) {
+                    if (decl1.getType().isSubtypeOf(decl2.getType())) {
                         // we keep the first one because it is more specific
                         superInterfaces.remove(j);
                     } else {
@@ -316,12 +463,12 @@ public class Util {
         return c == null || c.isEmpty();
     }
     
-    public static boolean isThrowable(Class c) {
-        if (c != null) {
+    public static boolean isThrowable(TypeDeclaration c) {
+        if (c instanceof Class) {
             if ("ceylon.language::Throwable".equals(c.getQualifiedNameString())) {
                 return true;
-            } else {
-                return isThrowable(c.getExtendedTypeDeclaration());
+            } else if (c.getExtendedType()!=null) {
+                return isThrowable(c.getExtendedType().getDeclaration());
             }
         }
         return false;
@@ -366,8 +513,12 @@ public class Util {
                 }
             }
 
-            queue.add(type.getExtendedTypeDeclaration());
-            queue.addAll(type.getSatisfiedTypeDeclarations());
+            if (type.getExtendedType() != null) {
+                queue.add(type.getExtendedType().getDeclaration());
+            }
+            for (Type satisfiedType: type.getSatisfiedTypes()) {
+                queue.add(satisfiedType.getDeclaration());
+            }
 
             return findBottomMostRefinedDeclaration(d, queue);
         }
@@ -454,18 +605,18 @@ public class Util {
 
         @Override
         public int compare(Referenceable a, Referenceable b) {
-            return a.getNameAsString().compareTo(b.getNameAsString());
+            return nullSafeCompare(a.getNameAsString(), b.getNameAsString());
         }
 
     };
     
-    public static class ProducedTypeComparatorByName implements Comparator<ProducedType> {
+    public static class TypeComparatorByName implements Comparator<Type> {
         
-        public static final ProducedTypeComparatorByName INSTANCE = new ProducedTypeComparatorByName();
+        public static final TypeComparatorByName INSTANCE = new TypeComparatorByName();
         
         @Override
-        public int compare(ProducedType a, ProducedType b) {
-            return a.getDeclaration().getName().compareTo(b.getDeclaration().getName());
+        public int compare(Type a, Type b) {
+            return nullSafeCompare(a.getDeclaration().getName(), b.getDeclaration().getName());
         }
     };
     
@@ -475,12 +626,31 @@ public class Util {
 
         @Override
         public int compare(ModuleImport a, ModuleImport b) {
-            return a.getModule().getNameAsString().compareTo(b.getModule().getNameAsString());
+            return nullSafeCompare(a.getModule().getNameAsString(), b.getModule().getNameAsString());
         }
+    }
+  
+    static int nullSafeCompare(final String s1, final String s2) {
+        if (s1 == s2) {
+            return 0;
+        } else if (s1 == null) {
+            return -1;
+        } else if (s2 == null) {
+            return 1;
+        }
+        return s1.compareTo(s2);
     }
 
     public static boolean isEnumerated(TypeDeclaration klass) {
         return klass.getCaseTypes() != null && !klass.getCaseTypes().isEmpty();
+    }
+
+    public static String getDeclarationName(Declaration decl) {
+        String name = decl.getName();
+        if( ModelUtil.isConstructor(decl) && name == null ) {
+            name = ((TypeDeclaration)decl.getContainer()).getName();
+        }
+        return name;
     }
    
 }

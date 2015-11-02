@@ -12,14 +12,15 @@ import java.util.Collections;
 import java.util.List;
 
 import com.redhat.ceylon.cmr.api.ArtifactContext;
-import com.redhat.ceylon.cmr.api.ArtifactResult;
 import com.redhat.ceylon.cmr.api.ModuleQuery;
+import com.redhat.ceylon.cmr.api.ModuleVersionDetails;
 import com.redhat.ceylon.cmr.api.RepositoryManager;
 import com.redhat.ceylon.cmr.ceylon.OutputRepoUsingTool;
 import com.redhat.ceylon.cmr.impl.IOUtils;
 import com.redhat.ceylon.cmr.impl.ShaSigner;
 import com.redhat.ceylon.common.Constants;
 import com.redhat.ceylon.common.FileUtil;
+import com.redhat.ceylon.common.Messages;
 import com.redhat.ceylon.common.OSUtil;
 import com.redhat.ceylon.common.config.DefaultToolOptions;
 import com.redhat.ceylon.common.tool.Argument;
@@ -31,8 +32,10 @@ import com.redhat.ceylon.common.tool.RemainingSections;
 import com.redhat.ceylon.common.tool.StandardArgumentParsers;
 import com.redhat.ceylon.common.tool.Summary;
 import com.redhat.ceylon.common.tool.ToolError;
+import com.redhat.ceylon.common.tools.CeylonTool;
 import com.redhat.ceylon.common.tools.ModuleSpec;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
+import com.redhat.ceylon.model.cmr.ArtifactResult;
+import com.redhat.ceylon.model.typechecker.model.Module;
 
 @Summary("Manages Ceylon command-line plugins")
 @Description(
@@ -79,6 +82,7 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
     private List<File> sourceFolders = DefaultToolOptions.getCompilerSourceDirs();
     private boolean force;
     private boolean system;
+    private boolean local;
     private Mode mode;
 
     public CeylonPluginTool() {
@@ -111,6 +115,12 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
         this.system = system;
     }
 
+    @Option
+    @Description("Install to or uninstall from a local folder")
+    public void setLocal(boolean local) {
+        this.local = local;
+    }
+
     @OptionArgument(shortName='s', longName="src", argumentName="dirs")
     @ParsedBy(StandardArgumentParsers.PathArgumentParser.class)
     @Description("A directory containing Ceylon and/or Java/JavaScript source code (default: `./source`)")
@@ -134,9 +144,12 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
     }
 
     @Override
+    protected List<File> getSourceDirs() {
+        return sourceFolders;
+    }
+
+    @Override
     public void run() throws Exception {
-        setSystemProperties();
-        
         // make sure we have a list of modules to work on if required
         if(modules == null)
             modules = new ArrayList<ModuleSpec>();
@@ -190,10 +203,13 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
         ArrayList<String> scripts = new ArrayList<String>();
         // Look in /etc/ceylon/bin/ and /etc/ceylon/bin/{moduleName}
         File systemDir = new File(FileUtil.getSystemConfigDir(), Constants.CEYLON_BIN_DIR);
-        listScripts(systemDir, scripts);
+        listScripts(systemDir, "system", scripts);
         // They are in ~/.ceylon/bin/ and ~/.ceylon/bin/{moduleName}
         File defUserDir = new File(FileUtil.getDefaultUserDir(), Constants.CEYLON_BIN_DIR);
-        listScripts(defUserDir, scripts);
+        listScripts(defUserDir, "user", scripts);
+        // They are in ./.ceylon/bin/ and ./.ceylon/bin/{moduleName}
+        File localDir = applyCwd(new File(Constants.CEYLON_CONFIG_DIR, Constants.CEYLON_BIN_DIR));
+        listScripts(localDir, "local", scripts);
         Collections.sort(scripts);
         for (String script : scripts) {
             append(script);
@@ -201,19 +217,19 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
         }
     }
 
-    private void listScripts(File dir, List<String> scripts) throws IOException {
+    private void listScripts(File dir, String location, List<String> scripts) throws IOException {
         File[] children = dir.listFiles();
         if (children != null) {
             for (File child : children) {
                 if (child.isDirectory()) {
                     File[] modfiles = child.listFiles();
                     for (File f : modfiles) {
-                        if (isScript(f)) {
-                            scripts.add(f.getName() + " (" + child.getName() + ")");
+                        if (isScript(f) || isPlugin(f)) {
+                            scripts.add(scriptName(f) + " (from " + location + " module '" + child.getName() + "')");
                         }
                     }
-                } else if (isScript(child)) {
-                    scripts.add(child.getName());
+                } else if (isScript(child) || isPlugin(child)) {
+                    scripts.add(scriptName(child));
                 }
             }
         }
@@ -228,9 +244,23 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
         return false;
     }
     
+    private boolean isPlugin(File f) {
+        return (f.isFile() && f.getName().startsWith("ceylon-") && f.getName().endsWith(".plugin"));
+    }
+    
+    private String scriptName(File f) {
+        String name = f.getName().substring(7);
+        if (name.toLowerCase().endsWith(".bat")) {
+            name = name.substring(0, name.length() - 4);
+        } else if (name.toLowerCase().endsWith(".plugin")) {
+            name = name.substring(0, name.length() - 7);
+        }
+        return name;
+    }
+    
     private boolean installScripts(RepositoryManager repositoryManager, ModuleSpec module, boolean errorIfMissing) throws IOException {
         String version = module.getVersion();
-        if(!module.getName().equals(Module.DEFAULT_MODULE_NAME)){
+        if((version == null || version.isEmpty()) && !module.getName().equals(Module.DEFAULT_MODULE_NAME)){
             version = checkModuleVersionsOrShowSuggestions(getRepositoryManager(), module.getName(), null, ModuleQuery.Type.ALL, null, null);
             if(version == null)
                 return false;
@@ -247,10 +277,10 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
             }
         }else{
             // obtain it from the repo
-            ArtifactContext context = new ArtifactContext(module.getName(), module.getVersion(), ArtifactContext.SCRIPTS_ZIPPED);
+            ArtifactContext context = new ArtifactContext(module.getName(), version, ArtifactContext.SCRIPTS_ZIPPED);
             ArtifactResult result = repositoryManager.getArtifactResult(context);
             if(result == null){
-                String err = getModuleNotFoundErrorMessage(repositoryManager, module.getName(), module.getVersion());
+                String err = getModuleNotFoundErrorMessage(repositoryManager, module.getName(), version);
                 errorAppend(err);
                 errorNewline();
                 return false;
@@ -274,9 +304,7 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
         if(zipSource != null)
             extractScripts(zipSource, moduleScriptDir);
         else{
-            for(File root : existingScriptFolders){
-                FileUtil.copyAll(root, moduleScriptDir);
-            }
+            copyScripts(existingScriptFolders, moduleScriptDir);
         }
         msg("success.installed", module.getName(), moduleScriptDir);
         newline();
@@ -302,6 +330,9 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
         if (system) {
             // Put them in /etc/ceylon/bin/{moduleName} (or equivalent on Windows / MacOS)
             installDir = FileUtil.getSystemConfigDir();
+        } if (local) {
+            // Put them in ./.ceylon/bin/{moduleName}
+            installDir = new File(Constants.CEYLON_CONFIG_DIR);
         } else {
             // Put them in ~/.ceylon/bin/{moduleName}
             installDir = FileUtil.getDefaultUserDir();
@@ -339,15 +370,13 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
 
     }
 
-    private boolean addScripts(RepositoryManager outputRepositoryManager, ModuleSpec module, boolean errorIfMissing) throws IOException {
-        String version = module.getVersion();
-        if(!module.getName().equals(Module.DEFAULT_MODULE_NAME)){
-            version = checkModuleVersionsOrShowSuggestions(getRepositoryManager(), module.getName(), null, ModuleQuery.Type.ALL, null, null);
-            if(version == null)
-                return false;
+    private void copyScripts(List<File> existingScriptFolders, File moduleScriptDir) throws IOException {
+        for(File root : existingScriptFolders){
+            FileUtil.copyAll(root, moduleScriptDir);
         }
-        ArtifactContext artifactScriptsZip = new ArtifactContext(module.getName(), version, ArtifactContext.SCRIPTS_ZIPPED);
-        
+    }
+
+    private boolean addScripts(RepositoryManager outputRepositoryManager, ModuleSpec module, boolean errorIfMissing) throws IOException {
         // find all doc folders to zip
         List<File> existingScriptFolders = findExistingScriptFolders(module.getName(), errorIfMissing);
         
@@ -355,6 +384,19 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
             return false;
         }
 
+        String version;
+        if (!module.getName().equals(Module.DEFAULT_MODULE_NAME)){
+            ModuleVersionDetails mvd = getVersionFromSource(module.getName());
+            if (mvd == null) {
+                errorMsg("error.no.script.version", module.getName());
+                return false;
+            }
+            version = mvd.getVersion();
+        } else {
+            version = null;
+        }
+        ArtifactContext artifactScriptsZip = new ArtifactContext(module.getName(), version, ArtifactContext.SCRIPTS_ZIPPED);
+        
         // make the doc zip roots
         IOUtils.ZipRoot[] roots = new IOUtils.ZipRoot[existingScriptFolders.size()];
         int d=0;
@@ -414,6 +456,16 @@ public class CeylonPluginTool extends OutputRepoUsingTool {
     }
 
     @Override
-    public void initialize() throws Exception {
+    public void initialize(CeylonTool mainTool) throws Exception {
+        if (system && local) {
+            throw new IllegalArgumentException(Messages.msg(bundle, "conflicting.destinations"));
+        }
+        if (mode == Mode.pack) {
+            for(ModuleSpec module : modules){
+                if (module.isVersioned()) {
+                    throw new IllegalArgumentException(Messages.msg(bundle, "invalid.module.or.file", module.getName()));
+                }
+            }
+        }
     }
 }

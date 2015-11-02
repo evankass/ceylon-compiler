@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.mcr;
 
-class ClassDefaultMemberClassWithSequencedParams implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ClassDefaultMemberClassWithSequencedParams implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ClassDefaultMemberClassWithSequencedParams() {
     }
@@ -19,7 +19,7 @@ class ClassDefaultMemberClassWithSequencedParams implements .com.redhat.ceylon.c
         );
     }
     
-    public class Member implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    public class Member implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         protected Member(final .ceylon.language.Sequential<? extends .ceylon.language.Integer> i) {
         }
@@ -49,12 +49,10 @@ class ClassDefaultMemberClassWithSequencedParams implements .com.redhat.ceylon.c
             returning Member$new$(arg$2$0);
         );
         Member$new$();
-        return Member$new$((.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.empty_.get_(), .ceylon.language.Integer.instance(1L), .ceylon.language.Integer.instance(2L), .ceylon.language.Integer.instance(3L)));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.mcr.ClassDefaultMemberClassWithSequencedParams();
+        return Member$new$((.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Integer.$TypeDescriptor$, new .java.lang.Object[]{
+                .ceylon.language.Integer.instance(1L),
+                .ceylon.language.Integer.instance(2L),
+                .ceylon.language.Integer.instance(3L)}, .ceylon.language.empty_.get_()));
     }
     
     @.java.lang.Override
@@ -116,12 +114,10 @@ class ClassDefaultMemberClassWithSequencedParams_sub extends .com.redhat.ceylon.
             returning Member$new$(arg$5$0);
         );
         Member$new$();
-        return Member$new$((.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.empty_.get_(), .ceylon.language.Integer.instance(2L), .ceylon.language.Integer.instance(3L), .ceylon.language.Integer.instance(4L)));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.mcr.ClassDefaultMemberClassWithSequencedParams_sub();
+        return Member$new$((.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Integer.$TypeDescriptor$, new .java.lang.Object[]{
+                .ceylon.language.Integer.instance(2L),
+                .ceylon.language.Integer.instance(3L),
+                .ceylon.language.Integer.instance(4L)}, .ceylon.language.empty_.get_()));
     }
     
     @.java.lang.Override

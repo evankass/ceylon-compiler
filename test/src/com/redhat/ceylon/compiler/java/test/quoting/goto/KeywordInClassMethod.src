@@ -1,16 +1,11 @@
 package com.redhat.ceylon.compiler.java.test.quoting.$goto;
 
-class KeywordInMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class KeywordInMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     KeywordInMethod() {
     }
     
     private final void goto$priv$() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.quoting.$goto.KeywordInMethod();
     }
     
     @.java.lang.Override

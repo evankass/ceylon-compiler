@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug12xx;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.Method
 @.com.redhat.ceylon.compiler.java.metadata.LocalDeclarations({"1Foo"})
 final class bug1250_ {
@@ -11,11 +11,11 @@ final class bug1250_ {
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Anything")
     static void bug1250() {
         
-        @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+        @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
         @.com.redhat.ceylon.compiler.java.metadata.Name("Foo")
         @.com.redhat.ceylon.compiler.java.metadata.Members({@.com.redhat.ceylon.compiler.java.metadata.Member(klass = Foo.Bar.class)})
         @.com.redhat.ceylon.compiler.java.metadata.LocalDeclaration(qualifier = "1")
-        class Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+        class Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
             
             Foo() {
             }
@@ -25,11 +25,10 @@ final class bug1250_ {
                 return new Bar();
             }
             
-            @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+            @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
             @.ceylon.language.SharedAnnotation$annotation$
             @.com.redhat.ceylon.compiler.java.metadata.Container(klass = Foo.class)
-            @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-            class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+            class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
                 
                 protected Bar() {
                 }
@@ -49,11 +48,5 @@ final class bug1250_ {
         }
         final Foo foo = new Foo();
         final Foo.Bar bar2 = (Foo.Bar)foo.Bar$new$();
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug12xx.bug1250_.bug1250();
     }
 }

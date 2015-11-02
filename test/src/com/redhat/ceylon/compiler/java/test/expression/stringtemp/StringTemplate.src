@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.stringtemp;
 
-class StringTemplate implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class StringTemplate implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     StringTemplate() {
     }
@@ -23,11 +23,6 @@ class StringTemplate implements .com.redhat.ceylon.compiler.java.runtime.model.R
     
     private final void m5$priv$() {
         final .java.lang.String t = new .java.lang.StringBuilder().append("Foo ").append(4L).append(" bar").toString();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.stringtemp.StringTemplate();
     }
     
     @.java.lang.Override

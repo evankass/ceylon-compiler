@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.boxing;
 
-class IntegerBoxing implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class IntegerBoxing implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     IntegerBoxing() {
         this.attrInteger = 1L;
@@ -93,11 +93,6 @@ class IntegerBoxing implements .com.redhat.ceylon.compiler.java.runtime.model.Re
     }
     
     private final void test$priv$(final long i) {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.boxing.IntegerBoxing();
     }
     
     @.java.lang.Override

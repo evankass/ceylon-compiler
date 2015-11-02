@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug04xx;
 
-class Bug479 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug479 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug479() {
         this.baseString = "John Doe";
@@ -31,11 +31,6 @@ class Bug479 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTy
     
     public final .java.lang.String get_underscoredFooUnderscoredBaseString() {
         return "underscoredFoo" + get_underscoredBaseString$priv$();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug04xx.Bug479();
     }
     
     @.java.lang.Override

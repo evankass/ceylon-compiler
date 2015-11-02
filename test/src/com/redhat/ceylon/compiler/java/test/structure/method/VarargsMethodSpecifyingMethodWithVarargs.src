@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.method;
 
-class VarargsMethodSpecifyingMethodWithVarargs implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class VarargsMethodSpecifyingMethodWithVarargs implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     VarargsMethodSpecifyingMethodWithVarargs() {
     }
@@ -51,11 +51,6 @@ class VarargsMethodSpecifyingMethodWithVarargs implements .com.redhat.ceylon.com
     
     private final .java.lang.Object bar$priv$(final .ceylon.language.Sequential<? extends .ceylon.language.Integer> ints) {
         return bar$priv$$canonical$(ints);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.method.VarargsMethodSpecifyingMethodWithVarargs();
     }
     
     @.java.lang.Override

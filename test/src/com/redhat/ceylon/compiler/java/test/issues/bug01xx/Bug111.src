@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug01xx;
 
-class Bug111 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug111 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug111() {
     }
@@ -25,11 +25,6 @@ class Bug111 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTy
             final .ceylon.language.Sequence<? extends .ceylon.language.Integer> nums$2 = (.ceylon.language.Sequence<? extends .ceylon.language.Integer>)(.ceylon.language.Sequence)nums$1;
             final .ceylon.language.Integer first = (.ceylon.language.Integer)(.java.lang.Object)nums$2.getFirst();
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug01xx.Bug111();
     }
     
     @.java.lang.Override

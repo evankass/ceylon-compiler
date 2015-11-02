@@ -20,13 +20,13 @@
 
 package com.redhat.ceylon.compiler.java.codegen;
 
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.Scope;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Scope;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
 
 /**
  * A visitor which marks TypeParameter declarations of methods as captured if any local
@@ -64,9 +64,9 @@ public class TypeParameterCaptureVisitor extends Visitor {
         Scope container = model.getContainer();
         while(container != null
                 && container instanceof Package == false){
-            // only Method type parameters are marked as captured
-            if(container instanceof Method){
-                for(TypeParameter tp : ((Method) container).getTypeParameters()){
+            // only Function type parameters are marked as captured
+            if(container instanceof Function){
+                for(TypeParameter tp : ((Function) container).getTypeParameters()){
                     tp.setCaptured(true);
                 }
             }

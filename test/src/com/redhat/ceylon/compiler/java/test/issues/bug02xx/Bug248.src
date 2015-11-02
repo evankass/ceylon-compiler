@@ -9,12 +9,9 @@ final class bug248_ {
         loop_0: while (true) {
             if (false) {
                 throw new .ceylon.language.Exception(null, null);
-            } else break loop_0;
+            } else {
+                break loop_0;
+            }
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug02xx.bug248_.bug248();
     }
 }

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfConditionListBoolBoolIs implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfConditionListBoolBoolIs implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfConditionListBoolBoolIs() {
     }
@@ -53,11 +53,6 @@ class MethodIfConditionListBoolBoolIs implements .com.redhat.ceylon.compiler.jav
         } else {
             return false;
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfConditionListBoolBoolIs();
     }
     
     @.java.lang.Override

@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.redhat.ceylon.compiler.typechecker.model.ControlBlock;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.typechecker.model.ControlBlock;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 /**
  * Visitor which adds information to the model needed for handling 
@@ -48,7 +48,8 @@ public class DefiniteAssignmentVisitor extends Visitor {
         // We're interested in non-variable, deferred AttributeDeclarations 
         // that are declared outside a for/else loop, but specified inside it
         if (that.getSpecifierOrInitializerExpression() == null
-                && !that.getDeclarationModel().isVariable()) {
+                && !that.getDeclarationModel().isVariable()
+                && !that.getDeclarationModel().isLate()) {
             tracked.put(that.getDeclarationModel(), forBlock);
         }
     }

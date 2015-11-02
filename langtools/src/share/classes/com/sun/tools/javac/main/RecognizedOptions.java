@@ -28,7 +28,7 @@ package com.sun.tools.javac.main;
 import com.redhat.ceylon.common.Constants;
 import com.redhat.ceylon.common.FileUtil;
 import com.redhat.ceylon.common.config.DefaultToolOptions;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Module;
 import com.sun.tools.javac.code.Lint;
 import com.sun.tools.javac.code.Source;
 import com.sun.tools.javac.code.Type;
@@ -147,6 +147,7 @@ public class RecognizedOptions {
         CEYLONUSER,
         CEYLONPASS,
         CEYLONNOOSGI,
+        CEYLONOSGIPROVIDEDBUNDLES,
         CEYLONNOPOM,
         CEYLONPACK200,
         SOURCEPATH,
@@ -167,8 +168,13 @@ public class RecognizedOptions {
         D,
         CEYLONOUT,
         CEYLONOFFLINE,
+        CEYLONTIMEOUT,
         CEYLONCONTINUE,
+        CEYLONPROGRESS,
+        CEYLONFLATCLASSPATH,
+        CEYLONAUTOEXPORTMAVENDEPENDENCIES,
         CEYLONMAVENOVERRIDES,
+        CEYLONOVERRIDES,
         S,
         IMPLICIT,
         ENCODING,
@@ -204,7 +210,8 @@ public class RecognizedOptions {
         SRC,
         BOOTSTRAPCEYLON,
         CEYLONDISABLEOPT,
-        CEYLONDISABLEOPT_CUSTOM);
+        CEYLONDISABLEOPT_CUSTOM,
+        CEYLONSUPPRESSWARNINGS);
 
     static Set<OptionName> javacFileManagerOptions = EnumSet.of(
         CLASSPATH,
@@ -217,6 +224,7 @@ public class RecognizedOptions {
         CEYLONUSER,
         CEYLONPASS,
         CEYLONNOOSGI,
+        CEYLONOSGIPROVIDEDBUNDLES,
         CEYLONNOPOM,
         CEYLONPACK200,
         SOURCEPATH,
@@ -235,8 +243,13 @@ public class RecognizedOptions {
         D,
         CEYLONOUT,
         CEYLONOFFLINE,
+        CEYLONTIMEOUT,
         CEYLONCONTINUE,
+        CEYLONPROGRESS,
+        CEYLONFLATCLASSPATH,
+        CEYLONAUTOEXPORTMAVENDEPENDENCIES,
         CEYLONMAVENOVERRIDES,
+        CEYLONOVERRIDES,
         S,
         ENCODING,
         SOURCE,
@@ -283,7 +296,8 @@ public class RecognizedOptions {
         XD,
         BOOTSTRAPCEYLON,
         CEYLONDISABLEOPT,
-        CEYLONDISABLEOPT_CUSTOM);
+        CEYLONDISABLEOPT_CUSTOM,
+        CEYLONSUPPRESSWARNINGS);
 
     public static Option[] getJavaCompilerOptions(OptionHelper helper) {
         return getOptions(helper, javacOptions);
@@ -348,6 +362,9 @@ public class RecognizedOptions {
                 // enter all the -verbose suboptions as "-verbose:suboption"
                 for (StringTokenizer t = new StringTokenizer(suboptions, ","); t.hasMoreTokens(); ) {
                     String tok = t.nextToken();
+                    // make sure all is an alias for --verbose
+                    if(tok.equals("all"))
+                        options.put(VERBOSE, "true");
                     String opt = "-verbose:" + tok;
                     options.put(opt, opt);
                 }
@@ -386,11 +403,13 @@ public class RecognizedOptions {
         new COption(CEYLONUSER,             "opt.arg.value",     "opt.ceylonuser"),
         new COption(CEYLONPASS,             "opt.arg.value",     "opt.ceylonpass"),
         new COption(CEYLONNOOSGI,                                "opt.ceylonnoosgi"),
+        new COption(CEYLONOSGIPROVIDEDBUNDLES,"opt.arg.value", "opt.ceylonosgiprovidedbundles"),
         new COption(CEYLONNOPOM,                                 "opt.ceylonnopom"),
         new COption(CEYLONPACK200,                               "opt.ceylonpack200"),
         new COption(CEYLONRESOURCEROOT,     "opt.arg.path",      "opt.ceylonresourceroot"),
         new COption(CEYLONDISABLEOPT,                            "opt.ceylondisableopt"),
         new COption(CEYLONDISABLEOPT_CUSTOM,                     "opt.ceylondisableopt.suboptlist"),
+        new COption(CEYLONSUPPRESSWARNINGS, "opt.arg.value",     "opt.ceylonsuppresswarnings"),
         new Option(SOURCEPATH,              "opt.arg.path",      "opt.sourcepath"){
             @Override
             public boolean process(Options options, String option, String arg) {
@@ -459,8 +478,19 @@ public class RecognizedOptions {
             } 
         },
         new COption(CEYLONOFFLINE,      "opt.ceylonoffline"),
+        new COption(CEYLONTIMEOUT,      "opt.arg.number",       "opt.ceylontimeout"),
         new COption(CEYLONCONTINUE,     "opt.ceyloncontinue"),
-        new COption(CEYLONMAVENOVERRIDES, "opt.arg.url",        "opt.ceylonmavenoverrides"),
+        new COption(CEYLONPROGRESS,     "opt.ceylonprogress"),
+        new COption(CEYLONAUTOEXPORTMAVENDEPENDENCIES,          "opt.ceylonautoexportmavendependencies"),
+        new COption(CEYLONFLATCLASSPATH,  "opt.ceylonflatclasspath"),
+        new COption(CEYLONOVERRIDES,      "opt.arg.url",        "opt.ceylonoverrides"),
+        // backwards-compat
+        new COption(CEYLONMAVENOVERRIDES, "opt.arg.url",        "opt.ceylonoverrides"){
+            @Override
+            public boolean process(Options options, String option, String arg) {
+                return super.process(options, "-overrides", arg);
+            } 
+        },
         new Option(S,                   "opt.arg.directory",    "opt.sourceDest"),
         new Option(IMPLICIT,                                    "opt.implicit",
                 Option.ChoiceKind.ONEOF, "none", "class"),
@@ -747,7 +777,7 @@ public class RecognizedOptions {
                 return s.endsWith(".java")  // Java source file
                         || s.endsWith(".ceylon") // FIXME: Should be a FileManager query
                         || "default".equals(s) // FIX for ceylon because default is not a valid name for Java
-                        || SourceVersion.isName(s)   // Legal type name
+                        || isCeylonName(s)   // Legal type name for Ceylon
                         || (new File(s)).isFile();   // Possibly a resource file
             }
             @Override
@@ -779,7 +809,8 @@ public class RecognizedOptions {
                         return true;
                     }
                     helper.addFile(f);
-                } if (f.isFile()) {
+                } 
+                if (f.isFile()) {
                     // Most likely a resource file
                     helper.addFile(f);
                 } else {
@@ -822,6 +853,21 @@ public class RecognizedOptions {
             }
         },
         };
+    }
+
+    /**
+     * Version of isName for Ceylon which allows keywords since we do allow them as part of module names 
+     * @param name
+     * @return
+     */
+    public static boolean isCeylonName(CharSequence name) {
+        String id = name.toString();
+
+        for(String s : id.split("\\.", -1)) {
+            if (!SourceVersion.isIdentifier(s))
+                return false;
+        }
+        return true;
     }
 
     public enum PkgInfo {

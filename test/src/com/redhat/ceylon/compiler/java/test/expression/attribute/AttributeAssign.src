@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.attribute;
 
-class AttributeAssign implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class AttributeAssign implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     AttributeAssign() {
         this.b1 = true;
@@ -46,11 +46,6 @@ class AttributeAssign implements .com.redhat.ceylon.compiler.java.runtime.model.
         setB2(false);
         setB3$priv$(false);
         setB4(false);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.attribute.AttributeAssign();
     }
     
     @.java.lang.Override

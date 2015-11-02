@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug07xx.bug711;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.com.redhat.ceylon.compiler.java.metadata.Method
 final class bug711_ {
     
@@ -11,11 +11,5 @@ final class bug711_ {
     static void bug711() {
         final .com.redhat.ceylon.compiler.java.test.issues.bug07xx.bug711.ClassWithGetterAndSetter klazz = new .com.redhat.ceylon.compiler.java.test.issues.bug07xx.bug711.ClassWithGetterAndSetter();
         klazz.setSomeString("foobar");
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug07xx.bug711.bug711_.bug711();
     }
 }

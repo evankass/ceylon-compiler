@@ -8,21 +8,11 @@ final class get_ {
     static .java.lang.String get() {
         return "hello";
     }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.expression.attribute.get_.get();
-    }
 }
-class X implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class X implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     X() {
         .ceylon.language.print_.print(.ceylon.language.String.instance("package.X"));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.attribute.X();
     }
     
     @.java.lang.Override
@@ -31,7 +21,7 @@ class X implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.attribute.X.class);
 }
-public class Outer implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class Outer implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public Outer() {
         new .com.redhat.ceylon.compiler.java.test.expression.attribute.Outer.Inner();
@@ -41,7 +31,7 @@ public class Outer implements .com.redhat.ceylon.compiler.java.runtime.model.Rei
         return 0L;
     }
     
-    class X implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class X implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         X() {
             .ceylon.language.print_.print(.ceylon.language.String.instance("outer.X"));
@@ -53,7 +43,7 @@ public class Outer implements .com.redhat.ceylon.compiler.java.runtime.model.Rei
         }
     }
     
-    class Inner implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class Inner implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         Inner() {
             $get$priv$();
@@ -70,7 +60,7 @@ public class Outer implements .com.redhat.ceylon.compiler.java.runtime.model.Rei
             return 0.0;
         }
         
-        class X implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+        class X implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
             
             X() {
                 .ceylon.language.print_.print(.ceylon.language.String.instance("this.X"));

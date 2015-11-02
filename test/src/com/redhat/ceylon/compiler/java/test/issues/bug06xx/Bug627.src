@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug06xx;
 
-abstract class Bug627Enum implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+abstract class Bug627Enum implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug627Enum() {
     }
@@ -17,11 +17,6 @@ class Bug627Four extends .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bu
         super();
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Four();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Four.$TypeDescriptor$;
@@ -32,11 +27,6 @@ class Bug627Three extends .com.redhat.ceylon.compiler.java.test.issues.bug06xx.B
     
     Bug627Three() {
         super();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Three();
     }
     
     @.java.lang.Override
@@ -51,11 +41,6 @@ class Bug627Two extends .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug
         super();
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Two();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Two.$TypeDescriptor$;
@@ -67,7 +52,7 @@ interface Bug627Abstract {
     public abstract .ceylon.language.Iterable<? extends .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Enum, ? extends .java.lang.Object> elements();
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Abstract.class);
 }
-class Bug627Concrete implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Abstract {
+class Bug627Concrete implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Abstract, .java.io.Serializable {
     
     Bug627Concrete() {
     }
@@ -75,11 +60,6 @@ class Bug627Concrete implements .com.redhat.ceylon.compiler.java.runtime.model.R
     @.java.lang.Override
     public final .ceylon.language.Iterable elements() {
         return (.ceylon.language.Iterable<? extends .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Enum, ? extends .java.lang.Object>)(.ceylon.language.Iterable).ceylon.language.empty_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug627Concrete();
     }
     
     @.java.lang.Override

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.attribute;
 
-abstract class ClassAttributeGetter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+abstract class ClassAttributeGetter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ClassAttributeGetter() {
         
@@ -63,11 +63,6 @@ class SubClassAttributeGetter extends .com.redhat.ceylon.compiler.java.test.stru
     @.java.lang.Override
     public final .java.lang.String getF6() {
         return "";
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.attribute.SubClassAttributeGetter();
     }
     
     @.java.lang.Override

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug06xx;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 interface Bug630 {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
@@ -9,10 +9,6 @@ interface Bug630 {
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.DefaultAnnotation$annotation$
     @.ceylon.language.ActualAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("default"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("actual")})
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
     @.com.redhat.ceylon.compiler.java.metadata.Transient
@@ -21,10 +17,6 @@ interface Bug630 {
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.DefaultAnnotation$annotation$
     @.ceylon.language.ActualAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("default"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("actual")})
     @.java.lang.Override
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Boolean")
     public boolean equals(@.com.redhat.ceylon.compiler.java.metadata.Name("other")
@@ -34,7 +26,7 @@ interface Bug630 {
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug630.class);
 }
 @.com.redhat.ceylon.compiler.java.metadata.Ignore
-final class Bug630$impl {
+final class Bug630$impl implements .java.io.Serializable {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     Bug630$impl(.com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug630 $this) {

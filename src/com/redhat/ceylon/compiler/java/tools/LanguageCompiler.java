@@ -30,12 +30,16 @@
 
 package com.redhat.ceylon.compiler.java.tools;
 
+import static com.redhat.ceylon.compiler.typechecker.tree.TreeUtil.formatPath;
+import static com.redhat.ceylon.compiler.typechecker.tree.TreeUtil.getNativeBackend;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -54,7 +58,10 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 
 import com.redhat.ceylon.cmr.util.JarUtils;
+import com.redhat.ceylon.common.Backend;
+import com.redhat.ceylon.common.Backends;
 import com.redhat.ceylon.common.FileUtil;
+import com.redhat.ceylon.common.StatusPrinter;
 import com.redhat.ceylon.compiler.java.codegen.CeylonClassWriter;
 import com.redhat.ceylon.compiler.java.codegen.CeylonCompilationUnit;
 import com.redhat.ceylon.compiler.java.codegen.CeylonFileObject;
@@ -62,16 +69,12 @@ import com.redhat.ceylon.compiler.java.codegen.CeylonTransformer;
 import com.redhat.ceylon.compiler.java.loader.CeylonEnter;
 import com.redhat.ceylon.compiler.java.loader.CeylonModelLoader;
 import com.redhat.ceylon.compiler.java.util.Timer;
-import com.redhat.ceylon.compiler.java.util.Util;
-import com.redhat.ceylon.compiler.loader.AbstractModelLoader;
-import com.redhat.ceylon.compiler.typechecker.analyzer.ModuleManager;
+import com.redhat.ceylon.compiler.typechecker.analyzer.ModuleSourceMapper;
+import com.redhat.ceylon.compiler.typechecker.analyzer.Warning;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnits;
 import com.redhat.ceylon.compiler.typechecker.io.VFS;
 import com.redhat.ceylon.compiler.typechecker.io.VirtualFile;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.Modules;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
 import com.redhat.ceylon.compiler.typechecker.parser.CeylonLexer;
 import com.redhat.ceylon.compiler.typechecker.parser.CeylonParser;
 import com.redhat.ceylon.compiler.typechecker.parser.LexError;
@@ -79,7 +82,17 @@ import com.redhat.ceylon.compiler.typechecker.parser.ParseError;
 import com.redhat.ceylon.compiler.typechecker.parser.RecognitionError;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.CompilationUnit;
+import com.redhat.ceylon.compiler.typechecker.tree.Tree.ImportModule;
+import com.redhat.ceylon.compiler.typechecker.tree.Tree.ModuleDescriptor;
 import com.redhat.ceylon.compiler.typechecker.util.ModuleManagerFactory;
+import com.redhat.ceylon.compiler.typechecker.util.NewlineFixingStringStream;
+import com.redhat.ceylon.model.loader.AbstractModelLoader;
+import com.redhat.ceylon.model.loader.JvmBackendUtil;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Modules;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.util.ModuleManager;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import com.sun.tools.javac.code.Symbol.CompletionFailure;
 import com.sun.tools.javac.comp.AttrContext;
@@ -114,6 +127,9 @@ public class LanguageCompiler extends JavaCompiler {
     /** The context key for the ceylon context. */
     public static final Context.Key<com.redhat.ceylon.compiler.typechecker.context.Context> ceylonContextKey = new Context.Key<com.redhat.ceylon.compiler.typechecker.context.Context>();
 
+    /** The context key for the StatusPrinter. */
+    public static final Context.Key<StatusPrinter> statusPrinterKey = new Context.Key<StatusPrinter>();
+
     private final CeylonTransformer gen;
     private final PhasedUnits phasedUnits;
     private final CompilerDelegate compilerDelegate;
@@ -146,6 +162,12 @@ public class LanguageCompiler extends JavaCompiler {
                     CompilerDelegate phasedUnitsManager = getCompilerDelegate(context);
                     return phasedUnitsManager.getModuleManager();
                 }
+
+                @Override
+                public ModuleSourceMapper createModuleManagerUtil(com.redhat.ceylon.compiler.typechecker.context.Context ceylonContext, ModuleManager moduleManager) {
+                    CompilerDelegate phasedUnitsManager = getCompilerDelegate(context);
+                    return phasedUnitsManager.getModuleSourceMapper();
+                }
             });
             context.put(phasedUnitsKey, phasedUnits);
         }
@@ -155,7 +177,8 @@ public class LanguageCompiler extends JavaCompiler {
     public static CompilerDelegate getCompilerDelegate(final Context context) {
         CompilerDelegate compilerDelegate = context.get(compilerDelegateKey);
         if (compilerDelegate == null) {
-            return new CeyloncCompilerDelegate(context);
+            compilerDelegate = new CeyloncCompilerDelegate(context);
+            context.put(compilerDelegateKey, compilerDelegate);
         }
         return compilerDelegate;
     }
@@ -170,6 +193,16 @@ public class LanguageCompiler extends JavaCompiler {
             context.put(ceylonContextKey, ceylonContext);
         }
         return ceylonContext;
+    }
+
+    /** Get the StatusPrinter instance for this context. */
+    public static StatusPrinter getStatusPrinterInstance(Context context) {
+        StatusPrinter statusPrinter = context.get(statusPrinterKey);
+        if (statusPrinter == null) {
+            statusPrinter = new StatusPrinter();
+            context.put(statusPrinterKey, statusPrinter);
+        }
+        return statusPrinter;
     }
 
     /** Get the JavaCompiler instance for this context. */
@@ -203,6 +236,10 @@ public class LanguageCompiler extends JavaCompiler {
         isBootstrap = options.get(OptionName.BOOTSTRAPCEYLON) != null;
         timer = Timer.instance(context);
         sourceLanguage = SourceLanguage.instance(context);
+        boolean isProgressPrinted = options.get(OptionName.CEYLONPROGRESS) != null && StatusPrinter.canPrint();
+        if(isProgressPrinted && taskListener == null){
+            taskListener = new StatusPrinterTaskListener(getStatusPrinterInstance(context));
+        }
     }
 
     @Override
@@ -348,6 +385,7 @@ public class LanguageCompiler extends JavaCompiler {
     public static interface CompilerDelegate {
         
         ModuleManager getModuleManager();
+        ModuleSourceMapper getModuleSourceMapper();
         PhasedUnit getExternalSourcePhasedUnit(VirtualFile srcDir, VirtualFile file);
         void typeCheck(java.util.List<PhasedUnit> listOfUnits);
         void visitModules(PhasedUnits phasedUnits);
@@ -370,6 +408,7 @@ public class LanguageCompiler extends JavaCompiler {
             throw new RunTwiceException("Trying to load new source file after CeylonEnter has been called: "+filename);
         try {
             ModuleManager moduleManager = phasedUnits.getModuleManager();
+            ModuleSourceMapper moduleSourceMapper = phasedUnits.getModuleSourceMapper();
             File sourceFile = new File(filename.getName());
             // FIXME: temporary solution
             VirtualFile file = vfs.getFromFile(sourceFile);
@@ -383,8 +422,24 @@ public class LanguageCompiler extends JavaCompiler {
             
             PhasedUnit externalPhasedUnit = compilerDelegate.getExternalSourcePhasedUnit(srcDir, file);
             
+            String suppressWarnings = options.get(OptionName.CEYLONSUPPRESSWARNINGS);
+            final EnumSet<Warning> suppressedWarnings;
+            if (suppressWarnings != null) {
+                if (suppressWarnings.trim().isEmpty()) {
+                    suppressedWarnings = EnumSet.allOf(Warning.class);
+                } else {
+                    suppressedWarnings = EnumSet.noneOf(Warning.class);
+                    for (String name : suppressWarnings.trim().split(" *, *")) {
+                        suppressedWarnings.add(Warning.valueOf(name));
+                    }
+                }
+            } else {
+                suppressedWarnings = EnumSet.noneOf(Warning.class);
+            }
+            
             if (externalPhasedUnit != null) {
                 phasedUnit = new CeylonPhasedUnit(externalPhasedUnit, filename, map);
+                phasedUnit.setSuppressedWarnings(suppressedWarnings);
                 phasedUnits.addPhasedUnit(externalPhasedUnit.getUnitFile(), phasedUnit);
                 gen.setMap(map);
                 
@@ -426,8 +481,9 @@ public class LanguageCompiler extends JavaCompiler {
                     /*
                      * Stef: see javadoc for findOrCreateModulelessPackage() for why this is here.
                      */
-                    com.redhat.ceylon.compiler.typechecker.model.Package p = modelLoader.findOrCreateModulelessPackage(pkgName == null ? "" : pkgName);
-                    phasedUnit = new CeylonPhasedUnit(file, srcDir, cu, p, moduleManager, ceylonContext, filename, map);
+                    com.redhat.ceylon.model.typechecker.model.Package p = modelLoader.findOrCreateModulelessPackage(pkgName == null ? "" : pkgName);
+                    phasedUnit = new CeylonPhasedUnit(file, srcDir, cu, p, moduleManager, moduleSourceMapper, ceylonContext, filename, map);
+                    phasedUnit.setSuppressedWarnings(suppressedWarnings);
                     phasedUnits.addPhasedUnit(file, phasedUnit);
                     gen.setMap(map);
 
@@ -456,10 +512,7 @@ public class LanguageCompiler extends JavaCompiler {
         timer.startTask("loadCompiledModules");
         LinkedList<JCCompilationUnit> moduleTrees = new LinkedList<JCCompilationUnit>();
         // now load modules and associate their moduleless packages with the corresponding modules
-        loadCompiledModules(trees, moduleTrees);
-        for (JCCompilationUnit moduleTree : moduleTrees) {
-            trees = trees.append(moduleTree);
-        }
+        trees = loadCompiledModules(trees, moduleTrees);
         /*
          * Stef: see javadoc for cacheModulelessPackages() for why this is here.
          */
@@ -468,7 +521,8 @@ public class LanguageCompiler extends JavaCompiler {
         return trees;
     }
 
-    private void loadCompiledModules(List<JCCompilationUnit> trees, LinkedList<JCCompilationUnit> moduleTrees) {
+    private List<JCCompilationUnit> loadCompiledModules(List<JCCompilationUnit> trees, LinkedList<JCCompilationUnit> moduleTrees) {
+        checkInvalidNativeModules();
         compilerDelegate.visitModules(phasedUnits);
         Modules modules = ceylonContext.getModules();
         // now make sure the phase units have their modules and packages set correctly
@@ -476,6 +530,7 @@ public class LanguageCompiler extends JavaCompiler {
             Package pkg = pu.getPackage();
             loadModuleFromSource(pkg, modules, moduleTrees, trees);
         }
+        checkInvalidNativeImports();
         // also make sure we have packages and modules set up for every Java file we compile
         for(JCCompilationUnit cu : trees){
             // skip Ceylon CUs
@@ -498,8 +553,46 @@ public class LanguageCompiler extends JavaCompiler {
                 moduleNamesToFileObjects .put(name, cfo);
             }
         }
+        for (JCCompilationUnit moduleTree : moduleTrees) {
+            trees = trees.append(moduleTree);
+        }
+        return trees;
     }
 
+    private void checkInvalidNativeModules() {
+        for (PhasedUnit pu : phasedUnits.getPhasedUnits()) {
+            ModuleDescriptor md = pu.findModuleDescriptor();
+            if (md != null) {
+                Backends bs = getNativeBackend(md.getAnnotationList(), md.getUnit());
+                if (!bs.none()) {
+                    if (bs.header()) {
+                        md.addError("missing backend argument for native annotation on module: " + formatPath(md.getImportPath().getIdentifiers()), Backend.Java);
+                    } else if (!ModelUtil.isForBackend(bs, Backend.Java)) {
+                        md.addError("module not meant for this backend: " + formatPath(md.getImportPath().getIdentifiers()), Backend.Java);
+                    }
+                }
+            }
+        }
+    }
+    
+    private void checkInvalidNativeImports() {
+        for (PhasedUnit pu : phasedUnits.getPhasedUnits()) {
+            ModuleDescriptor md = pu.findModuleDescriptor();
+            if (md != null) {
+                for (ImportModule im : md.getImportModuleList().getImportModules()) {
+                    Backends bs = getNativeBackend(im.getAnnotationList(), im.getUnit());
+                    if (im.getImportPath() != null) {
+                        Module m = (Module)im.getImportPath().getModel();
+                        if (!bs.none() && m.isNative() && !bs.supports(m.getNativeBackends())) {
+                            im.addError("native backend name conflicts with imported module: '\"" + 
+                                    bs.names() + "\"' is not '\"" + m.getNativeBackends().names() + "\"'", Backend.Java);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     private void loadModuleFromSource(Package pkg, Modules modules, LinkedList<JCCompilationUnit> moduleTrees, List<JCCompilationUnit> parsedTrees) {
         // skip it if we already resolved the package
         if(pkg.getModule() != null){
@@ -518,7 +611,7 @@ public class LanguageCompiler extends JavaCompiler {
             module = modules.getDefaultModule();
         else{
             for(Module m : modulesLoadedFromSource){
-                if(Util.isSubPackage(m.getNameAsString(), pkgName)){
+                if(JvmBackendUtil.isSubPackage(m.getNameAsString(), pkgName)){
                     module = m;
                     break;
                 }

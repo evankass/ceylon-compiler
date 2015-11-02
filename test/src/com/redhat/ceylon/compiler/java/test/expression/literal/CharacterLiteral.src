@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.literal;
 
-class CharacterLiteral implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class CharacterLiteral implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     CharacterLiteral() {
     }
@@ -14,11 +14,6 @@ class CharacterLiteral implements .com.redhat.ceylon.compiler.java.runtime.model
         final int c6 = 10;
         final int c7 = 119070;
         final int c8 = 119070;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.literal.CharacterLiteral();
     }
     
     @.java.lang.Override

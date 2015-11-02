@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.erasure;
 
-class CE_Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class CE_Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     CE_Foo() {
     }
@@ -18,22 +18,17 @@ class CE_Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTy
         getNonErasedGetter$priv$().$call$();
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.erasure.CE_Foo();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.expression.erasure.CE_Foo.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.erasure.CE_Foo.class);
 }
-public class CE_MethodClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class CE_MethodClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public CE_MethodClass() {
         this.erasedMethod = .ceylon.language.nothing_.get_();
-        this.nonErasedMethod = (.ceylon.language.Callable).ceylon.language.nothing_.get_();
+        this.nonErasedMethod = (.ceylon.language.Callable<? extends .ceylon.language.Integer>).ceylon.language.nothing_.get_();
     }
     private final .java.lang.Object erasedMethod;
     
@@ -68,7 +63,16 @@ public interface CE_MethodInterface {
     public abstract .java.lang.Object m4();
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.erasure.CE_MethodInterface.class);
 }
-public class CE_MethodInterfaceImpl implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.erasure.CE_MethodInterface {
+public class CE_MethodInterfaceImpl implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.erasure.CE_MethodInterface, .java.io.Serializable {
+    
+    protected CE_MethodInterfaceImpl() {
+        super();
+        this.c = null;
+        this.erased = null;
+        this.nonErased = null;
+        this.m1$specifier$ = null;
+        this.m2$specifier$ = null;
+    }
     
     public CE_MethodInterfaceImpl(final .com.redhat.ceylon.compiler.java.test.expression.erasure.CE_MethodClass c, final .java.lang.Object erased, final .ceylon.language.Callable<? extends .ceylon.language.Integer> nonErased) {
         this.c = c;

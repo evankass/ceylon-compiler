@@ -1,5 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.fordebug;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +69,19 @@ public class Javac {
 
     private List<String> buildArgs() {
         List<String> args = new ArrayList<String>();
-        args.add("javac");
+        String home = System.getenv("JAVA_HOME");
+        if (home == null) {
+            home = System.getProperty("java.home");
+        }
+        if (home != null) {
+            File javac = new File(home, "bin/javac");
+            if (!javac.exists()) {// maybe we found the JRE home
+                javac = new File(home, "../bin/javac");
+            }
+            args.add(javac.getPath());
+        } else {
+            args.add("javac");
+        }
         if (verbose) {
             args.add("-verbose");
         }

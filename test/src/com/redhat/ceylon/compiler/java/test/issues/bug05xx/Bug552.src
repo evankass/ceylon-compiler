@@ -1,30 +1,20 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug05xx;
 
-class C<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class C<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     C(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T) {
         this.$reified$T = $reified$T;
     }
     private final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T;
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug05xx.C(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.C.class, $reified$T);
     }
 }
-class A implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class A implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     A() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug05xx.A();
     }
     
     @.java.lang.Override
@@ -37,22 +27,25 @@ final class test_ {
     
     private test_() {
     }
-    private static final .com.redhat.ceylon.compiler.java.test.issues.bug05xx.C<.com.redhat.ceylon.compiler.java.test.issues.bug05xx.A>[] value;
+    private static final .com.redhat.ceylon.compiler.java.test.issues.bug05xx.C<.com.redhat.ceylon.compiler.java.test.issues.bug05xx.A> value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new .com.redhat.ceylon.compiler.java.test.issues.bug05xx.C[]{new .com.redhat.ceylon.compiler.java.test.issues.bug05xx.C<.com.redhat.ceylon.compiler.java.test.issues.bug05xx.A>(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.A.$TypeDescriptor$)};
+            value = new .com.redhat.ceylon.compiler.java.test.issues.bug05xx.C<.com.redhat.ceylon.compiler.java.test.issues.bug05xx.A>(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.A.$TypeDescriptor$);
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
             value = null;
+            $init$value = false;
         }
     }
     
     public static .com.redhat.ceylon.compiler.java.test.issues.bug05xx.C<.com.redhat.ceylon.compiler.java.test.issues.bug05xx.A> get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (test_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'test\' before it was set");
         }

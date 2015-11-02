@@ -2,16 +2,17 @@ package com.redhat.ceylon.compiler.java.codegen.recovery;
 
 import java.util.List;
 
-import com.redhat.ceylon.compiler.loader.model.LazyClass;
+import com.redhat.ceylon.common.Backend;
+import com.redhat.ceylon.compiler.typechecker.analyzer.AnalysisError;
 import com.redhat.ceylon.compiler.typechecker.analyzer.UsageWarning;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Message;
-import com.redhat.ceylon.compiler.typechecker.tree.NaturalVisitor;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.loader.model.LazyClass;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 /**
  * Visitor for declarations which constructs a {@link TransformationPlan} for 
@@ -19,7 +20,7 @@ import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
  * Unlike the {@link StatementErrorVisitor} and {@link ErrorVisitor}
  * this visitor does not fail fast.
  */
-class DeclarationErrorVisitor extends Visitor implements NaturalVisitor {
+class DeclarationErrorVisitor extends Visitor {
     private static final int TYPE_DECLARATION_DOES_NOT_EXIST = 102;
     private static final int FORMAL_MEMBER_UNIMPLEMENTED_IN_CLASS_HIERARCHY = 300;
     private static final int MEMBER_HAS_WRONG_NUMBER_OF_PARAMETERS = 9100;
@@ -27,33 +28,13 @@ class DeclarationErrorVisitor extends Visitor implements NaturalVisitor {
     private static final int COULD_NOT_DETERMINE_PARAMETER_TYPE_SAME_AS_CORRESPONDING_PARAMETER = 9210;
     private static final int REFINED_MEMBER_WRONG_NUM_PL = 9300;
     private static final int MISSING_PL_FUNCTION_DECL = 1000;
+    private static final int PL_AND_CONSTRUCTORS = 1002;
     
     private TransformationPlan plan;
     private final ExpressionErrorVisitor expressionVisitor;
     private boolean expectingError;
     private String errMessage;
     private Declaration model;
-    
-    static class DeclExprErrorVisitor extends Visitor implements NaturalVisitor {
-        public void visit(Tree.BaseMemberExpression that) {
-            for (Message e : that.getErrors()) {
-                if (e.getCode() == 1460) {
-                    throw new HasErrorException(that, e);
-                }
-            }
-        }
-        public void visit(Tree.Declaration that) {
-            // don't visit other declarations
-        }
-        
-        @Override
-        public void handleException(Exception e, Node that) {
-            // rethrow
-            throw (RuntimeException)e;
-        }
-        
-    }
-    DeclExprErrorVisitor ev = new DeclExprErrorVisitor();
     
     DeclarationErrorVisitor(ExpressionErrorVisitor expressionVisitor) {
         this.expressionVisitor = expressionVisitor;
@@ -127,7 +108,14 @@ class DeclarationErrorVisitor extends Visitor implements NaturalVisitor {
                             || (model instanceof Value
                                     && ((Value)model).getTypeDeclaration().isAnonymous()))) {
                     plan = new ThrowerMethod(that, message);
-                } else {
+                } 
+                else if (message.getCode() == PL_AND_CONSTRUCTORS
+                        && (model instanceof Class 
+                            || (model instanceof Value
+                                    && ((Value)model).getTypeDeclaration().isAnonymous()))) {
+                    plan = new ThrowerCatchallConstructor(that, message);
+                } 
+                else {
                     plan = new Drop(that, message);
                 } 
                 newplan(plan);
@@ -158,18 +146,27 @@ class DeclarationErrorVisitor extends Visitor implements NaturalVisitor {
     
     @Override
     public void visit(Tree.Body that) {
-        // don't go there
+        // don't go there: we don't really care about block errors
     }
     
     @Override
     public void visit(Tree.SpecifierOrInitializerExpression that) {
-        try {
-            that.visit(ev);
-        } catch (HasErrorException e) {
-            newplan(new Drop(e.getNode(), e.getErrorMessage()));
-        }
+        // don't go there: we don't really care about expression errors
     }
     
+    @Override
+    public void visit(Tree.Type that) {
+        HasErrorException error = expressionVisitor.getFirstErrorMessage(that);
+        if (error != null && isError(that, error.getErrorMessage())) {
+            newplan(new Drop(error.getNode(), error.getErrorMessage()));
+            return;
+        }
+        // type inference is used but the type of 
+        // the inferred expression is unknown due to other errors
+        if (that.getTypeModel().containsUnknowns()) {
+            newplan(new Drop(that, new AnalysisError(that, "unknown type", Backend.Java)));
+        }
+    }
     
     @Override
     public void visit(Tree.InitializerParameter that) {

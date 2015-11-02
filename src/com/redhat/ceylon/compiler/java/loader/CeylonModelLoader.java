@@ -20,8 +20,8 @@
 
 package com.redhat.ceylon.compiler.java.loader;
 
-import static javax.tools.StandardLocation.PLATFORM_CLASS_PATH;
 import static javax.tools.StandardLocation.CLASS_PATH;
+import static javax.tools.StandardLocation.PLATFORM_CLASS_PATH;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,8 +33,6 @@ import javax.lang.model.element.NestingKind;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 
-import com.redhat.ceylon.cmr.api.ArtifactResult;
-import com.redhat.ceylon.cmr.api.JDKUtils;
 import com.redhat.ceylon.compiler.java.codegen.CeylonCompilationUnit;
 import com.redhat.ceylon.compiler.java.codegen.Naming;
 import com.redhat.ceylon.compiler.java.loader.mirror.JavacClass;
@@ -44,19 +42,26 @@ import com.redhat.ceylon.compiler.java.tools.CeylonLog;
 import com.redhat.ceylon.compiler.java.tools.LanguageCompiler;
 import com.redhat.ceylon.compiler.java.util.Timer;
 import com.redhat.ceylon.compiler.java.util.Util;
-import com.redhat.ceylon.compiler.loader.AbstractModelLoader;
-import com.redhat.ceylon.compiler.loader.ModelLoaderFactory;
-import com.redhat.ceylon.compiler.loader.ModelResolutionException;
-import com.redhat.ceylon.compiler.loader.SourceDeclarationVisitor;
-import com.redhat.ceylon.compiler.loader.TypeParser;
-import com.redhat.ceylon.compiler.loader.mirror.ClassMirror;
-import com.redhat.ceylon.compiler.loader.mirror.MethodMirror;
+import com.redhat.ceylon.compiler.typechecker.analyzer.ModuleSourceMapper;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnits;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.CompilationUnit;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.Declaration;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.ModuleDescriptor;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.PackageDescriptor;
+import com.redhat.ceylon.model.cmr.ArtifactResult;
+import com.redhat.ceylon.model.cmr.JDKUtils;
+import com.redhat.ceylon.model.loader.AbstractModelLoader;
+import com.redhat.ceylon.model.loader.JvmBackendUtil;
+import com.redhat.ceylon.model.loader.ModelResolutionException;
+import com.redhat.ceylon.model.loader.TypeParser;
+import com.redhat.ceylon.model.loader.mirror.ClassMirror;
+import com.redhat.ceylon.model.loader.mirror.MethodMirror;
+import com.redhat.ceylon.model.loader.model.AnnotationProxyClass;
+import com.redhat.ceylon.model.loader.model.AnnotationProxyMethod;
+import com.redhat.ceylon.model.loader.model.LazyFunction;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.UnknownType;
 import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Kinds;
 import com.sun.tools.javac.code.Scope;
@@ -91,6 +96,8 @@ public class CeylonModelLoader extends AbstractModelLoader {
     private Options options;
     private JavaFileManager fileManager;
     protected final Map<String,Boolean> packageExistence = new HashMap<String,Boolean>();
+    private AnnotationLoader annotationLoader;
+    private ModuleSourceMapper moduleSourceMapper;
     
     public static AbstractModelLoader instance(Context context) {
         AbstractModelLoader instance = context.get(AbstractModelLoader.class);
@@ -123,6 +130,8 @@ public class CeylonModelLoader extends AbstractModelLoader {
         moduleManager = phasedUnits.getModuleManager();
         modules = ceylonContext.getModules();
         fileManager = context.get(JavaFileManager.class);
+        annotationLoader = new AnnotationLoader(this, typeFactory);
+        moduleSourceMapper = phasedUnits.getModuleSourceMapper();
     }
 
     @Override
@@ -173,7 +182,7 @@ public class CeylonModelLoader extends AbstractModelLoader {
             ceylonTree.visit(new SourceDeclarationVisitor(){
                 @Override
                 public void loadFromSource(Declaration decl) {
-                    if(isNative(decl))
+                    if(!checkNative(decl))
                         return;
                     String fqn = Naming.toplevelClassName(pkgName, decl);
                     try{
@@ -238,7 +247,8 @@ public class CeylonModelLoader extends AbstractModelLoader {
                         continue;
                     ClassSymbol enclosingClass = getEnclosing((ClassSymbol) m);
 
-                    if(!Util.isLoadedFromSource(enclosingClass)){
+                    if(enclosingClass == m
+                            && !Util.isLoadedFromSource(enclosingClass)){
                         m.complete();
                         // avoid anonymous and local classes
                         if(isAnonymousOrLocal((ClassSymbol) m))
@@ -249,7 +259,12 @@ public class CeylonModelLoader extends AbstractModelLoader {
                         // skip module and package descriptors
                         if(isModuleOrPackageDescriptorName(m.name.toString()))
                             continue;
-                        convertToDeclaration(module, lookupClassMirror(module, m.getQualifiedName().toString()), DeclarationType.VALUE);
+                        ClassMirror classMirror = lookupClassMirror(module, m.getQualifiedName().toString());
+                        // Some languages like Scala generate classes like com.foo.package which we would
+                        // quote to com.foo.$package, which does not exist, so we'd get a null leading to an NPE
+                        // So ATM we just avoid it, presumably we don't support what it does anyways
+                        if(classMirror != null)
+                            convertToDeclaration(module, classMirror, DeclarationType.VALUE);
                     }
                 }
                 if(module.getNameAsString().equals(JAVA_BASE_MODULE_NAME)
@@ -430,7 +445,7 @@ public class CeylonModelLoader extends AbstractModelLoader {
                 for(Symbol s : classSymbol.getEnclosedElements()){
                     if(s instanceof ClassSymbol 
                             && (s.getSimpleName().toString().equals(part)
-                                    || (Util.isInitialLowerCase(part) 
+                                    || (JvmBackendUtil.isInitialLowerCase(part) 
                                             && s.getSimpleName().toString().equals(part + "_")))){
                         classSymbol = (ClassSymbol) s;
                         continue PART;
@@ -661,7 +676,8 @@ public class CeylonModelLoader extends AbstractModelLoader {
             }
         }
         // in every other case, rethrow as a ModelLoaderExceptions
-        throw new ModelResolutionException("Failed to determine if "+method.name.toString()+" is overriding a super method", x);
+        throw new ModelResolutionException("Failed to determine if "+method.name.toString()+" is overriding a super method" +
+        (x.getLocalizedMessage() != null ? ": " + x.getLocalizedMessage() : ""), x);
     }
 
     /**
@@ -707,8 +723,52 @@ public class CeylonModelLoader extends AbstractModelLoader {
     }
 
     @Override
-    protected Module findModuleForClassMirror(ClassMirror classMirror) {
+    public Module findModuleForClassMirror(ClassMirror classMirror) {
         String pkgName = getPackageNameForQualifiedClassName(classMirror);
         return lookupModuleByPackageName(pkgName);
+    }
+    
+    @Override
+    protected boolean isFlatClasspath() {
+        return options.isSet(OptionName.CEYLONFLATCLASSPATH);
+    }
+
+    @Override
+    protected boolean isAutoExportMavenDependencies() {
+        return options.isSet(OptionName.CEYLONAUTOEXPORTMAVENDEPENDENCIES);
+    }
+
+    @Override
+    protected void setAnnotationConstructor(LazyFunction method, MethodMirror meth) {
+        annotationLoader.setAnnotationConstructor(method, meth);
+    }
+    
+    @Override
+    protected void makeInteropAnnotationConstructorInvocation(AnnotationProxyMethod ctor, AnnotationProxyClass klass, java.util.List<Parameter> ctorParams) {
+        annotationLoader.makeInterorAnnotationConstructorInvocation(ctor, klass, ctorParams);
+    }
+
+    /**
+     * To be overridden by subclasses
+     */
+    protected UnknownType.ErrorReporter makeModelErrorReporter(Module module, String message) {
+        return new ModuleErrorAttacherRunnable(moduleSourceMapper, module, message);
+    }
+
+    public static class ModuleErrorAttacherRunnable extends UnknownType.ErrorReporter {
+
+        private Module module;
+        private ModuleSourceMapper moduleSourceMapper;
+
+        public ModuleErrorAttacherRunnable(ModuleSourceMapper moduleSourceMapper, Module module, String message) {
+            super(message);
+            this.moduleSourceMapper = moduleSourceMapper;
+            this.module = module;
+        }
+
+        @Override
+        public void reportError() {
+            moduleSourceMapper.attachErrorToOriginalModuleImport(module, getMessage());
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug04xx;
 
-class Bug404 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug404 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug404() {
     }
@@ -116,11 +116,6 @@ class Bug404 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTy
                 }
             }.sequence();
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug04xx.Bug404();
     }
     
     @.java.lang.Override

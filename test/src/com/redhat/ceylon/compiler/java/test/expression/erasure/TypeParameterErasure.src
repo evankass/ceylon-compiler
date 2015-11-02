@@ -21,7 +21,7 @@ interface TPERight extends .com.redhat.ceylon.compiler.java.test.expression.eras
     public abstract long getRightAttribute();
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight.class);
 }
-class TPECLeft implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft {
+class TPECLeft implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft, .java.io.Serializable {
     
     TPECLeft() {
         this.topAttribute = 1L;
@@ -50,18 +50,13 @@ class TPECLeft implements .com.redhat.ceylon.compiler.java.runtime.model.Reified
         return leftAttribute;
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.erasure.TPECLeft();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.expression.erasure.TPECLeft.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPECLeft.class);
 }
-class TPECMiddle implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight {
+class TPECMiddle implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight, .java.io.Serializable {
     
     TPECMiddle() {
         this.topAttribute = 1L;
@@ -102,18 +97,13 @@ class TPECMiddle implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
         return rightAttribute;
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.erasure.TPECMiddle();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.expression.erasure.TPECMiddle.$TypeDescriptor$;
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPECMiddle.class);
 }
-class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     TypeParameterErasure() {
     }
@@ -375,7 +365,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         );
     }
     
-    class Parameterized<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class Parameterized<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         Parameterized(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final T t) {
             this.$reified$T = $reified$T;
@@ -416,7 +406,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         }
     }
     
-    class ParameterizedWithBounds<T extends .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class ParameterizedWithBounds<T extends .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         ParameterizedWithBounds(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final T t) {
             this.$reified$T = $reified$T;
@@ -431,7 +421,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         }
     }
     
-    class ParameterizedWithIntersectionBounds<T extends .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft & .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class ParameterizedWithIntersectionBounds<T extends .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft & .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         ParameterizedWithIntersectionBounds(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final T t) {
             this.$reified$T = $reified$T;
@@ -470,7 +460,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         }
     }
     
-    class ParameterizedWithErasedBounds<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class ParameterizedWithErasedBounds<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         ParameterizedWithErasedBounds(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final T t) {
             this.$reified$T = $reified$T;
@@ -483,7 +473,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         }
     }
     
-    class ParameterizedWithParameterizedBounds<T extends .ceylon.language.Ordinal<? extends T> & .ceylon.language.Comparable<? super T>> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class ParameterizedWithParameterizedBounds<T extends .ceylon.language.Ordinal<? extends T> & .ceylon.language.Comparable<? super T>> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         ParameterizedWithParameterizedBounds(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final T t) {
             this.$reified$T = $reified$T;
@@ -500,9 +490,9 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         final .java.lang.Object middle = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TPECMiddle();
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft left = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TPECLeft();
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized parameterizedMiddle = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.intersection(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight.$TypeDescriptor$), middle);
-        final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> parameterizedLeft = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, left);
+        final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> parameterizedLeft = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)left);
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized parameterizedExplicitMiddle = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.intersection(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight.$TypeDescriptor$), middle);
-        final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> parameterizedExplicitLeft = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, left);
+        final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> parameterizedExplicitLeft = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)left);
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithBounds parameterizedWithBoundsMiddle = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithBounds(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.intersection(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight.$TypeDescriptor$), (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)middle);
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithBounds<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> parameterizedWithBoundsLeft = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithBounds<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, left);
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithIntersectionBounds parameterizedWithIntersectionBoundsMiddle = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithIntersectionBounds(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.intersection(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight.$TypeDescriptor$), (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)middle);
@@ -511,7 +501,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithErasedBounds<.ceylon.language.String> parameterizedWithReallyErasedExplicitBoundsMiddle = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithErasedBounds<.ceylon.language.String>(.ceylon.language.String.$TypeDescriptor$, .ceylon.language.String.instance(""));
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithParameterizedBounds<.ceylon.language.Integer> parameterizedWithParameterizedBounds = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithParameterizedBounds<.ceylon.language.Integer>(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.instance(2L));
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithParameterizedBounds<.ceylon.language.Integer> parameterizedWithExplicitParameterizedBounds = new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.ParameterizedWithParameterizedBounds<.ceylon.language.Integer>(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.instance(2L));
-        parameterizedMiddle.<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>parameterized(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, left, middle);
+        parameterizedMiddle.<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>parameterized(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)left, middle);
         parameterizedMiddle.<.java.lang.Object>parameterized(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.intersection(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight.$TypeDescriptor$), middle, middle);
         parameterizedMiddle.<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>parameterized(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)middle, middle);
         parameterizedMiddle.<.java.lang.Object>parameterized(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.intersection(.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.test.expression.erasure.TPERight.$TypeDescriptor$), middle, middle);
@@ -539,7 +529,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> parameterizedLeft = (
             let
             {
-                .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft arg$36$0 = left;
+                .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft arg$36$0 = (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)left;
                 .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor arg$36$reified$0 = .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$;
             }
             returning new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>(arg$36$reified$0, arg$36$0);
@@ -555,7 +545,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         final .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft> parameterizedExplicitLeft = (
             let
             {
-                .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft arg$38$0 = left;
+                .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft arg$38$0 = (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)left;
                 .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor arg$38$reified$0 = .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$;
             }
             returning new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized<.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft>(arg$38$reified$0, arg$38$0);
@@ -612,7 +602,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
             let
             {
                 .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.Parameterized arg$45$callable$ = parameterizedMiddle;
-                .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft arg$45$0 = left;
+                .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft arg$45$0 = (.com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft)left;
                 .java.lang.Object arg$45$1 = middle;
                 .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor arg$45$reified$0 = .com.redhat.ceylon.compiler.java.test.expression.erasure.TPELeft.$TypeDescriptor$;
             }
@@ -734,7 +724,7 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         T n = (T)init;
     }
     
-    class TestPrimitiveBound<T extends .ceylon.language.Integer> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    class TestPrimitiveBound<T extends .ceylon.language.Integer> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         TestPrimitiveBound(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final T init) {
             this.$reified$T = $reified$T;
@@ -746,11 +736,6 @@ class TypeParameterErasure implements .com.redhat.ceylon.compiler.java.runtime.m
         public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
             return .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.member(.com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure.TestPrimitiveBound.class, $reified$T));
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.erasure.TypeParameterErasure();
     }
     
     @.java.lang.Override

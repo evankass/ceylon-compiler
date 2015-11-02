@@ -1,6 +1,14 @@
 package com.redhat.ceylon.compiler.java.test.expression.attribute;
 
-class Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected Foo() {
+        super();
+        this.param = null;
+        this.sharedParam = null;
+        this.init = null;
+        this.sharedInit = null;
+    }
     
     Foo(final .java.lang.String init, final .java.lang.String sharedInit, final .java.lang.String param, final .java.lang.String sharedParam) {
         this.init = init;
@@ -64,7 +72,15 @@ class Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType 
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.attribute.Foo.class);
 }
-class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected Bar() {
+        super();
+        this.init = null;
+        this.variableInit = null;
+        this.variableAttr = null;
+        this.attr = null;
+    }
     
     Bar(final .ceylon.language.String init, .ceylon.language.String variableInit$param$) {
         this.init = init;

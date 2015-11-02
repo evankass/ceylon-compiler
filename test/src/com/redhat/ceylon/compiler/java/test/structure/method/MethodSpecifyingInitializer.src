@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.structure.method;
 
-class MethodSpecifierType implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodSpecifierType implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodSpecifierType() {
     }
     
     private final .com.redhat.ceylon.compiler.java.test.structure.method.MethodSpecifierType foo$priv$() {
         return new .com.redhat.ceylon.compiler.java.test.structure.method.MethodSpecifierType();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.method.MethodSpecifierType();
     }
     
     @.java.lang.Override

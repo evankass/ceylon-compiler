@@ -1,8 +1,8 @@
 package com.redhat.ceylon.compiler.java.codegen;
 
-import com.redhat.ceylon.compiler.java.codegen.Naming.Prefix;
-import com.redhat.ceylon.compiler.typechecker.model.Functional;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
+import com.redhat.ceylon.model.loader.NamingBase.Prefix;
+import com.redhat.ceylon.model.typechecker.model.Functional;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
 import com.sun.tools.javac.tree.JCTree.JCAnnotation;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.util.ListBuffer;
@@ -60,7 +60,7 @@ public class ParameterAnnotationTerm extends AnnotationTerm implements Annotatio
     @Override
     public int encode(AbstractTransformer gen, ListBuffer<JCExpression> instantiations) {
         Parameter parameter = getSourceParameter();
-        int index = ((Functional)parameter.getDeclaration()).getParameterLists().get(0).getParameters().indexOf(parameter);
+        int index = ((Functional)parameter.getDeclaration()).getFirstParameterList().getParameters().indexOf(parameter);
         if (isSpread()) {
             index += 256;
         }

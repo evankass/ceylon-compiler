@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug10xx;
 
-class Bug1095B implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1095B implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1095B() {
     }
@@ -27,15 +27,10 @@ class Bug1095B implements .com.redhat.ceylon.compiler.java.runtime.model.Reified
             let
             {
                 .ceylon.language.Summable<Summand> arg$2$callable$ = (.ceylon.language.Summable<Summand>)(.ceylon.language.Summable)x;
-                Summand arg$2$0 = (Summand)x2;
+                Summand arg$2$0 = (Summand)(.ceylon.language.Summable)x2;
             }
             returning arg$2$callable$.plus(arg$2$0);
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug10xx.Bug1095B();
     }
     
     @.java.lang.Override

@@ -1,13 +1,13 @@
 package com.redhat.ceylon.compiler.java.test.statement.swtch;
 
-class SwitchIsEnumeratedPrimitive implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class SwitchIsEnumeratedPrimitive implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     SwitchIsEnumeratedPrimitive() {
     }
     
     private final <Number>void m$priv$(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$Number, final Number n) {
         {
-            .java.lang.Object sel$0 = n;
+            Number sel$0 = n;
             if (sel$0 instanceof .ceylon.language.Integer) {
                 final .java.lang.Object n$3 = (.java.lang.Object)sel$0;
                 final double f = ((.ceylon.language.Integer)n$3).getFloat();
@@ -19,11 +19,6 @@ class SwitchIsEnumeratedPrimitive implements .com.redhat.ceylon.compiler.java.ru
                 final double f = 0.0;
             } else throw new .com.redhat.ceylon.compiler.java.language.EnumeratedTypeError("Supposedly exhaustive switch was not exhaustive");
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.swtch.SwitchIsEnumeratedPrimitive();
     }
     
     @.java.lang.Override

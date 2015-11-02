@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfIsNotNull implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfIsNotNull implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfIsNotNull() {
     }
@@ -17,11 +17,6 @@ class MethodIfIsNotNull implements .com.redhat.ceylon.compiler.java.runtime.mode
             final .java.lang.Object x$4 = x$3;
             .ceylon.language.print_.print(.ceylon.language.String.instance(x$4.toString()));
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfIsNotNull();
     }
     
     @.java.lang.Override

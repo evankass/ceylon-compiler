@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.trycatch;
 
-class TryCatch implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class TryCatch implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     TryCatch() {
     }
@@ -17,11 +17,6 @@ class TryCatch implements .com.redhat.ceylon.compiler.java.runtime.model.Reified
         } catch (final .java.lang.Exception e) {
             c$priv$(e);
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.trycatch.TryCatch();
     }
     
     @.java.lang.Override

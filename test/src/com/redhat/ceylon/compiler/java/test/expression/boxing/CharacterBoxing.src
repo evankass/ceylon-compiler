@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.boxing;
 
-class CharacterBoxing implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class CharacterBoxing implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     CharacterBoxing() {
     }
@@ -26,22 +26,19 @@ class CharacterBoxing implements .com.redhat.ceylon.compiler.java.runtime.model.
             final int c$2 = c$1.intValue();
             return .ceylon.language.Character.instance(.ceylon.language.Character.getSuccessor(c$2));
         }
+        final .java.lang.Object c$3 = c;
         return null;
     }
     
     private final int successor3$priv$(final .ceylon.language.Character c) {
-        .ceylon.language.Character c$4;
-        if ((c$4 = c) != null) {
-            final int c$5 = c$4.intValue();
-            return .ceylon.language.Character.getSuccessor(c$5);
+        .ceylon.language.Character c$5;
+        if ((c$5 = c) != null) {
+            final int c$7 = c$5.intValue();
+            return .ceylon.language.Character.getSuccessor(c$7);
         } else {
+            final .java.lang.Object c$6 = c$5;
             return 32;
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.boxing.CharacterBoxing();
     }
     
     @.java.lang.Override

@@ -1,7 +1,7 @@
 package com.redhat.ceylon.compiler.java.test.interop;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
-class EnumSwitch implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
+class EnumSwitch implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     EnumSwitch() {
     }
@@ -46,7 +46,7 @@ class EnumSwitch implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
     
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Anything")
     private final void optionalExhaustive$priv$(@.com.redhat.ceylon.compiler.java.metadata.Name("e")
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Null|com.redhat.ceylon.compiler.java.test.interop::JavaEnum")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("com.redhat.ceylon.compiler.java.test.interop::JavaEnum?")
     final .com.redhat.ceylon.compiler.java.test.interop.JavaEnum e) {
         {
             .com.redhat.ceylon.compiler.java.test.interop.JavaEnum sel$0 = e;
@@ -73,7 +73,7 @@ class EnumSwitch implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
     
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Anything")
     private final void optionalExhaustive2$priv$(@.com.redhat.ceylon.compiler.java.metadata.Name("e")
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Null|com.redhat.ceylon.compiler.java.test.interop::JavaEnum")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("com.redhat.ceylon.compiler.java.test.interop::JavaEnum?")
     final .com.redhat.ceylon.compiler.java.test.interop.JavaEnum e) {
         {
             .com.redhat.ceylon.compiler.java.test.interop.JavaEnum sel$1 = e;
@@ -109,14 +109,9 @@ class EnumSwitch implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
             } else if (sel$2 == .java.lang.Thread.State.RUNNABLE) {
             } else if (sel$2 == .java.lang.Thread.State.BLOCKED) {
             } else {
+                final .java.lang.Thread.State e$3 = (.java.lang.Thread.State)sel$2;
             }
         }
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.interop.EnumSwitch();
     }
     
     @.java.lang.Override

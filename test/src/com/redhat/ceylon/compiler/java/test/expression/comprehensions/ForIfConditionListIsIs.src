@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.comprehensions;
 
-class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ForIfConditionListIsIs() {
     }
@@ -23,7 +23,7 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                         if (x$exhausted$) {
                             return false;
                         } else {
-                            x = (.java.lang.Object)$ceylontmp$item$0;
+                            x = $ceylontmp$item$0;
                             return true;
                         }
                     }
@@ -33,6 +33,7 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                         if (x$exhausted$) return false;
                         if ($iterator$1 != null) return true;
                         if (!this.x()) return false;
+                        final .java.lang.Object x = this.x;
                         $iterator$1 = ys.iterator();
                         return true;
                     }
@@ -46,7 +47,7 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                             if (y$exhausted$) {
                                 $iterator$1 = null;
                             } else {
-                                y = (.java.lang.Object)$ceylontmp$item$1;
+                                y = $ceylontmp$item$1;
                                 return true;
                             }
                         }
@@ -59,6 +60,8 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                     private final boolean $next$2() {
                         ifcomp_2: while (true) {
                             if (!this.y()) break ifcomp_2;
+                            final .java.lang.Object y = this.y;
+                            final .java.lang.Object x = this.x;
                             .java.lang.Object y1$4 = null;
                             .java.lang.Object x1$2 = null;
                             if ((x1$2 = x) instanceof .ceylon.language.Integer) {
@@ -74,10 +77,10 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                     
                     public final .java.lang.Object next() {
                         if (this.$next$2()) {
-                            final .java.lang.Object x = this.x;
-                            final .java.lang.Object y = this.y;
-                            final long y1$5 = this.y1$5;
                             final long x1$3 = this.x1$3;
+                            final long y1$5 = this.y1$5;
+                            final .java.lang.Object y = this.y;
+                            final .java.lang.Object x = this.x;
                             return .ceylon.language.Boolean.instance(x1$3 == y1$5);
                         } else return .ceylon.language.finished_.get_();
                     }
@@ -104,7 +107,7 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                         if (x$exhausted$) {
                             return false;
                         } else {
-                            x = (.java.lang.Object)$ceylontmp$item$6;
+                            x = $ceylontmp$item$6;
                             return true;
                         }
                     }
@@ -114,6 +117,7 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                         if (x$exhausted$) return false;
                         if ($iterator$1 != null) return true;
                         if (!this.x()) return false;
+                        final .java.lang.Object x = this.x;
                         $iterator$1 = ys.iterator();
                         return true;
                     }
@@ -127,7 +131,7 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                             if (y$exhausted$) {
                                 $iterator$1 = null;
                             } else {
-                                y = (.java.lang.Object)$ceylontmp$item$7;
+                                y = $ceylontmp$item$7;
                                 return true;
                             }
                         }
@@ -140,6 +144,8 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                     private final boolean $next$2() {
                         ifcomp_2: while (true) {
                             if (!this.y()) break ifcomp_2;
+                            final .java.lang.Object y = this.y;
+                            final .java.lang.Object x = this.x;
                             .java.lang.Object y$10 = null;
                             .java.lang.Object x$8 = null;
                             if ((x$8 = x) instanceof .ceylon.language.Integer) {
@@ -155,21 +161,16 @@ class ForIfConditionListIsIs implements .com.redhat.ceylon.compiler.java.runtime
                     
                     public final .java.lang.Object next() {
                         if (this.$next$2()) {
-                            final .java.lang.Object x = this.x;
-                            final .java.lang.Object y = this.y;
-                            final long y$11 = this.y$11;
                             final long x$9 = this.x$9;
+                            final long y$11 = this.y$11;
+                            final .java.lang.Object y = this.y;
+                            final .java.lang.Object x = this.x;
                             return .ceylon.language.Boolean.instance(x$9 == y$11);
                         } else return .ceylon.language.finished_.get_();
                     }
                 };
             }
         }.sequence();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.comprehensions.ForIfConditionListIsIs();
     }
     
     @.java.lang.Override

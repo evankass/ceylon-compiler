@@ -219,7 +219,7 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
     public JCTree visitLabeledStatement(LabeledStatementTree node, P p) {
         JCLabeledStatement t = (JCLabeledStatement) node;
         JCStatement body = copy(t.body, p);
-        return M.at(t.pos).Labelled(t.label, t.body);
+        return M.at(t.pos).Labelled(t.label, body);
     }
 
     public JCTree visitLiteral(LiteralTree node, P p) {
@@ -415,6 +415,12 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
             default:
                 throw new AssertionError("unknown tree tag: " + tree.getTag());
         }
+    }
+
+    @Override
+    public JCTree visitLet(LetTree node, P p) {
+        LetExpr tree = (LetExpr)node;
+        return M.at(tree.pos).LetExpr(copy(tree.stats), copy(tree.expr));
     }
 
 }

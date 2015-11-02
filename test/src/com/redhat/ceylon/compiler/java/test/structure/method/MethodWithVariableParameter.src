@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.method;
 
-class MethodWithVariableParameter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodWithVariableParameter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodWithVariableParameter() {
     }
@@ -105,11 +105,6 @@ class MethodWithVariableParameter implements .com.redhat.ceylon.compiler.java.ru
             }
         }
         final fn_ fn = new fn_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.method.MethodWithVariableParameter();
     }
     
     @.java.lang.Override

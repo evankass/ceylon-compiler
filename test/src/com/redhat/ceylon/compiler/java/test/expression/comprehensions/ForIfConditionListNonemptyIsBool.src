@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.comprehensions;
 
-class ForIfConditionList implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ForIfConditionList implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ForIfConditionList() {
     }
@@ -23,7 +23,7 @@ class ForIfConditionList implements .com.redhat.ceylon.compiler.java.runtime.mod
                         if (x$exhausted$) {
                             return false;
                         } else {
-                            x = (.ceylon.language.Sequential<? extends .java.lang.Object>)$ceylontmp$item$0;
+                            x = (.ceylon.language.Sequential<? extends .java.lang.Object>)(.ceylon.language.Sequential)$ceylontmp$item$0;
                             return true;
                         }
                     }
@@ -33,11 +33,12 @@ class ForIfConditionList implements .com.redhat.ceylon.compiler.java.runtime.mod
                     private final boolean $next$1() {
                         ifcomp_1: while (true) {
                             if (!this.x()) break ifcomp_1;
+                            final .ceylon.language.Sequential<? extends .java.lang.Object> x = this.x;
                             .java.lang.Object y$3 = null;
                             .ceylon.language.Sequential<? extends .java.lang.Object> x$1 = null;
                             if ((x$1 = x) instanceof .ceylon.language.Sequence) {
                                 x$2 = (.ceylon.language.Sequence<? extends .java.lang.Object>)(.ceylon.language.Sequence)x$1;
-                                if ((y$3 = x$2.get(.ceylon.language.Integer.instance(0L))) instanceof .ceylon.language.Integer) {
+                                if ((y$3 = x$2.getFromFirst(0L)) instanceof .ceylon.language.Integer) {
                                     y$4 = ((.ceylon.language.Integer)y$3).longValue();
                                     if (y$4 > 0L) {
                                         break ifcomp_1;
@@ -50,20 +51,15 @@ class ForIfConditionList implements .com.redhat.ceylon.compiler.java.runtime.mod
                     
                     public final .java.lang.Object next() {
                         if (this.$next$1()) {
-                            final .ceylon.language.Sequential<? extends .java.lang.Object> x = this.x;
-                            final long y$4 = this.y$4;
                             final .ceylon.language.Sequence<? extends .java.lang.Object> x$2 = this.x$2;
+                            final long y$4 = this.y$4;
+                            final .ceylon.language.Sequential<? extends .java.lang.Object> x = this.x;
                             return .ceylon.language.Boolean.instance(y$4 == 1L);
                         } else return .ceylon.language.finished_.get_();
                     }
                 };
             }
         }.sequence();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.comprehensions.ForIfConditionList();
     }
     
     @.java.lang.Override

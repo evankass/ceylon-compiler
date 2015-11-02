@@ -1,4 +1,12 @@
-import ceylon.language.meta.model { Class }
+import ceylon.language.meta.model { 
+    Class, 
+    Function, 
+    Method,
+    CallableConstructor,
+    MemberClassCallableConstructor
+}
+import ceylon.language.meta.declaration { ConstructorDeclaration }
+import ceylon.language.meta{type}
 
 void literalsRuntime(){
    literalsRuntime2<Integer>();
@@ -70,9 +78,18 @@ void literalsRuntime2<T>(){
     assert(`T` == `Integer`);
     
     assert(`value obj.attribute`.name == "attribute");
-    assert(`obj.attribute`.declaration == `value obj.attribute`);
+    assert(`\Iobj.attribute`.declaration == `value obj.attribute`);
 
     assert(`function obj.method`.name == "method");
-    assert(`obj.method<Integer>`.declaration == `function obj.method`);
+    assert(`\Iobj.method<Integer>`.declaration == `function obj.method`);
+
+    // ConstructorDeclarations
+    assert(`new LitClassWithConstructors`.name == "");
+    assert(`new LitClassWithConstructors`.qualifiedName == "com.redhat.ceylon.compiler.java.test.metamodel::LitClassWithConstructors");
+    print(`new LitClassWithConstructors`.string == "new com.redhat.ceylon.compiler.java.test.metamodel::LitClassWithConstructors");
+    assert(`new LitClassWithConstructors.other`.name == "other");
+    assert(`new LitParameterisedClassWithConstructors`.name == ""); 
+    assert(`new LitParameterisedClassWithConstructors.other`.name == "other");
+    
 }
 

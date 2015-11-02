@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.attribute;
 
-class InnerAttributeGetterWithConflictingMethods implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class InnerAttributeGetterWithConflictingMethods implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     InnerAttributeGetterWithConflictingMethods() {
     }
@@ -57,11 +57,6 @@ class InnerAttributeGetterWithConflictingMethods implements .com.redhat.ceylon.c
         final getX_ getX = new getX_();
         final long n = x$getter$_.get_();
         final long n2 = getX.getX();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.attribute.InnerAttributeGetterWithConflictingMethods();
     }
     
     @.java.lang.Override

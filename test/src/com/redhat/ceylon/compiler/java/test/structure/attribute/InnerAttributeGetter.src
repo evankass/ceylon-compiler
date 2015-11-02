@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.attribute;
 
-class InnerAttributeGetter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class InnerAttributeGetter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     InnerAttributeGetter() {
     }
@@ -35,11 +35,6 @@ class InnerAttributeGetter implements .com.redhat.ceylon.compiler.java.runtime.m
         }
         final .com.redhat.ceylon.compiler.java.language.GetterLong innerGetter$getter$_ = new innerGetter$getter$_();
         final long n = innerGetter$getter$_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.attribute.InnerAttributeGetter();
     }
     
     @.java.lang.Override

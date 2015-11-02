@@ -1,6 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.statement.loop.optim;
 
-class OptimizedForWithSegment implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class OptimizedForWithSegment implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected OptimizedForWithSegment() {
+        super();
+        this.start = 0L;
+        this.length = 0L;
+    }
     
     OptimizedForWithSegment(final long start, final long length) {
         this.start = start;
@@ -20,15 +26,15 @@ class OptimizedForWithSegment implements .com.redhat.ceylon.compiler.java.runtim
     private final void literals$priv$() {
         long sum = 0L;
         final long start$0 = 0L;
-        final long end$1 = start$0 + .java.lang.Math.max(0L, 10L);
-        loop_0: for (long i$2 = start$0; i$2 < end$1; i$2++) {
-            final long i = i$2;
+        final long length$1 = 10L;
+        loop_0: for (long i$2 = 0; i$2 < length$1; i$2++) {
+            final long i = i$2 + start$0;
             sum += i;
         }
         final int start$3 = 97;
-        final int end$4 = (int)(start$3 + .java.lang.Math.max(0L, 26L));
-        loop_1: for (int i$5 = start$3; i$5 < end$4; i$5++) {
-            final int c = i$5;
+        final long length$4 = 26L;
+        loop_1: for (long i$5 = 0; i$5 < length$4; i$5++) {
+            final int c = .ceylon.language.Character.neighbour(start$3, i$5);
             sum += .ceylon.language.Character.getInteger(c);
         }
     }
@@ -36,35 +42,35 @@ class OptimizedForWithSegment implements .com.redhat.ceylon.compiler.java.runtim
     private final void expressions$priv$() {
         long sum = 0L;
         final long start$6 = getStart$priv$();
-        final long end$7 = start$6 + .java.lang.Math.max(0L, getLength$priv$());
-        loop_2: for (long i$8 = start$6; i$8 < end$7; i$8++) {
-            final long i = i$8;
+        final long length$7 = getLength$priv$();
+        loop_2: for (long i$8 = 0; i$8 < length$7; i$8++) {
+            final long i = i$8 + start$6;
             sum += i;
         }
         final long start$9 = getStart$priv$() + 10L;
-        final long end$10 = start$9 + .java.lang.Math.max(0L, getLength$priv$() + 10L);
-        loop_3: for (long i$11 = start$9; i$11 < end$10; i$11++) {
-            final long i = i$11;
+        final long length$10 = getLength$priv$() + 10L;
+        loop_3: for (long i$11 = 0; i$11 < length$10; i$11++) {
+            final long i = i$11 + start$9;
             sum += i;
         }
     }
     
     private final void by$priv$() {
         long sum = 0L;
-        final long start$12 = 1L;
-        final long step$15 = 3L;
-        if (step$15 <= 0) throw new .ceylon.language.AssertionError("Assertion failed" + ": step size must be greater than zero" + (.java.lang.System.lineSeparator() + "\tviolated " + "step > 0"));
-        final long end$13 = start$12 + .java.lang.Math.max(0L, 10L);
-        loop_4: for (long i$14 = start$12; i$14 < end$13; i$14 += step$15) {
-            final long i = i$14;
+        final long start$13 = 1L;
+        final long length$14 = 10L;
+        final long step$12 = 3L;
+        if (length$14 > 0 && step$12 <= 0) throw new .ceylon.language.AssertionError("Assertion failed" + ": step size must be greater than zero" + (.java.lang.System.lineSeparator() + "\tviolated " + "step > 0"));
+        loop_4: for (long i$15 = 0; i$15 < length$14; i$15 = step$12 == 1L ? i$15 + 1L : .ceylon.language.Integer.neighbour(i$15, step$12)) {
+            final long i = step$12 == 1L ? i$15 + start$13 : .ceylon.language.Integer.neighbour(start$13, i$15);
             sum += i;
         }
-        final long start$16 = 1L;
-        final long step$19 = 3L;
-        if (step$19 <= 0) throw new .ceylon.language.AssertionError("Assertion failed" + ": step size must be greater than zero" + (.java.lang.System.lineSeparator() + "\tviolated " + "step > 0"));
-        final long end$17 = start$16 + .java.lang.Math.max(0L, 10L);
-        loop_5: for (long i$18 = start$16; i$18 < end$17; i$18 += step$19) {
-            final long i = i$18;
+        final long start$17 = 1L;
+        final long length$18 = 10L;
+        final long step$16 = 3L;
+        if (length$18 > 0 && step$16 <= 0) throw new .ceylon.language.AssertionError("Assertion failed" + ": step size must be greater than zero" + (.java.lang.System.lineSeparator() + "\tviolated " + "step > 0"));
+        loop_5: for (long i$19 = 0; i$19 < length$18; i$19 = step$16 == 1L ? i$19 + 1L : .ceylon.language.Integer.neighbour(i$19, step$16)) {
+            final long i = step$16 == 1L ? i$19 + start$17 : .ceylon.language.Integer.neighbour(start$17, i$19);
             sum += i;
         }
     }
@@ -88,118 +94,118 @@ class OptimizedForWithSegment implements .com.redhat.ceylon.compiler.java.runtim
     private final void flow$priv$() {
         long sum = 0L;
         final long start$24 = 1L;
-        final long end$25 = start$24 + .java.lang.Math.max(0L, 10L);
-        loop_8: for (long i$26 = start$24; i$26 < end$25; i$26++) {
-            final long withElse = i$26;
+        final long length$25 = 10L;
+        loop_8: for (long i$26 = 0; i$26 < length$25; i$26++) {
+            final long withElse = i$26 + start$24;
             sum += withElse;
         }
         sum = 0L;
         final long start$27 = 1L;
-        final long end$28 = start$27 + .java.lang.Math.max(0L, 10L);
-        loop_9: for (long i$29 = start$27; i$29 < end$28; i$29++) {
-            final long breaks = i$29;
+        final long length$28 = 10L;
+        loop_9: for (long i$29 = 0; i$29 < length$28; i$29++) {
+            final long breaks = i$29 + start$27;
             sum += breaks;
             break loop_9;
         }
-        boolean doforelse$33 = true;
-        final long start$30 = 1L;
-        final long end$31 = start$30 + .java.lang.Math.max(0L, 10L);
-        loop_10: for (long i$32 = start$30; i$32 < end$31; i$32++) {
-            final long breaksWithElse = i$32;
+        boolean doforelse$30 = true;
+        final long start$31 = 1L;
+        final long length$32 = 10L;
+        loop_10: for (long i$33 = 0; i$33 < length$32; i$33++) {
+            final long breaksWithElse = i$33 + start$31;
             sum += breaksWithElse;
-            doforelse$33 = false;
+            doforelse$30 = false;
             break loop_10;
         }
-        if (doforelse$33) {
+        if (doforelse$30) {
             sum = 0L;
         }
-        boolean doforelse$37 = true;
-        final long start$34 = 1L;
-        final long end$35 = start$34 + .java.lang.Math.max(0L, 10L);
-        loop_11: for (long i$36 = start$34; i$36 < end$35; i$36++) {
-            final long breaksWithElse = i$36;
+        boolean doforelse$34 = true;
+        final long start$35 = 1L;
+        final long length$36 = 10L;
+        loop_11: for (long i$37 = 0; i$37 < length$36; i$37++) {
+            final long breaksWithElse = i$37 + start$35;
             sum += breaksWithElse;
             if (breaksWithElse == 5L) {
-                doforelse$37 = false;
+                doforelse$34 = false;
                 break loop_11;
             }
         }
-        if (doforelse$37) {
+        if (doforelse$34) {
             sum = 0L;
         }
         final long start$39 = 1L;
-        final long end$40 = start$39 + .java.lang.Math.max(0L, 10L);
-        loop_12: for (long i$41 = start$39; i$41 < end$40; i$41++) {
-            final long returns = i$41;
+        final long length$40 = 10L;
+        loop_12: for (long i$41 = 0; i$41 < length$40; i$41++) {
+            final long returns = i$41 + start$39;
             sum += returns;
             break loop_12;
         }
-        boolean doforelse$45 = true;
-        final long start$42 = 1L;
-        final long end$43 = start$42 + .java.lang.Math.max(0L, 10L);
-        loop_13: for (long i$44 = start$42; i$44 < end$43; i$44++) {
-            final long returnsWithElse = i$44;
+        boolean doforelse$42 = true;
+        final long start$43 = 1L;
+        final long length$44 = 10L;
+        loop_13: for (long i$45 = 0; i$45 < length$44; i$45++) {
+            final long returnsWithElse = i$45 + start$43;
             sum += returnsWithElse;
-            doforelse$45 = false;
+            doforelse$42 = false;
             break loop_13;
         }
-        if (doforelse$45) {
+        if (doforelse$42) {
             sum = 0L;
         }
-        boolean doforelse$49 = true;
-        final long start$46 = 1L;
-        final long end$47 = start$46 + .java.lang.Math.max(0L, 10L);
-        loop_14: for (long i$48 = start$46; i$48 < end$47; i$48++) {
-            final long returnsWithElse = i$48;
+        boolean doforelse$46 = true;
+        final long start$47 = 1L;
+        final long length$48 = 10L;
+        loop_14: for (long i$49 = 0; i$49 < length$48; i$49++) {
+            final long returnsWithElse = i$49 + start$47;
             sum += returnsWithElse;
             if (returnsWithElse == 5L) {
-                doforelse$49 = false;
+                doforelse$46 = false;
                 break loop_14;
             }
         }
-        if (doforelse$49) {
+        if (doforelse$46) {
             sum = 0L;
         }
         final long start$51 = 1L;
-        final long end$52 = start$51 + .java.lang.Math.max(0L, 10L);
-        loop_15: for (long i$53 = start$51; i$53 < end$52; i$53++) {
-            final long $throws = i$53;
+        final long length$52 = 10L;
+        loop_15: for (long i$53 = 0; i$53 < length$52; i$53++) {
+            final long $throws = i$53 + start$51;
             sum += $throws;
             break loop_15;
         }
-        boolean doforelse$57 = true;
-        final long start$54 = 1L;
-        final long end$55 = start$54 + .java.lang.Math.max(0L, 10L);
-        loop_16: for (long i$56 = start$54; i$56 < end$55; i$56++) {
-            final long throwsWithElse = i$56;
+        boolean doforelse$54 = true;
+        final long start$55 = 1L;
+        final long length$56 = 10L;
+        loop_16: for (long i$57 = 0; i$57 < length$56; i$57++) {
+            final long throwsWithElse = i$57 + start$55;
             sum += throwsWithElse;
-            doforelse$57 = false;
+            doforelse$54 = false;
             break loop_16;
         }
-        if (doforelse$57) {
+        if (doforelse$54) {
             sum = 0L;
         }
-        boolean doforelse$61 = true;
-        final long start$58 = 1L;
-        final long end$59 = start$58 + .java.lang.Math.max(0L, 10L);
-        loop_17: for (long i$60 = start$58; i$60 < end$59; i$60++) {
-            final long throwsWithElse = i$60;
+        boolean doforelse$58 = true;
+        final long start$59 = 1L;
+        final long length$60 = 10L;
+        loop_17: for (long i$61 = 0; i$61 < length$60; i$61++) {
+            final long throwsWithElse = i$61 + start$59;
             sum += throwsWithElse;
             if (throwsWithElse == 5L) {
-                doforelse$61 = false;
+                doforelse$58 = false;
                 break loop_17;
             }
         }
-        if (doforelse$61) {
+        if (doforelse$58) {
             sum = 0L;
         }
     }
     
     private final void captured$priv$() {
         final long start$63 = 0L;
-        final long end$64 = start$63 + .java.lang.Math.max(0L, 10L);
-        loop_18: for (long i$65 = start$63; i$65 < end$64; i$65++) {
-            final long i = i$65;
+        final long length$64 = 10L;
+        loop_18: for (long i$65 = 0; i$65 < length$64; i$65++) {
+            final long i = i$65 + start$63;
             
             final class x_ {
                 

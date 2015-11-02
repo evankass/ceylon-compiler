@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.attribute;
 
-class MethodLocalAssign implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodLocalAssign implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodLocalAssign() {
     }
@@ -34,11 +34,6 @@ class MethodLocalAssign implements .com.redhat.ceylon.compiler.java.runtime.mode
         }
         final b2$setter$_ b2$setter$_ = new b2$setter$_();
         b2$setter$_.set_(true);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.attribute.MethodLocalAssign();
     }
     
     @.java.lang.Override

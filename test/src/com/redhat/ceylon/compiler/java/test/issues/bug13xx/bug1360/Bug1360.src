@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1360;
 
-class Bug1360 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1360 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1360() {
     }
@@ -33,11 +33,6 @@ class Bug1360 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedT
         );
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1360.Bug1360();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1360.Bug1360.$TypeDescriptor$;
@@ -54,7 +49,7 @@ interface I<T> {
     
     public void $main(final T[] s);
 }
-final class I$impl<T> {
+final class I$impl<T> implements .java.io.Serializable {
     
     I$impl(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, .com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1360.I<T> $this) {
         this.$reified$T = $reified$T;
@@ -95,7 +90,7 @@ final class I$impl<T> {
         );
     }
 }
-class C implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1360.I<.java.lang.String> {
+class C implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1360.I<.java.lang.String>, .java.io.Serializable {
     
     C() {
         this.$com$redhat$ceylon$compiler$java$test$issues$bug13xx$bug1360$I$this$ = new .com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1360.I$impl<.java.lang.String>(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.java.lang.String.class), this);
@@ -131,11 +126,6 @@ class C implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .
     
     private void $main$canonical$(final .java.lang.String[] s) {
         $com$redhat$ceylon$compiler$java$test$issues$bug13xx$bug1360$I$this$.$main(s);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug13xx.bug1360.C();
     }
     
     @.java.lang.Override

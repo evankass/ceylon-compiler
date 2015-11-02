@@ -1,14 +1,9 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug06xx;
 
-class Bug623Direct extends .java.lang.Object implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug623Direct extends .java.lang.Object implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug623Direct() {
         super();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug623Direct();
     }
     
     @.java.lang.Override
@@ -20,15 +15,10 @@ class Bug623Direct extends .java.lang.Object implements .com.redhat.ceylon.compi
 interface Bug623 {
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug623.class);
 }
-class Bug623Indirect extends .java.lang.Object implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug623 {
+class Bug623Indirect extends .java.lang.Object implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug623, .java.io.Serializable {
     
     Bug623Indirect() {
         super();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug06xx.Bug623Indirect();
     }
     
     @.java.lang.Override

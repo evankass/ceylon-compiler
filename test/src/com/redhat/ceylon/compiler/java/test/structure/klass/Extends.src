@@ -1,13 +1,8 @@
 package com.redhat.ceylon.compiler.java.test.structure.klass;
 
-class Extends implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Extends implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Extends() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.klass.Extends();
     }
     
     @.java.lang.Override
@@ -20,11 +15,6 @@ class ExtendsB extends .com.redhat.ceylon.compiler.java.test.structure.klass.Ext
     
     ExtendsB() {
         super();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.klass.ExtendsB();
     }
     
     @.java.lang.Override

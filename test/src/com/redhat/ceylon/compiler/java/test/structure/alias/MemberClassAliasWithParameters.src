@@ -1,12 +1,11 @@
 package com.redhat.ceylon.compiler.java.test.structure.alias;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.ceylon.language.SharedAnnotation$annotation$
 @.com.redhat.ceylon.compiler.java.metadata.Members({
         @.com.redhat.ceylon.compiler.java.metadata.Member(klass = .com.redhat.ceylon.compiler.java.test.structure.alias.MemberClassAliasWithParameters_Foo.MemberClassAlias.class),
         @.com.redhat.ceylon.compiler.java.metadata.Member(klass = .com.redhat.ceylon.compiler.java.test.structure.alias.MemberClassAliasWithParameters_Foo.Member.class)})
-@.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-public class MemberClassAliasWithParameters_Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class MemberClassAliasWithParameters_Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public MemberClassAliasWithParameters_Foo() {
     }
@@ -32,11 +31,10 @@ public class MemberClassAliasWithParameters_Foo implements .com.redhat.ceylon.co
         );
     }
     
-    @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+    @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
     @.ceylon.language.SharedAnnotation$annotation$
     @.com.redhat.ceylon.compiler.java.metadata.Container(klass = .com.redhat.ceylon.compiler.java.test.structure.alias.MemberClassAliasWithParameters_Foo.class)
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-    public class Member implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+    public class Member implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
         
         protected Member(@.com.redhat.ceylon.compiler.java.metadata.Name("i")
         @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
@@ -67,11 +65,10 @@ public class MemberClassAliasWithParameters_Foo implements .com.redhat.ceylon.co
         throw new .ceylon.language.Exception();
     }
     
-    @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+    @.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
     @.ceylon.language.SharedAnnotation$annotation$
     @.com.redhat.ceylon.compiler.java.metadata.Alias("com.redhat.ceylon.compiler.java.test.structure.alias::MemberClassAliasWithParameters_Foo.Member")
     @.com.redhat.ceylon.compiler.java.metadata.Container(klass = .com.redhat.ceylon.compiler.java.test.structure.alias.MemberClassAliasWithParameters_Foo.class)
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
     public final class MemberClassAlias {
         
         private MemberClassAlias() {
@@ -104,10 +101,5 @@ final class memberClassAliasWithParametersMethod_ {
     
     static void memberClassAliasWithParametersMethod() {
         final .com.redhat.ceylon.compiler.java.test.structure.alias.MemberClassAliasWithParameters_Foo.Member foo = new .com.redhat.ceylon.compiler.java.test.structure.alias.MemberClassAliasWithParameters_Foo().MemberClassAlias$new$(1L, "a");
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.structure.alias.memberClassAliasWithParametersMethod_.memberClassAliasWithParametersMethod();
     }
 }

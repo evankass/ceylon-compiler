@@ -5,12 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Functional;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Functional;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.Type;
 import com.sun.tools.javac.tree.JCTree.JCAnnotation;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.util.ListBuffer;
@@ -20,7 +20,7 @@ import com.sun.tools.javac.util.ListBuffer;
  */
 public class AnnotationInvocation {
     
-    private Method constructorDeclaration;
+    private Function constructorDeclaration;
     
     private List<AnnotationConstructorParameter> constructorParameters = new ArrayList<AnnotationConstructorParameter>();
     
@@ -36,11 +36,11 @@ public class AnnotationInvocation {
     /**
      * The annotation constructor, if this is the invocation of an annotation constructor
      */
-    public Method getConstructorDeclaration() {
+    public Function getConstructorDeclaration() {
         return constructorDeclaration;
     }
     
-    public void setConstructorDeclaration(Method constructorDeclaration) {
+    public void setConstructorDeclaration(Function constructorDeclaration) {
         this.constructorDeclaration = constructorDeclaration;
     }
     
@@ -64,7 +64,7 @@ public class AnnotationInvocation {
 
     /** 
      * The primary of the invocation: 
-     * Either an annotation constructor ({@code Method}) 
+     * Either an annotation constructor ({@code Function}) 
      * or an annotation class ({@code Class}). 
      */
     public Declaration getPrimary() {
@@ -75,7 +75,7 @@ public class AnnotationInvocation {
         this.primary = primary;
     }
     
-    public void setPrimary(Method primary) {
+    public void setPrimary(Function primary) {
         this.primary = primary;
     }
     
@@ -89,12 +89,12 @@ public class AnnotationInvocation {
     /**
      * The type of the annotation class ultimately being instantiated
      */
-    public ProducedType getAnnotationClassType() {
+    public Type getAnnotationClassType() {
         if (isInstantiation()) {
             return ((Class)getPrimary()).getType();
         } else {
-            // TODO Method may not be declared to return this!
-            return ((Method)getPrimary()).getType();
+            // TODO Function may not be declared to return this!
+            return ((Function)getPrimary()).getType();
         }
     }
     
@@ -102,7 +102,7 @@ public class AnnotationInvocation {
      * The parameters of the primary
      */
     public List<Parameter> getParameters() {
-        return ((Functional)primary).getParameterLists().get(0).getParameters();
+        return ((Functional)primary).getFirstParameterList().getParameters();
     }
     
     /**
@@ -156,7 +156,7 @@ public class AnnotationInvocation {
      * Make a type expression for the underlying annotation class
      */
     public JCExpression makeAnnotationType(ExpressionTransformer exprGen) {
-        ProducedType type = getAnnotationClassType();
+        Type type = getAnnotationClassType();
         if (isInterop()) {
             return exprGen.makeJavaType(type.getSatisfiedTypes().get(0));
         } else {
@@ -220,7 +220,7 @@ public class AnnotationInvocation {
         if (isInstantiation()) {
             primary = gen.makeJavaType(getAnnotationClassType());
         } else {
-            primary = gen.naming.makeName((Method)getPrimary(), Naming.NA_FQ | Naming.NA_WRAPPER);
+            primary = gen.naming.makeName((Function)getPrimary(), Naming.NA_FQ | Naming.NA_WRAPPER);
         }
         JCAnnotation atInstantiation = gen.make().Annotation(
                 gen.make().Type(gen.syms().ceylonAtAnnotationInstantiationType),
@@ -252,7 +252,7 @@ public class AnnotationInvocation {
             }
         } else {
             // we're invoking another constructor
-            AnnotationInvocation ctor = (AnnotationInvocation)((Method)getPrimary()).getAnnotationConstructor();
+            AnnotationInvocation ctor = (AnnotationInvocation)((Function)getPrimary()).getAnnotationConstructor();
             // find it's arguments
             for (AnnotationArgument otherArgument : ctor.findAnnotationArgumentForClassParameter(classParameter)) {
                 if (otherArgument.getTerm() instanceof ParameterAnnotationTerm) {

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.invoke;
 
-class NamedArgumentInvocation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class NamedArgumentInvocation implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     NamedArgumentInvocation() {
         (
@@ -91,11 +91,6 @@ class NamedArgumentInvocation implements .com.redhat.ceylon.compiler.java.runtim
             }
             returning arg$5$callable$.f$priv$(arg$5$0, arg$5$1);
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.invoke.NamedArgumentInvocation();
     }
     
     @.java.lang.Override

@@ -30,34 +30,39 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.redhat.ceylon.common.JVMModuleUtil;
 import com.redhat.ceylon.compiler.java.util.Util;
-import com.redhat.ceylon.compiler.loader.model.FieldValue;
-import com.redhat.ceylon.compiler.loader.model.JavaBeanValue;
-import com.redhat.ceylon.compiler.loader.model.JavaMethod;
-import com.redhat.ceylon.compiler.loader.model.LazyClass;
-import com.redhat.ceylon.compiler.loader.model.LazyInterface;
-import com.redhat.ceylon.compiler.loader.model.LazyMethod;
-import com.redhat.ceylon.compiler.loader.model.LazyValue;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.ControlBlock;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Interface;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.Scope;
-import com.redhat.ceylon.compiler.typechecker.model.Setter;
-import com.redhat.ceylon.compiler.typechecker.model.TypeAlias;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
-import com.redhat.ceylon.compiler.typechecker.tree.NaturalVisitor;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.loader.JvmBackendUtil;
+import com.redhat.ceylon.model.loader.NamingBase;
+import com.redhat.ceylon.model.loader.model.FieldValue;
+import com.redhat.ceylon.model.loader.model.JavaMethod;
+import com.redhat.ceylon.model.loader.model.LazyClass;
+import com.redhat.ceylon.model.loader.model.LazyInterface;
+import com.redhat.ceylon.model.loader.model.LazyFunction;
+import com.redhat.ceylon.model.loader.model.LazyValue;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Constructor;
+import com.redhat.ceylon.model.typechecker.model.ControlBlock;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Functional;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.Scope;
+import com.redhat.ceylon.model.typechecker.model.Setter;
+import com.redhat.ceylon.model.typechecker.model.TypeAlias;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Value;
 import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.code.TypeTags;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.JCTree.JCFieldAccess;
 import com.sun.tools.javac.tree.JCTree.JCIdent;
@@ -66,100 +71,8 @@ import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Names;
 
-public class Naming implements LocalId {
+public class Naming extends NamingBase implements LocalId {
 
-    /**
-     * A synthetic name, or part of a synthetic name 
-     */
-    interface Affix {
-    }
-    
-    /**
-     * An internally used identifier (not used as a prefix or suffix).
-     * Should start and end with a {@code $} and contain no {@code $}
-     */
-    public enum Unfix implements Affix {
-        ref,
-        set_,
-        get_,
-        value,
-        
-        $annotationSequence$,
-        $array$,
-        $call$,
-        $callvariadic$,
-        $calltyped$,
-        $element$,
-        $evaluate$,
-        $getArray$,
-        $getFirst$,
-        $getLength$,
-        $getType$,
-        $getIterables$,
-        $index$,
-        $initException$,
-        $instance$,
-        $invoke$,
-        $lookup$,
-        $refine$,
-        $sb$,
-        $spreadVarargs$,
-        $TypeDescriptor$
-    }
-    
-    /**
-     * Enumerates suffixes used in synthetic names.
-     * 
-     * Should start and end with a {@code $} and contain no {@code $}
-     */
-    public enum Suffix implements Affix {
-        $aliased$,
-        $annotation$,
-        $annotations$,
-        $arg$,
-        $argthis$,
-        $callable$,
-        $canonical$,
-        $element$,
-        $exhausted$,
-        $getter$,
-        $impl, // special case, since it's used in type names
-        $iterable$,
-        $iteration$,
-        $iterator$,
-        $new$,
-        $param$,
-        $priv$,
-        $qual$,
-        $reified$,
-        $sb$,
-        $setter$,
-        $specifier$,
-        $this$,
-        $variadic$, 
-    }
-    
-    /**
-     * Enumerates prefixes used in synthetic names.
-     * 
-     * Should start and end with a {@code $} and contain no {@code $}
-     */
-    enum Prefix implements Affix {
-        $next$,
-        $arg$,
-        $ceylontmp$,
-        $default$,
-        $init$,
-        $iterator$,
-        $kv$, 
-        $reified$,
-        $superarg$
-    }
-    
-    static String name(Unfix unfix) {
-        return unfix.toString();
-    }
-    
     private static String prefixName(Prefix prefix, String s) {
         return prefix.toString() + s;
     }
@@ -176,10 +89,6 @@ public class Naming implements LocalId {
         
         sb.setLength(sb.length()-1);// remove last $
         return sb.toString();
-    }
-    
-    public static String suffixName(Suffix suffix, String s) {
-        return s + suffix.toString();
     }
     
     static String compoundName(String name, String name2) {
@@ -201,6 +110,7 @@ public class Naming implements LocalId {
     private static final String IMPL_POSTFIX = Suffix.$impl.toString();
     private static final String ANNO_POSTFIX = Suffix.$annotation$.toString();
     private static final String ANNOS_POSTFIX = Suffix.$annotations$.toString();
+    private static final String DELEGATION_POSTFIX = Suffix.$delegation$.toString();
 
     static enum DeclNameFlag {
         /** 
@@ -215,103 +125,24 @@ public class Naming implements LocalId {
         /** The name of the annotation type of this thing */
         ANNOTATION,
         /** The name of the annotation type of this thing */
-        ANNOTATIONS
+        ANNOTATIONS,
+        /** Quoted */
+        DELEGATION
     }
     
     /** Quote the given name by prefixing it with a dollar ($) */
     public static String quote(String name) {
-        return "$"+name;
+        return JVMModuleUtil.quote(name);
     }
 
-    private static final HashSet<String> tokens;
-    private static final String[] tokensArray =         new String[]{
-        "abstract",
-        "assert",
-        "boolean",
-        "break",
-        "byte",
-        "case",
-        "catch",
-        "char",
-        "class",
-        "const",
-        "continue",
-        "default",
-        "do",
-        "double",
-        "else",
-        "enum",
-        "extends",
-        "final",
-        "finally",
-        "float",
-        "for",
-        "goto",
-        "if",
-        "implements",
-        "import",
-        "instanceof",
-        "int",
-        "interface",
-        "long",
-        "native",
-        "new",
-        "package",
-        "private",
-        "protected",
-        "public",
-        "return",
-        "short",
-        "static",
-        "strictfp",
-        "super",
-        "switch",
-        "synchronized",
-        "this",
-        "throw",
-        "throws",
-        "transient",
-        "try",
-        "void",
-        "volatile",
-        "while",
-        "true",
-        "false",
-        "null",
-    };
-    static {
-        tokens = new HashSet<String>();
-        for (String token : tokensArray) {
-            tokens.add(token);
-        }
-    }
     /** Determines whether the given name is a Java keyword */
     public static boolean isJavaKeyword(String name) {
-        return tokens.contains(name);
-    }
-
-    /** Determines whether the given name is a Java keyword */
-    public static boolean isJavaKeyword(String string, int start, int end) {
-        int length = end - start;
-        OUTER:
-        for(int i=0;i<tokensArray.length;i++){
-            String token = tokensArray[i];
-            if(token.length() != length)
-                continue;
-            for(int c=0;c<length;c++){
-                if(string.charAt(c + start) != token.charAt(c))
-                    continue OUTER;
-            }
-            return true;
-        }
-        return false;
+        return JVMModuleUtil.isJavaKeyword(name);
     }
 
     /** Prefixes the given name with a dollar ($) if it is a Java keyword */
     public static String quoteIfJavaKeyword(String name){
-        if(isJavaKeyword(name))
-            return quote(name);
-        return name;
+        return JVMModuleUtil.quoteIfJavaKeyword(name);
     }
 
     private static final HashSet<String> QUOTABLE_METHOD_NAMES;
@@ -359,39 +190,32 @@ public class Naming implements LocalId {
     private static String getMethodNameInternal(TypedDeclaration decl) {
         String name;
         if (decl.isClassOrInterfaceMember()
-                && decl instanceof Method) {
+                && decl instanceof Function) {
             Declaration refined = decl.getRefinedDeclaration();
             if (refined instanceof JavaMethod) {
                 return ((JavaMethod)refined).getRealName();
             }
-            name = quoteMethodNameIfProperty((Method)decl);
+            name = quoteMethodNameIfProperty((Function)decl);
         } else {
             name = decl.getName();
         }
+        if (decl.isClassMember()
+                && "readResolve".equals(name)
+                && Strategy.addReadResolve((Class)decl.getContainer())) {
+            return quote(name);
+        }
+        if (decl.isClassMember()
+                && "writeReplace".equals(name)
+                && Strategy.useSerializationProxy((Class)decl.getContainer())) {
+            return quote(name);
+        }
+        
         // ERASURE
         if (QUOTABLE_METHOD_NAMES.contains(name)) {
             return quote(name);
         } else {
             return quoteIfJavaKeyword(name);
         }
-    }
-
-    private static String getErasedGetterName(Declaration decl) {
-        String property = decl.getName();
-        // ERASURE
-        if (!(decl instanceof Value) || ((Value)decl).isShared()) {
-            if ("hash".equals(property)) {
-                return "hashCode";
-            } else if ("string".equals(property)) {
-                return "toString";
-            }
-        }
-        
-        String getterName = getGetterName(property);
-        if (decl.isMember() && !decl.isShared()) {
-            getterName = suffixName(Suffix.$priv$, getterName);
-        }
-        return getterName;
     }
 
     public static String getVariableName(Tree.Variable var) {
@@ -418,35 +242,6 @@ public class Naming implements LocalId {
         return Naming.quoteIfJavaKeyword(name);
     }
     
-    /**
-     * Removes any leading $ from the given string.
-     */
-    public static String stripLeadingDollar(String str){
-        return (str.charAt(0) == '$') ? str.substring(1) : str;
-    }
-
-    public static String capitalize(String str){
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
-    }
-    
-    /** 
-     * @deprecated Use of this method outside this package is 
-     * <strong>strongly</strong> discouraged. 
-     * Its public modifier will be removed at a future date.
-     */
-    public static String getGetterName(String property) {
-        return "get"+capitalize(stripLeadingDollar(property));
-    }
-
-    /** 
-     * @deprecated Use of this method outside this package is 
-     * <strong>strongly</strong> discouraged. 
-     * Its public modifier will be removed at a future date.
-     */
-    public static String getSetterName(String property){
-        return "set"+capitalize(stripLeadingDollar(property));
-    }
-    
     private final java.util.Map<Scope, Integer> locals = new java.util.HashMap<Scope, Integer>();
     
     /**
@@ -454,7 +249,7 @@ public class Naming implements LocalId {
      * determining the name munging necessary for "hoisting" interface declarations 
      * to top level.
      */
-    private class LocalIdVisitor extends Visitor implements NaturalVisitor {
+    private class LocalIdVisitor extends Visitor {
         
         private int localId = 0;
         
@@ -466,6 +261,10 @@ public class Naming implements LocalId {
             if (!locals.containsKey(decl)) {
                 locals.put(decl, localId);
                 localId++;
+            }
+            Scope container = decl.getContainer();
+            if(container != null && ModelUtil.isLocalNotInitializerScope(container)){
+                local(container);
             }
         }
         
@@ -646,7 +445,7 @@ public class Naming implements LocalId {
         } while (!(s instanceof Package));
         Collections.reverse(l);
         
-        if (flags.contains(DeclNameFlag.QUALIFIED)) {
+        if (flags.contains(DeclNameFlag.QUALIFIED) && (!decl.isAnonymous() || decl.isNamed())) {
             final List<String> packageName;
             if(!AbstractTransformer.isJavaArray(decl))
                 packageName = ((Package) s).getName();
@@ -669,9 +468,13 @@ public class Naming implements LocalId {
 
     private void appendTypeDeclaration(final TypeDeclaration decl, EnumSet<DeclNameFlag> flags, 
             TypeDeclarationBuilder<?> typeDeclarationBuilder, Scope scope, final boolean last) {
-        if (scope instanceof Class || scope instanceof TypeAlias) {
+        if (scope instanceof Class 
+                || scope instanceof TypeAlias 
+                || (scope instanceof Constructor && (scope.equals(decl) || !Decl.isLocalNotInitializerScope(scope)))) {
             TypeDeclaration klass = (TypeDeclaration)scope;
-            typeDeclarationBuilder.append(klass.getName());
+            if(klass.isAnonymous() && !klass.isNamed())
+                typeDeclarationBuilder.clear();
+            typeDeclarationBuilder.append(escapeClassName(klass.getName() != null ? klass.getName() : ""));
             if (Decl.isCeylon(klass)) {
                 if (flags.contains(DeclNameFlag.COMPANION)
                     && Decl.isLocalNotInitializer(klass)
@@ -683,13 +486,16 @@ public class Naming implements LocalId {
                 } else if (flags.contains(DeclNameFlag.ANNOTATIONS)
                         && last) {
                     typeDeclarationBuilder.append(ANNOS_POSTFIX);
+                } else if (flags.contains(DeclNameFlag.DELEGATION)
+                        && last) {
+                    typeDeclarationBuilder.append(DELEGATION_POSTFIX);
                 }
             }
         } else if (scope instanceof Interface) {
             Interface iface = (Interface)scope;
             typeDeclarationBuilder.append(iface.getName());
             if (Decl.isCeylon(iface)
-                && ((decl instanceof Class || decl instanceof TypeAlias) 
+                && ((decl instanceof Class || decl instanceof Constructor || decl instanceof TypeAlias|| scope instanceof Constructor) 
                         || flags.contains(DeclNameFlag.COMPANION))) {
                 typeDeclarationBuilder.append(IMPL_POSTFIX);
             }
@@ -723,9 +529,13 @@ public class Naming implements LocalId {
             // nothing? that's just weird
         }
         if (!last) {
-            if (decl instanceof Interface 
-                    && Decl.isCeylon((Interface)decl)
+            if (decl instanceof Interface
+                    && Decl.isCeylon((TypeDeclaration)decl)
                     && !flags.contains(DeclNameFlag.COMPANION)) {
+                typeDeclarationBuilder.append('$');
+            } else if (decl instanceof Constructor
+                    && ((Class)decl.getContainer()).isMember()
+                    && decl.getContainer().equals(scope)) {
                 typeDeclarationBuilder.append('$');
             } else {
                 if (flags.contains(DeclNameFlag.QUALIFIED)) {
@@ -819,104 +629,59 @@ public class Naming implements LocalId {
         return makeTypeDeclarationExpression(null, decl, DeclNameFlag.QUALIFIED, DeclNameFlag.COMPANION);
     }
     
-    private static String quoteMethodNameIfProperty(Method method) {
+    private static String quoteMethodNameIfProperty(Function method) {
         String name = method.getName();
         if (!method.isShared()) {
             name = suffixName(Suffix.$priv$, name);
         }
         // Toplevel methods keep their original name because their names might be mangled
-        if (method instanceof LazyMethod) {
-            return ((LazyMethod)method).getRealName();
+        if (method instanceof LazyFunction) {
+            return ((LazyFunction)method).getRealName();
         }
         // only quote if method is a member, we cannot get a conflict for local
         // since local methods have a $getter suffix
         if(!method.isClassOrInterfaceMember())
             return name;
         // do not quote method names if we have a refined constraint
-        Method refinedMethod = (Method) method.getRefinedDeclaration();
+        Function refinedMethod = (Function) method.getRefinedDeclaration();
         if(refinedMethod instanceof JavaMethod){
             return ((JavaMethod)refinedMethod).getRealName();
         }
         // get/is with at least one more letter, no parameter and non-void type
         if(((name.length() >= 4 && name.startsWith("get"))
              || name.length() >= 3 && name.startsWith("is"))
-            && method.getParameterLists().get(0).getParameters().isEmpty()
+            && method.getFirstParameterList().getParameters().isEmpty()
             && !AbstractTransformer.isAnything(method.getType()))
             return quote(name);
         // set with one parameter and void type
         if((name.length() >= 4 && name.startsWith("set"))
-           && method.getParameterLists().get(0).getParameters().size() == 1
+           && method.getFirstParameterList().getParameters().size() == 1
            && AbstractTransformer.isAnything(method.getType()))
             return quote(name);
         return name;
     }
 
-    private static String quoteMethodName(Method decl, int namingOptions){
+    private static String quoteMethodName(Function decl, int namingOptions){
         // always use the refined decl
         Declaration refinedDecl = decl.getRefinedDeclaration();  
-        return getMethodName((Method)refinedDecl, namingOptions);
+        return getMethodName((Function)refinedDecl, namingOptions);
     
     }
 
-    public static String getGetterName(Declaration decl) {
-        return getGetterName(decl, false);
-    }
-
-    public static String getGetterName(Declaration decl, boolean indirect) {
-        // always use the refined decl
-        decl = decl.getRefinedDeclaration();
-        if (decl instanceof FieldValue){
-            return ((FieldValue)decl).getRealName();
-        }
-        if (decl instanceof JavaBeanValue) {
-            return ((JavaBeanValue)decl).getGetterName();
-        }
-        if (Decl.withinClassOrInterface(decl) && !Decl.isLocalToInitializer(decl) && !indirect) {
-            return getErasedGetterName(decl);
-        } else if (decl instanceof TypedDeclaration && Decl.isBoxedVariable((TypedDeclaration)decl)) {
-            return name(Unfix.ref);
-        } else {
-            return name(Unfix.get_);
-        }
-    }
-
-    public static String getSetterName(Declaration decl){
-        // use the refined decl except when the current declaration is variable and the refined isn't
-        Declaration refinedDecl = decl.getRefinedDeclaration();
-        if (Decl.isValue(decl) && Decl.isValue(refinedDecl)) {
-            Value v = (Value)decl;
-            Value rv = (Value)refinedDecl;
-            if (!v.isVariable() || rv.isVariable()) {
-                decl = refinedDecl;
-            }
-        } else {
-            decl = refinedDecl;
-        }
-        if (decl instanceof FieldValue){
-            return ((FieldValue)decl).getRealName();
-        }
-        if (decl instanceof JavaBeanValue
-                // only if the declaration actually has a setter name, if it's a non-variable
-                // one it will not. This is also used for late setters...
-                && ((JavaBeanValue)decl).getSetterName() != null) {
-            return ((JavaBeanValue)decl).getSetterName();
-        } else if (Decl.withinClassOrInterface(decl) && !Decl.isLocalToInitializer(decl)) {
-            String setterName = getSetterName(decl.getName());
-            if (decl.isMember() && !decl.isShared()) {
-                setterName = suffixName(Suffix.$priv$, setterName);
-            }
-            return setterName;
-        } else if (decl instanceof TypedDeclaration && Decl.isBoxedVariable((TypedDeclaration)decl)) {
-            return name(Unfix.ref);
-        }  else {
-            return name(Unfix.set_);
-        }
-    }
 
     public static String getDefaultedParamMethodName(Declaration decl, Parameter param) {
-        if (decl instanceof Method) {
-            return compoundName(((Method) decl).getName(), CodegenUtil.getTopmostRefinedDeclaration(param.getModel()).getName());
-        } else if (decl instanceof ClassOrInterface) {
+        if (Decl.isConstructor(decl)) {
+            Constructor constructor = Decl.getConstructor(decl);
+            if (Decl.isDefaultConstructor(constructor)) {
+                return compoundName(Decl.getConstructedClass(constructor).getName(), param.getName());
+            } else {
+                return compoundName(Decl.getConstructedClass(constructor).getName(), decl.getName(), param.getName());
+            }
+        } else if (decl instanceof Function) {
+            if(decl.isAnonymous())
+                return prefixName(Prefix.$default$, param.getName());
+            return compoundName(((Function) decl).getName(), CodegenUtil.getTopmostRefinedDeclaration(param.getModel()).getName());
+        } else if (decl instanceof ClassOrInterface ) {
             if (decl.isToplevel() || Decl.isLocalNotInitializer(decl)) {
                 return prefixName(Prefix.$default$, param.getName());
             } else {
@@ -930,12 +695,10 @@ public class Naming implements LocalId {
         }
     }
     
-    String getInstantiatorMethodName(Class model) {
-        return suffixName(Suffix.$new$, model.getName());
-    }
-    
-    String getAliasInstantiatorMethodName(Class model) {
-        return suffixName(Suffix.$aliased$, model.getName());
+    String getInstantiatorMethodName(Functional classOrCtor) {
+        // In the case of a constructor we use a constructor name parameter to tell the diff
+        // the instantiator method still has the same name as the class.
+        return suffixName(Suffix.$new$, classOrCtor.getName());
     }
     
     JCExpression makeInstantiatorMethodName(JCExpression qual, Class model) {
@@ -946,13 +709,18 @@ public class Naming implements LocalId {
         return getAliasedParameterName(parameter.getModel());
     }
     
-    private static String getAliasedParameterName(MethodOrValue parameter) {
+    static boolean aliasConstructorParameterName(FunctionOrValue mov) {
+        return mov.getContainer() instanceof Constructor && !mov.isShared() && !mov.isCaptured();
+    }
+    
+    private static String getAliasedParameterName(FunctionOrValue parameter) {
         if (!parameter.isParameter()) {
             throw new BugException();
         }
-        MethodOrValue mov = parameter;
-        if ((mov instanceof Method && ((Method)mov).isDeferred())
-                || (mov instanceof Value && mov.isVariable() && mov.isCaptured())) {
+        FunctionOrValue mov = parameter;
+        if ((mov instanceof Function && ((Function)mov).isDeferred())
+                || (mov instanceof Value && mov.isVariable() && mov.isCaptured())
+                || aliasConstructorParameterName(mov)) {
             return suffixName(Suffix.$param$, parameter.getName());
         }
         return quoteIfJavaKeyword(parameter.getName());
@@ -1274,19 +1042,19 @@ public class Naming implements LocalId {
             }
             String name;
             if ((namingOptions & __NA_IDENT_PARAMETER_ALIASED) != 0) {
-                name = Naming.getAliasedParameterName((MethodOrValue)decl);
+                name = Naming.getAliasedParameterName((FunctionOrValue)decl);
             } else {
                 name = substitute(decl);
                 
             }
             builder.select(name);
         } else if ((namingOptions & NA_SETTER) != 0) {
-            if (decl instanceof Method) {
+            if (decl instanceof Function) {
                 throw new BugException("A method has no setter");
             }
             builder.select(getSetterName(decl));
         } else if ((namingOptions & NA_GETTER) != 0) {
-            if (decl instanceof Method) {
+            if (decl instanceof Function) {
                 throw new BugException("A method has no getter");
             }
             builder.select(getGetterName(decl));
@@ -1295,17 +1063,17 @@ public class Naming implements LocalId {
             builder.select(getGetterName(decl));
         } else if (decl instanceof Setter) {
             builder.select(getSetterName(decl.getName()));
-        } else if (decl instanceof Method
+        } else if (decl instanceof Function
                 && ((!decl.isParameter() || decl.isShared() || decl.isCaptured())
                         // if we want it aliased, it means we're in a constructor and we don't want
                         // the member name ever for parameters, so let's never fall into that branch and skip
                         // to the next one
                         && (namingOptions & NA_ALIASED) == 0)) {
             builder.select(getMethodName(decl, namingOptions));
-        } else if (decl instanceof MethodOrValue
-                && ((MethodOrValue)decl).isParameter()) {
+        } else if (decl instanceof FunctionOrValue
+                && ((FunctionOrValue)decl).isParameter()) {
             if ((namingOptions & NA_ALIASED) != 0) {
-                builder.select(getAliasedParameterName((MethodOrValue)decl));
+                builder.select(getAliasedParameterName((FunctionOrValue)decl));
             } else {
                 builder.select(decl.getName());
             }
@@ -1387,10 +1155,14 @@ public class Naming implements LocalId {
         }
     }
     
-    
+    static String escapeClassName(String name) {
+        // escape # of anonymous class names with underscore, we will save the name in @Name anyways
+        return name.replace('#', '_');
+    }
 
     static String quoteClassName(String name) {
-        return Util.isInitialLowerCase(name) ? name + "_" : name;
+        name = escapeClassName(name);
+        return JvmBackendUtil.isInitialLowerCase(name) ? name + "_" : name;
     }
     
     /** 
@@ -1403,8 +1175,8 @@ public class Naming implements LocalId {
         String name;
         if (decl instanceof LazyValue) {
             name = ((LazyValue)decl).getRealName();
-        } else if (decl instanceof LazyMethod) {
-            name = ((LazyMethod)decl).getRealName();
+        } else if (decl instanceof LazyFunction) {
+            name = ((LazyFunction)decl).getRealName();
         } else if (decl instanceof LazyClass) {
             name = ((LazyClass)decl).getRealName();
         } else if (decl instanceof LazyInterface) {
@@ -1466,10 +1238,6 @@ public class Naming implements LocalId {
     private static final int __NA_IDENT_PARAMETER_ALIASED = 1<<12;
     static final int NA_IDENT_PARAMETER_ALIASED = NA_IDENT | __NA_IDENT_PARAMETER_ALIASED;
     
-    public static final String OLD_MODULE_DESCRIPTOR_CLASS_NAME = "module_";
-    public static final String MODULE_DESCRIPTOR_CLASS_NAME = "$module_";
-    public static final String PACKAGE_DESCRIPTOR_CLASS_NAME = "$package_";
-    
     
     /**
      * Returns the name of the Java method/field for the given declaration 
@@ -1487,16 +1255,16 @@ public class Naming implements LocalId {
             } else {
                 return getGetterName(decl);
             }
-        } else if (decl instanceof Method) {
+        } else if (decl instanceof Function) {
             if (decl.isClassMember()) {
                 // don't try to be smart with interop calls 
                 if(decl instanceof JavaMethod)
                     return ((JavaMethod)decl).getRealName();
                 return getMethodName(decl, namingOptions);
             }
-            return quoteMethodName((Method)decl, namingOptions);
-        } else if (decl instanceof MethodOrValue
-                && ((MethodOrValue)decl).isParameter()) {
+            return quoteMethodName((Function)decl, namingOptions);
+        } else if (decl instanceof FunctionOrValue
+                && ((FunctionOrValue)decl).isParameter()) {
             return getMethodName(decl, namingOptions);
         }
         throw new BugException();
@@ -1540,7 +1308,7 @@ public class Naming implements LocalId {
     final String getCompanionFieldName(Interface def) {
         // resolve aliases
         if(def.isAlias())
-            def = (Interface) def.getExtendedTypeDeclaration();
+            def = (Interface) def.getExtendedType().getDeclaration();
         return suffixName(Suffix.$this$, "$" + Decl.className(def).replace('.', '$'));
     }
 
@@ -1586,6 +1354,14 @@ public class Naming implements LocalId {
             throw new BugException();
         }
         return makeSelect(makeName((TypedDeclaration)decl, NA_FQ | NA_WRAPPER), getMethodNameInternal((TypedDeclaration)decl));
+    }
+    
+    JCExpression makeLanguageSerializationValue(String string) {
+        Declaration decl = gen().typeFact().getLanguageModuleSerializationDeclaration(string);
+        if (!Decl.isValue(decl)) {
+            throw new BugException();
+        }
+        return makeSelect(makeName((Value)decl, NA_FQ | NA_WRAPPER), getGetterName(decl));
     }
     
     /*
@@ -2156,6 +1932,42 @@ public class Naming implements LocalId {
         return new SyntheticName(names.fromString(quoteIfJavaKeyword(value.getName())));
     }
     
+    SyntheticName synthetic(Tree.Variable var) {
+        return new SyntheticName(names.fromString(getVariableName(var)));
+    }
+    
+    SyntheticName synthetic(Tree.Pattern pattern) {
+        if (pattern instanceof Tree.VariablePattern) {
+            return synthetic(((Tree.VariablePattern)pattern).getVariable());
+        } else if (pattern instanceof Tree.KeyValuePattern) {
+            return synthetic(Prefix.$pattern$, "entry").alias();
+        } else if (pattern instanceof Tree.TuplePattern) {
+            return synthetic(Prefix.$pattern$, "tuple").alias();
+        } else {
+            throw BugException.unhandledCase(pattern);
+        }
+    }
+    
+    SyntheticName syntheticDestructure(Tree.Statement varOrDes) {
+        if (varOrDes instanceof Tree.Variable) {
+            return synthetic((Tree.Variable)varOrDes);
+        } else if (varOrDes instanceof Tree.Destructure) {
+            return synthetic(((Tree.Destructure)varOrDes).getPattern());
+        } else {
+            throw BugException.unhandledCase(varOrDes);
+        }
+    }
+    
+    SyntheticName synthetic(Tree.ForIterator forIterator) {
+        if (forIterator instanceof Tree.ValueIterator) {
+            return synthetic(((Tree.ValueIterator)forIterator).getVariable());
+        } else if (forIterator instanceof Tree.PatternIterator) {
+            return synthetic(((Tree.PatternIterator)forIterator).getPattern());
+        } else {
+            throw BugException.unhandledCase(forIterator);
+        }
+    }
+    
     void clearSubstitutions(Declaration decl) {
         if (decl.isToplevel()) {
             // Clear all the substitutions before each top level declaration
@@ -2175,7 +1987,7 @@ public class Naming implements LocalId {
     /**
      * Makes a name for a local attribute where we store a method specifier
      */
-    public String getMethodSpecifierAttributeName(Method m) {
+    public String getMethodSpecifierAttributeName(Function m) {
         return suffixName(Suffix.$specifier$, m.getName());
     }
     
@@ -2191,8 +2003,8 @@ public class Naming implements LocalId {
         return name(Unfix.$callvariadic$);
     }
     
-    public static String getCallableMethodName(Method method) {
-        java.util.List<Parameter> parameters = method.getParameterLists().get(0).getParameters();
+    public static String getCallableMethodName(Function method) {
+        java.util.List<Parameter> parameters = method.getFirstParameterList().getParameters();
         boolean variadic = !parameters.isEmpty() && parameters.get(parameters.size()-1).isSequenced();
         return variadic ? getCallableVariadicMethodName() : getCallableMethodName();
     }
@@ -2263,13 +2075,72 @@ public class Naming implements LocalId {
     public String getAnnotationSequenceMethodName() {
         return name(Unfix.$annotationSequence$);
     }
-
+    
     public static String getToplevelAttributeSavedExceptionName() {
         return name(Unfix.$initException$);
     }
     
     public static boolean isLowerCase(String name){
-        return !name.isEmpty() && Character.isLowerCase(name.charAt(0));
+        return !name.isEmpty() && Character.isLowerCase(name.codePointAt(0));
+    }
+
+    public static String getInitializationFieldName(String fieldName) {
+        return prefixName(Prefix.$init$, quoteFieldName(fieldName));
+    }
+    
+    public JCExpression makeNamedConstructorName(Constructor constructor, boolean delegation) {
+        DeclNameFlag[] flags = delegation ? new DeclNameFlag[]{DeclNameFlag.QUALIFIED, DeclNameFlag.DELEGATION}: new DeclNameFlag[]{DeclNameFlag.QUALIFIED};
+        Class cls = (Class)constructor.getContainer();
+        if (cls.isToplevel() || 
+                (cls.isMember() && ((TypeDeclaration)cls.getContainer()).isToplevel())) {
+            return makeTypeDeclarationExpression(null, constructor, flags);
+        } else {
+            return maker.TypeCast(
+                    makeTypeDeclarationExpression(null, constructor, flags),
+                    //makeTypeDeclarationExpression(makeTypeDeclarationExpression(null, cls, DeclNameFlag.QUALIFIED), constructor, DeclNameFlag.QUALIFIED),
+                    make().Literal(TypeTags.BOT, null));
+        }
+    }
+    
+    public JCExpression makeNamedConstructorType(Constructor constructor, boolean delegation) {
+        DeclNameFlag[] flags = delegation ? new DeclNameFlag[]{DeclNameFlag.QUALIFIED, DeclNameFlag.DELEGATION}: new DeclNameFlag[]{DeclNameFlag.QUALIFIED};
+        return makeTypeDeclarationExpression(null, constructor, flags);
+    }
+
+    /**
+     * uRLDecoder is ambiguous because we generate the getURLDecoder getter which gets decoded to urlDecoder,
+     * so for those we have to remember the exact name
+     */
+    public static boolean isAmbiguousGetterName(TypedDeclaration attr) {
+        return !attr.isToplevel() && isAmbiguousGetterName(attr.getName());
+    }
+
+    /**
+     * uRLDecoder is ambiguous because we generate the getURLDecoder getter which gets decoded to urlDecoder,
+     * so for those we have to remember the exact name.
+     */
+    public static boolean isAmbiguousGetterName(String name) {
+        int cpl = name.codePointCount(0, name.length());
+        if(cpl < 2)
+            return false;
+        int f = name.codePointAt(0);
+        if(!Character.isLowerCase(f) && f != '_')
+            return false;
+        int s = name.codePointAt(1);
+        return Character.isUpperCase(s);
+    }
+    
+    protected SyntheticName getValueConstructorFieldName(Value singletonModel) {
+        Class clz = (Class)singletonModel.getContainer();
+        if (clz.isToplevel()) {
+            return synthetic(Naming.quoteFieldName(singletonModel.getName()));
+        }
+        else if (clz.isClassMember()){
+            return synthetic(Prefix.$instance$, clz.getName(), singletonModel.getName());
+        } else {
+            return synthetic(Prefix.$instance$, clz.getName(), singletonModel.getName());
+        }
     }
 }
+
 

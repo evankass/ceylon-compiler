@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.klass;
 
-class FunctionalParameterActual<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class FunctionalParameterActual<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     FunctionalParameterActual(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T) {
         this.$reified$T = $reified$T;
@@ -11,17 +11,17 @@ class FunctionalParameterActual<T> implements .com.redhat.ceylon.compiler.java.r
         return t;
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.klass.FunctionalParameterActual(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.structure.klass.FunctionalParameterActual.class, $reified$T);
     }
 }
 class FunctionalParameterActualString extends .com.redhat.ceylon.compiler.java.test.structure.klass.FunctionalParameterActual<.ceylon.language.String> {
+    
+    protected FunctionalParameterActualString() {
+        super(.ceylon.language.String.$TypeDescriptor$);
+        this.m = null;
+    }
     
     FunctionalParameterActualString(final .ceylon.language.Callable<? extends .ceylon.language.String> m) {
         super(.ceylon.language.String.$TypeDescriptor$);

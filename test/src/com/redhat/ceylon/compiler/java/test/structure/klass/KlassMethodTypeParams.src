@@ -1,17 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.structure.klass;
 
-class KlassMethodTypeParams implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class KlassMethodTypeParams implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     KlassMethodTypeParams() {
     }
     
     private final <T>T m$priv$(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T, final T t) {
         return t;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.klass.KlassMethodTypeParams();
     }
     
     @.java.lang.Override

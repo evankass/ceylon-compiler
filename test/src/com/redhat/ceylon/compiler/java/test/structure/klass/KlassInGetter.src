@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.klass;
 
-class KlassInGetter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class KlassInGetter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     KlassInGetter() {
         
@@ -13,7 +13,7 @@ class KlassInGetter implements .com.redhat.ceylon.compiler.java.runtime.model.Re
                 if (true || true) {
                     final long i = 1L;
                     
-                    class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+                    class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
                         
                         Bar() {
                         }
@@ -33,11 +33,6 @@ class KlassInGetter implements .com.redhat.ceylon.compiler.java.runtime.model.Re
             }
         }
         final .com.redhat.ceylon.compiler.java.language.Getter<.java.lang.String> foo$getter$_ = new foo$getter$_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.klass.KlassInGetter();
     }
     
     @.java.lang.Override

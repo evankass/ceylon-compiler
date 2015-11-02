@@ -1,7 +1,7 @@
 package com.redhat.ceylon.compiler.java.test.interop;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
-class GetString implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
+class GetString implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     GetString() {
         final .com.redhat.ceylon.compiler.java.test.interop.JavaGetString jgs = new .com.redhat.ceylon.compiler.java.test.interop.JavaGetString();
@@ -13,12 +13,6 @@ class GetString implements .com.redhat.ceylon.compiler.java.runtime.model.Reifie
         h = jgs.getHash();
         b = jgs.isHash();
         jgs.setHash(.com.redhat.ceylon.compiler.java.Util.toInt(1L));
-    }
-    
-    @.com.redhat.ceylon.compiler.java.metadata.Ignore
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.interop.GetString();
     }
     
     @.java.lang.Override

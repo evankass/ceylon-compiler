@@ -1,13 +1,13 @@
-shared class CeylonClass<Element>()
+native("jvm") class CeylonClass<Element>()
     extends JavaClass<Element>()
     satisfies JavaInterface<Element>{
     
     shared actual void foo<T>() given T satisfies Object{} 
 }
 
-shared interface CeylonInterface<Element> satisfies JavaInterface<Element>{}
+native("jvm") interface CeylonInterface<Element> satisfies JavaInterface<Element>{}
 
-void reifiedInstantiateInterop(){
+native("jvm") void reifiedInstantiateInterop(){
     value c = CeylonClass<Integer>();
     c.foo();
     c.foo{};

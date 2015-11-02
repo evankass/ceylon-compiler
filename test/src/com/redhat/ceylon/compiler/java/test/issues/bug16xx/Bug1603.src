@@ -1,6 +1,12 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug16xx;
 
-class Bug1603<Element extends .ceylon.language.Ordinal<? extends Element> & .ceylon.language.Comparable<? super Element> & .ceylon.language.Summable<Element>> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1603<Element extends .ceylon.language.Ordinal<? extends Element> & .ceylon.language.Comparable<? super Element> & .ceylon.language.Summable<Element>> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected Bug1603(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$Element) {
+        super();
+        this.$reified$Element = $reified$Element;
+        this.first = null;
+    }
     
     Bug1603(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$Element, final Element first, final long length) {
         this.$reified$Element = $reified$Element;
@@ -18,7 +24,7 @@ class Bug1603<Element extends .ceylon.language.Ordinal<? extends Element> & .cey
         if ((element$1 = element) instanceof .ceylon.language.Integer) {
             final long element$2 = ((.ceylon.language.Integer)element$1).longValue();
             if ((Element)getFirst() instanceof .ceylon.language.Integer) {
-                return .ceylon.language.Integer.instance(element$2).compare((.ceylon.language.Integer)getFirst()) != .ceylon.language.larger_.get_();
+                return element$2 <= ((.ceylon.language.Integer)getFirst()).longValue();
             }
         }
         return false;

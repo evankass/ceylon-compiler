@@ -10,7 +10,7 @@ interface FooInterface {
     public abstract .com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooInterface foo();
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooInterface.class);
 }
-class Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common, .com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooInterface {
+class Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common, .com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooInterface, .java.io.Serializable {
     
     Foo() {
     }
@@ -23,11 +23,6 @@ class Foo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType,
     @.java.lang.Override
     public final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo foo() {
         return (.com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo).ceylon.language.nothing_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo();
     }
     
     @.java.lang.Override
@@ -46,11 +41,6 @@ class FooSub extends .com.redhat.ceylon.compiler.java.test.expression.comprehens
         return (.com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooSub).ceylon.language.nothing_.get_();
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooSub();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooSub.$TypeDescriptor$;
@@ -62,7 +52,7 @@ interface BarInterface {
     public abstract .com.redhat.ceylon.compiler.java.test.expression.comprehensions.BarInterface bar();
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.comprehensions.BarInterface.class);
 }
-class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common, .com.redhat.ceylon.compiler.java.test.expression.comprehensions.BarInterface {
+class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common, .com.redhat.ceylon.compiler.java.test.expression.comprehensions.BarInterface, .java.io.Serializable {
     
     Bar() {
     }
@@ -75,11 +65,6 @@ class Bar implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType,
     @.java.lang.Override
     public final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Bar bar() {
         return (.com.redhat.ceylon.compiler.java.test.expression.comprehensions.Bar).ceylon.language.nothing_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Bar();
     }
     
     @.java.lang.Override
@@ -120,6 +105,7 @@ final class isCond_ {
                     private final boolean $next$1() {
                         ifcomp_1: while (true) {
                             if (!this.x()) break ifcomp_1;
+                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             .java.lang.Object x$1 = null;
                             if ((x$1 = x) instanceof .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo) {
                                 x$2 = (.com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo)x$1;
@@ -131,8 +117,8 @@ final class isCond_ {
                     
                     public final .java.lang.Object next() {
                         if (this.$next$1()) {
-                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo x$2 = this.x$2;
+                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             return x$2.foo();
                         } else return .ceylon.language.finished_.get_();
                     }
@@ -165,6 +151,7 @@ final class isCond_ {
                     private final boolean $next$1() {
                         ifcomp_1: while (true) {
                             if (!this.x()) break ifcomp_1;
+                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             .java.lang.Object x$4 = null;
                             if ((x$4 = x) instanceof .com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooSub) {
                                 x$5 = (.com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooSub)x$4;
@@ -176,8 +163,8 @@ final class isCond_ {
                     
                     public final .java.lang.Object next() {
                         if (this.$next$1()) {
-                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.FooSub x$5 = this.x$5;
+                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             return x$5.foo();
                         } else return .ceylon.language.finished_.get_();
                     }
@@ -209,6 +196,7 @@ final class isCond_ {
                     private final boolean $next$1() {
                         ifcomp_1: while (true) {
                             if (!this.x()) break ifcomp_1;
+                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             if (x instanceof .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo || x instanceof .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Bar) {
                                 break ifcomp_1;
                             }
@@ -250,6 +238,7 @@ final class isCond_ {
                     private final boolean $next$1() {
                         ifcomp_1: while (true) {
                             if (!this.x()) break ifcomp_1;
+                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             if (x instanceof .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo && x instanceof .com.redhat.ceylon.compiler.java.test.expression.comprehensions.BarInterface) {
                                 break ifcomp_1;
                             }
@@ -291,6 +280,7 @@ final class isCond_ {
                     private final boolean $next$1() {
                         ifcomp_1: while (true) {
                             if (!this.x()) break ifcomp_1;
+                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             if (x instanceof .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Foo && x instanceof .com.redhat.ceylon.compiler.java.test.expression.comprehensions.BarInterface) {
                                 break ifcomp_1;
                             }
@@ -309,7 +299,7 @@ final class isCond_ {
         }.sequence();
         final .ceylon.language.Sequential<? extends .java.lang.Object> nowt = new .com.redhat.ceylon.compiler.java.language.AbstractIterable<.java.lang.Object, .java.lang.Object>(.ceylon.language.Null.$TypeDescriptor$, .ceylon.language.Null.$TypeDescriptor$){
             
-            public final .ceylon.language.Iterator<.java.lang.Object> iterator() {
+            public final .ceylon.language.Iterator iterator() {
                 return new .com.redhat.ceylon.compiler.java.language.AbstractIterator<.java.lang.Object>(.ceylon.language.Null.$TypeDescriptor$){
                     {
                         $iterator$0 = seq.iterator();
@@ -332,6 +322,7 @@ final class isCond_ {
                     private final boolean $next$1() {
                         ifcomp_1: while (true) {
                             if (!this.x()) break ifcomp_1;
+                            final .com.redhat.ceylon.compiler.java.test.expression.comprehensions.Common x = this.x;
                             if (x == null) {
                                 break ifcomp_1;
                             }

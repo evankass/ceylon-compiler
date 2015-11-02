@@ -21,22 +21,29 @@ package com.redhat.ceylon.compiler.java.codegen;
 
 import java.util.List;
 
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Element;
-import com.redhat.ceylon.compiler.typechecker.model.Functional;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.ParameterList;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Unit;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.MethodDeclaration;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.PositionalArgument;
+import com.redhat.ceylon.model.loader.JvmBackendUtil;
+import com.redhat.ceylon.model.loader.model.LazyClass;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassAlias;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Constructor;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Element;
+import com.redhat.ceylon.model.typechecker.model.Functional;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.ParameterList;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.redhat.ceylon.model.typechecker.model.Unit;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 /**
  * Utility functions telling you about code generation strategies
@@ -50,7 +57,7 @@ class Strategy {
     }
     
     public static boolean defaultParameterMethodTakesThis(Declaration decl) {
-        return decl instanceof Method 
+        return decl instanceof Function 
                 && decl.isToplevel();
     }
     
@@ -79,17 +86,20 @@ class Strategy {
     }
     
     public static DefaultParameterMethodOwner defaultParameterMethodOwner(Declaration decl) {
-        if (decl instanceof Method 
+        if (decl instanceof Function 
                 && !Decl.withinInterface(decl)
-                && !((Method)decl).isParameter()) {
+                && !((Function)decl).isParameter()) {
             return DefaultParameterMethodOwner.SELF;
         }
-        if (decl instanceof MethodOrValue
-                && ((MethodOrValue)decl).isParameter()) {
-            decl = (Declaration) ((MethodOrValue)decl).getContainer();
+        if (decl instanceof FunctionOrValue
+                && ((FunctionOrValue)decl).isParameter()) {
+            decl = (Declaration) decl.getContainer();
+        } 
+        if (Decl.isConstructor(decl)) {
+            decl = Decl.getConstructedClass(decl);
         }
         
-        if ((decl instanceof Method || decl instanceof Class) 
+        if ((decl instanceof Function || decl instanceof Class) 
                 && decl.isToplevel()) {
             // Only top-level methods have static default value methods
             return DefaultParameterMethodOwner.STATIC;
@@ -110,12 +120,15 @@ class Strategy {
     }
     
     public static boolean defaultParameterMethodStatic(Element decl) {
-        if (decl instanceof MethodOrValue
-                && ((MethodOrValue)decl).isParameter()) {
-            decl = (Element) ((MethodOrValue)decl).getContainer();
+        if (decl instanceof FunctionOrValue
+                && ((FunctionOrValue)decl).isParameter()) {
+            decl = (Element) decl.getContainer();
+        }
+        if (decl instanceof Declaration && Decl.isConstructor((Declaration)decl)) {
+            decl = (Class)Decl.getConstructedClass((Declaration)decl);
         }
         // Only top-level methods have static default value methods
-        return ((decl instanceof Method && !((Method)decl).isParameter())
+        return ((decl instanceof Function && !((Function)decl).isParameter())
                 || decl instanceof Class) 
                 && ((Declaration)decl).isToplevel();
     }
@@ -127,10 +140,15 @@ class Strategy {
     }
     
     public static boolean defaultParameterMethodOnOuter(Element elem) {
-        if (elem instanceof MethodOrValue
-                && ((MethodOrValue)elem).isParameter()) {
-            elem = (Element) ((MethodOrValue)elem).getContainer();
+        if (elem instanceof Declaration 
+                && Decl.isConstructor((Declaration)elem)) {
+            elem = Decl.getConstructedClass((Declaration)elem);
         }
+        if (elem instanceof FunctionOrValue
+                && ((FunctionOrValue)elem).isParameter()) {
+            elem = (Element) ((FunctionOrValue)elem).getContainer();
+        }
+        
         // Only inner classes have their default value methods on their outer
         return (elem instanceof Class) 
                 && !((Class)elem).isToplevel()
@@ -142,8 +160,8 @@ class Strategy {
     }
     
     public static boolean defaultParameterMethodOnSelf(Declaration decl) {
-        return decl instanceof Method
-                && !((Method)decl).isParameter()
+        return decl instanceof Function
+                && !((Function)decl).isParameter()
                 && !Decl.withinInterface(decl);
     }
     
@@ -162,13 +180,20 @@ class Strategy {
     
     /**
      * Determines whether the given Class def should have a {@code main()} method generated.
-     * I.e. it's a concrete top level Class without initializer parameters
+     * I.e. it's a shared concrete top level Class without initializer parameters
      * @param def
      */
     public static boolean generateMain(Tree.ClassOrInterface def) {
+        for (Tree.CompilerAnnotation c: def.getCompilerAnnotations()) {
+            if (c.getIdentifier().getText().equals("nomain")) {
+                return false;
+            }
+        }
         return def instanceof Tree.AnyClass 
                 && Decl.isToplevel(def) 
+                && Decl.isShared(def)
                 && !Decl.isAbstract(def)
+                && !def.getDeclarationModel().isNativeHeader()
                 && hasNoRequiredParameters((Class)def.getDeclarationModel());
     }
     
@@ -192,12 +217,13 @@ class Strategy {
     }
 
     /**
-     * Determines whether the given Method def should have a {@code main()} method generated.
-     * I.e. it's a top level method without parameters
+     * Determines whether the given Function def should have a {@code main()} method generated.
+     * I.e. it's a shared top level method without parameters
      * @param def
      */
     public static boolean generateMain(Tree.AnyMethod def) {
-        return  Decl.isToplevel(def) 
+        return  Decl.isToplevel(def)
+                && Decl.isShared(def)
                 && hasNoRequiredParameters(def.getDeclarationModel());
     }
     
@@ -217,7 +243,7 @@ class Strategy {
     
     
     public static boolean createField(Parameter p, Value v) {
-        return !Decl.withinInterface(v) 
+        return !Decl.withinInterface(v)
                 && (p == null 
                         || (useField(v)));
     }
@@ -235,17 +261,10 @@ class Strategy {
      * for a FunctionalParameter 
      */
     static boolean createMethod(Parameter parameter) {
-        MethodOrValue model = parameter.getModel();
-        return createMethod(model);
+        FunctionOrValue model = parameter.getModel();
+        return JvmBackendUtil.createMethod(model);
     }
 
-    static boolean createMethod(MethodOrValue model) {
-        return model instanceof Method
-                && model.isParameter()
-                && model.isClassMember()
-                && (model.isShared() || model.isCaptured());
-    }
-    
     /**
      * Non-{@code shared} concrete interface members are 
      * only defined/declared on the companion class, not on the transformed 
@@ -258,17 +277,26 @@ class Strategy {
     }
     
     static boolean generateInstantiator(Declaration model) {
-        return (Decl.isRefinableMemberClass(model) 
-                    && !((Class)model).isAbstract()) 
-                || 
-                // If shared, generate an instantiator so that BC is 
-                // preserved should the member class later become refinable
-                (model instanceof Class 
-                    && model.isMember()
-                    && model.isShared()
-                    && !model.isAnonymous()
-                    && !((Class)model).isAbstract()
-                    && Decl.isCeylon((Class)model));
+        if (model instanceof Class) {
+            Class cls = (Class)model;
+            return !cls.isAbstract()
+                    && (Decl.isRefinableMemberClass(cls) 
+                        || 
+                        // If shared, generate an instantiator so that BC is 
+                        // preserved should the member class later become refinable
+                        (Decl.isCeylon(cls)
+                                && model.isMember()
+                                && cls.isShared()
+                                && !cls.isAnonymous()));
+        } else if (Decl.isConstructor(model)) {
+            Constructor ctor = Decl.getConstructor(model);
+            Class cls = Decl.getConstructedClass(ctor);
+            return cls.isMember()
+                    && cls.isShared()
+                    && ctor.isShared();
+        } else {
+            return false;
+        }
     }
     
     /**
@@ -287,10 +315,10 @@ class Strategy {
      * (but was not itself refined from a Java {@code void} method), or is 
      * {@code actual} then {@code java.lang.Object} should be used.
      */
-    static boolean useBoxedVoid(Method m) {
+    static boolean useBoxedVoid(Function m) {
         return m.isMember() &&
             (m.isDefault() || m.isFormal() || m.isActual()) &&
-            m.getUnit().getAnythingDeclaration().equals(m.getType().getDeclaration()) &&
+            m.getType().isAnything() &&
             Decl.isCeylon((TypeDeclaration)m.getRefinedDeclaration().getContainer());
     }
 
@@ -310,17 +338,17 @@ class Strategy {
             power = ExpressionTransformer.getIntegerLiteralPower(op);
             if (power != null) {
                 Unit unit = op.getUnit();
-                ProducedType baseType = op.getLeftTerm().getTypeModel();
+                Type baseType = op.getLeftTerm().getTypeModel();
                 // Although the optimisation still works for powers > 64, it ends 
                 // up bloating the code (e.g. imagine x^1_000_000_000)
                 if (power > 0
                         && power <= 64
-                        && baseType.isExactly(unit.getIntegerDeclaration().getType())) {
+                        && baseType.isExactly(unit.getIntegerType())) {
                     return true;
                 }
                 else if (power > 0
                         && power <= 64
-                        && baseType.isExactly(unit.getFloatDeclaration().getType())) {
+                        && baseType.isExactly(unit.getFloatType())) {
                     return true;
                 }
             }
@@ -338,6 +366,141 @@ class Strategy {
     public static boolean preferLazySwitchingIterable(
             java.util.List<PositionalArgument> positionalArguments) {
         return positionalArguments.size() < 128;
+    }
+
+    public static boolean generateJpaCtor(
+            Tree.ClassOrInterface def) {
+        return generateJpaCtor(def.getDeclarationModel());
+    }
+
+    static boolean generateJpaCtor(ClassOrInterface declarationModel) {
+        if (declarationModel instanceof Class
+                && !(declarationModel instanceof ClassAlias)
+                && declarationModel.isToplevel()) {
+            Class cls = (Class)declarationModel;
+            if (cls.getCaseValues() != null && !cls.getCaseValues().isEmpty()) {
+                return false;
+            }
+            if (hasNullaryNonJpaConstructor(cls)) {
+                // The class will already have a nullary ctor
+                return false;
+            }
+            
+            boolean hasDelegatableSuper = false;
+            Class superClass = (Class)cls.getExtendedType().getDeclaration();
+            if (superClass instanceof LazyClass
+                    && !((LazyClass)superClass).isCeylon()) {
+                if (superClass.isAbstraction()) {
+                    for (Declaration s : superClass.getOverloads()) {
+                        if (s instanceof Class
+                                && isNullary((Class)s)) {
+                            hasDelegatableSuper = true;
+                            break;
+                        }
+                    }
+                } else {
+                    // If the superclass is Java then generate a Jpa constructor
+                    // if there's a nullary superclass constructor we can call
+                    hasDelegatableSuper = isNullary(superClass);
+                }
+            } else {
+                hasDelegatableSuper = hasNullaryNonJpaConstructor(superClass)
+                        || hasJpaConstructor(superClass);
+            }
+            
+            boolean constrained = 
+                    (cls.getCaseValues() != null 
+                    && !cls.getCaseValues().isEmpty())
+                    || cls.hasEnumerated() && Decl.hasOnlyValueConstructors(cls);
+            
+            return hasDelegatableSuper
+                    && !constrained;
+        } else {
+            return false;
+        }
+    }
+    
+    private static boolean isNullary(Class superClass) {
+        return superClass.getParameterList() != null 
+                && superClass.getParameterList().getParameters() != null 
+                && superClass.getParameterList().getParameters().isEmpty();
+    }
+    
+    /**
+     * Whether the given class has a "JPA constructor". 
+     * A JPA constructor is a hidden-from-Ceylon constructor
+     * which is used by frameworks like JPA. To be useful to frameworks
+     * the JPA constructor must be nullary. A JPA constructor
+     * will not be nullary if the class is generic: This makes it non-useful 
+     * to JPA, but allows subclasses to delegate to it and have their own
+     * nullary JPA constructor.  
+     * @param c The class
+     * @return
+     */
+    public static boolean hasJpaConstructor(Class c) {
+        if (c instanceof LazyClass
+                && !(c instanceof ClassAlias)) {
+            // If it's binary it has a JpaConstructor if it says so
+            return ((LazyClass)c).hasJpaConstructor();
+        } else {
+            return generateJpaCtor(c);
+        }
+    }
+    
+    /**
+     * Will this class have a nullary Java constructor, excluding JPA constructors
+     * @param c
+     * @return
+     */
+    protected static boolean hasNullaryNonJpaConstructor(Class c) {
+        if (c.isToplevel()
+                && !(c instanceof ClassAlias)) {
+            List<Parameter> parameters = null;
+            if (c.hasConstructors()) {
+                Constructor defaultConstructor = Decl.getDefaultConstructor(c);
+                if (defaultConstructor != null
+                        && defaultConstructor.getParameterList() != null) {
+                    parameters = defaultConstructor.getParameterList().getParameters();
+                }
+            } else if (c.getParameterList() != null ){
+                parameters = c.getParameterList().getParameters();
+            }
+            return parameters != null 
+                    && (parameters.isEmpty()
+                    || parameters.get(0).isDefaulted()
+                    || (parameters.get(0).isSequenced() && !parameters.get(0).isAtLeastOne()));
+        }
+        return false;
+    }
+
+    public static boolean introduceJavaIoSerializable(
+            Class cls, Interface ser) {
+        if (!(cls instanceof ClassAlias)) {
+            if ((Decl.hasOnlyValueConstructors(cls) 
+                    || cls.isAnonymous()
+                    || (cls.getExtendedType() != null
+                    && (cls.getExtendedType().isBasic()
+                    || cls.getExtendedType().isObject())))
+                    && !cls.getSatisfiedTypes().contains(ser.getType())) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    /** Should the given class have a readResolve() method added ?
+     * @param ser */
+    public static boolean addReadResolve(Class cls) {
+        if (cls.isAnonymous()
+                && cls.isToplevel()) {
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean useSerializationProxy(Class model) {
+        return model.hasEnumerated()
+                && (model.isToplevel() || model.isMember());
     }
     
 }

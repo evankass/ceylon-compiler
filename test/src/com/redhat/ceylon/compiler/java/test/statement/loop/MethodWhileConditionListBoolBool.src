@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.loop;
 
-class MethodWhileConditionListBoolBool implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodWhileConditionListBoolBool implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodWhileConditionListBoolBool() {
     }
@@ -10,15 +10,14 @@ class MethodWhileConditionListBoolBool implements .com.redhat.ceylon.compiler.ja
             if (x > 0L) {
                 if (x < 10L) {
                     return x == 1L;
-                } else break loop_0;
-            } else break loop_0;
+                } else {
+                    break loop_0;
+                }
+            } else {
+                break loop_0;
+            }
         }
         return false;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.loop.MethodWhileConditionListBoolBool();
     }
     
     @.java.lang.Override

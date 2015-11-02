@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.attribute;
 
-abstract class ClassAttribute implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+abstract class ClassAttribute implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ClassAttribute() {
         final .java.lang.String uncapturedvar;
@@ -51,11 +51,6 @@ class SubClassAttribute extends .com.redhat.ceylon.compiler.java.test.structure.
     @.java.lang.Override
     public final .java.lang.String getFormalvarShortcut() {
         return formalvarShortcut;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.attribute.SubClassAttribute();
     }
     
     @.java.lang.Override

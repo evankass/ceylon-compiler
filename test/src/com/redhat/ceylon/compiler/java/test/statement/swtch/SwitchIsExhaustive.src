@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.swtch;
 
-class SwitchIsExhaustive implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class SwitchIsExhaustive implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     SwitchIsExhaustive() {
     }
@@ -24,11 +24,6 @@ class SwitchIsExhaustive implements .com.redhat.ceylon.compiler.java.runtime.mod
             } else throw new .com.redhat.ceylon.compiler.java.language.EnumeratedTypeError("Supposedly exhaustive switch was not exhaustive");
         }
         return name;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.swtch.SwitchIsExhaustive();
     }
     
     @.java.lang.Override

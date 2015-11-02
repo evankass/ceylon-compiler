@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug12xx;
 
-class Bug1211Top<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1211Top<T> implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1211Top(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$T) {
         this.$reified$T = $reified$T;
@@ -13,11 +13,6 @@ class Bug1211Top<T> implements .com.redhat.ceylon.compiler.java.runtime.model.Re
     
     public .java.lang.Object f2(final .ceylon.language.Callable<? extends .java.lang.Object> g) {
         return null;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug12xx.Bug1211Top(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.NothingType);
     }
     
     @.java.lang.Override
@@ -39,11 +34,6 @@ class Bug1211Bottom extends .com.redhat.ceylon.compiler.java.test.issues.bug12xx
     @.java.lang.Override
     public final .java.lang.Object f2(final .ceylon.language.Callable<? extends .java.lang.Object> g) {
         return null;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug12xx.Bug1211Bottom();
     }
     
     @.java.lang.Override

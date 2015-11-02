@@ -26,6 +26,7 @@ import static com.redhat.ceylon.ceylondoc.Util.getModifiers;
 import static com.redhat.ceylon.ceylondoc.Util.getNameWithContainer;
 import static com.redhat.ceylon.ceylondoc.Util.isAbbreviatedType;
 import static com.redhat.ceylon.ceylondoc.Util.isEmpty;
+import static com.redhat.ceylon.compiler.typechecker.tree.TreeUtil.buildAnnotations;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,7 +35,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,28 +44,32 @@ import org.antlr.runtime.CommonToken;
 
 import com.redhat.ceylon.compiler.java.codegen.Decl;
 import com.redhat.ceylon.compiler.typechecker.context.PhasedUnit;
-import com.redhat.ceylon.compiler.typechecker.model.Annotation;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.ClassOrInterface;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Functional;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.ParameterList;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.Scope;
-import com.redhat.ceylon.compiler.typechecker.model.Setter;
-import com.redhat.ceylon.compiler.typechecker.model.TypeAlias;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.Unit;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
 import com.redhat.ceylon.compiler.typechecker.tree.Node;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.model.typechecker.model.Annotation;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.ClassOrInterface;
+import com.redhat.ceylon.model.typechecker.model.Constructor;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Functional;
+import com.redhat.ceylon.model.typechecker.model.Generic;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.ParameterList;
+import com.redhat.ceylon.model.typechecker.model.Referenceable;
+import com.redhat.ceylon.model.typechecker.model.Scope;
+import com.redhat.ceylon.model.typechecker.model.Setter;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeAlias;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypeParameter;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Unit;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 public abstract class ClassOrPackageDoc extends CeylonDoc {
     
@@ -88,114 +92,156 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
 		super(module, tool, writer);
 	}
     
-    protected final void doc(TypeAlias alias) throws IOException {
+    protected final void doc(String name, TypeAlias alias) throws IOException {
+        boolean isAlias = Util.nullSafeCompare(name, alias.getName()) != 0;
         open("tr");
         
-        open("td id='" + alias.getName() + "' nowrap");
+        open("td id='" + name + "' nowrap");
         writeIcon(alias);
-        around("code class='decl-label'", alias.getName());
+        around("code class='decl-label'", name);
         close("td");
         
         open("td");
         writeLinkOneSelf(alias);
-        writeLinkSource(alias);
-        writeTagged(alias);
-        open("code class='signature'");
-        around("span class='modifiers'", getModifiers(alias));
-        write(" ");
-        open("span class='type-identifier'");
-        write(alias.getName());
-        close("span");
-        if (!alias.getTypeParameters().isEmpty()) {
-            writeTypeParameters(alias.getTypeParameters());
-            writeTypeParametersConstraints(alias.getTypeParameters());
-            open("div class='type-alias-specifier'");
+        if(isAlias){
+            writeTagged(alias);
+            writeAlias(alias);
+        }else{
+            writeLinkSource(alias);
+            writeTagged(alias);
+            open("code class='signature'");
+            around("span class='modifiers'", getModifiers(alias));
+            write(" ");
+            open("span class='type-identifier'");
+            write(alias.getName());
+            close("span");
+            if (!alias.getTypeParameters().isEmpty()) {
+                writeTypeParameters(alias.getTypeParameters(), alias);
+                writeTypeParametersConstraints(alias.getTypeParameters(), alias);
+                open("div class='type-alias-specifier'");
+            }
+            around("span class='specifier'", "=> ");
+            linkRenderer().to(alias.getExtendedType()).useScope(alias).write();
+            if (!alias.getTypeParameters().isEmpty()) {
+                close("div"); // type-alias-specifier
+            }
+            close("code"); // signature
+            writeDescription(alias);
         }
-        around("span class='specifier'", "=> ");
-        linkRenderer().to(alias.getExtendedType()).write();
-        if (!alias.getTypeParameters().isEmpty()) {
-            close("div"); // type-alias-specifier
-        }
-        close("code"); // signature
-        writeDescription(alias);
         close("td");
         
         close("tr");
     }
 
-    protected final void doc(ClassOrInterface d) throws IOException {
+    protected final void doc(String name, ClassOrInterface d) throws IOException {
+        boolean alias = Util.nullSafeCompare(name, d.getName()) != 0;
         open("tr");
         
-        open("td id='" + d.getName() + "' nowrap");
+        open("td id='" + name + "' nowrap");
         writeIcon(d);
-        open("a class='decl-label' href='"+ linkRenderer().to(d).getUrl() +"'");
-        around("code", d.getName());
+        open("a class='decl-label' href='"+ linkRenderer().to(d).useScope(d).getUrl() +"'");
+        around("code", name);
         close("a");
         close("td");
         
         open("td");
         writeLinkOneSelf(d);
-        writeLinkSourceCode(d);
-        writeTagged(d);
-        open("code class='signature'");
-        around("span class='modifiers'", getModifiers(d));
-        write(" ");
-        linkRenderer().to(d.getType()).printAbbreviated(!isAbbreviatedType(d)).printTypeParameterDetail(true).write();
-        writeTypeParametersConstraints(d.getTypeParameters());
-        close("code");
-        writeDescription(d);
+        if(alias){
+            writeTagged(d);
+            writeAlias(d);
+        }else{
+            writeLinkSourceCode(d);
+            writeTagged(d);
+            open("code class='signature'");
+            around("span class='modifiers'", getModifiers(d));
+            write(" ");
+            linkRenderer().to(d.getType()).useScope(d).printAbbreviated(!isAbbreviatedType(d)).printTypeParameterDetail(true).write();
+            writeTypeParametersConstraints(d.getTypeParameters(), d);
+            close("code");
+            writeDescription(d);
+        }
         close("td");
         
         close("tr");
     }
 
-    protected final void doc(TypedDeclaration d) throws IOException {
+    private void writeAlias(Declaration decl) throws IOException {
+        write("See ");
+        open("code class='signature'");
+        String cssClass = decl instanceof TypeDeclaration ? "type-identifier" : "identifier";
+        open("span class='"+cssClass+"'");
+        linkRenderer().to(decl).useScope(decl).write();
+        close("span");
+        close("code");
+    }
+
+    protected final void doc(String name, Declaration d) throws IOException {
+        String declarationName = Util.getDeclarationName(d);
+        boolean alias = Util.nullSafeCompare(name, declarationName) != 0;
+        
         // put the id on the td because IE8 doesn't support id attributes on tr (yeah right)
         open("tr");
         
-        open("td id='" + d.getName() + "' nowrap");
+        open("td id='" + name + "' nowrap");
         writeIcon(d);
-        around("code class='decl-label'", d.getName());
-        close("td");
+        if( !(d instanceof Constructor) ) {
+            around("code class='decl-label'", name);
+            close("td");
+            open("td");
+        }
         
-        open("td");
         writeLinkOneSelf(d);
-        writeLinkSource(d);
-        writeTagged(d);
-        
-        if(d instanceof Functional)
-            writeParameterLinksIfRequired((Functional) d);
-        open("code class='signature'");
-        around("span class='modifiers'", getModifiers(d));
-        write(" ");
-        
-        if( d instanceof Functional && ((Functional) d).isDeclaredVoid() ) {
-            around("span class='void'", "void");
-        } else {
-            linkRenderer().to(d.getType()).write();    
-        }
-        
-        write(" ");
-        open("span class='identifier'");
-        write(d.getName());
-        close("span");
-        if( isConstantValue(d) ) {
-            writeConstantValue((Value) d);
-        }
-        if( d instanceof Functional ) {
-            Functional f = (Functional) d;
-            writeTypeParameters(f.getTypeParameters());
-            writeParameterList(f);
-            writeTypeParametersConstraints(f.getTypeParameters());
-        }
-        if (d instanceof Value) {
-            Setter setter = ((Value) d).getSetter();
-            if (setter != null && Util.getAnnotation(setter.getAnnotations(), "doc") != null) {
-                tool.warningSetterDoc(d.getQualifiedNameString(), d);
+        if(alias){
+            writeTagged(d);
+            writeAlias(d);
+        }else{
+            writeLinkSource(d);
+            writeTagged(d);
+
+            if(d instanceof Functional) {
+                writeParameterLinksIfRequired((Functional) d);
             }
+            open("code class='signature'");
+            around("span class='modifiers'", getModifiers(d));
+            write(" ");
+
+            if( !ModelUtil.isConstructor(d) ) {
+                if( d instanceof Functional && ((Functional) d).isDeclaredVoid() ) {
+                    around("span class='void'", "void");
+                } else if ( d instanceof TypedDeclaration) {
+                    linkRenderer().to(((TypedDeclaration) d).getType()).useScope(d).write();
+                } else {
+                    linkRenderer().to(d).useScope(d).write();
+                }
+            }
+
+            write(" ");
+            open("span class='identifier'");
+            write(name);
+            close("span");
+            if( isConstantValue(d) ) {
+                writeConstantValue((Value) d);
+            }
+            if( d instanceof Generic ) {
+                Generic f = (Generic) d;
+                writeTypeParameters(f.getTypeParameters(), d);
+            }
+            if( d instanceof Functional ) {
+                writeParameterList((Functional) d, d);
+            }
+            if( d instanceof Generic ) {
+                Generic f = (Generic) d;
+                writeTypeParametersConstraints(f.getTypeParameters(), d);
+            }
+            if (d instanceof Value) {
+                Setter setter = ((Value) d).getSetter();
+                if (setter != null && Util.getAnnotation(setter.getUnit(), setter.getAnnotations(), "doc") != null) {
+                    tool.warningSetterDoc(d.getQualifiedNameString(), d);
+                }
+            }
+            close("code");
+            writeDescription(d);
         }
-        close("code");
-        writeDescription(d);
         close("td");
         close("tr");
     }
@@ -205,17 +251,13 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
             Value value = (Value) d;
             if( value.isShared() && !value.isVariable() ) {
                 Unit unit = value.getUnit();
-                TypeDeclaration type = value.getTypeDeclaration();
+                Type type = value.getType();
                 
-                if (type == unit.getSequentialDeclaration()) {
-                    ProducedType elementType = unit.getIteratedType(value.getType());
-                    type = elementType.getDeclaration();
+                if (type.isSequential()) {
+                    type = unit.getSequentialElementType(type);
                 }
 
-                if (unit.getStringDeclaration().equals(type)
-                        || unit.getIntegerDeclaration().equals(type)
-                        || unit.getFloatDeclaration().equals(type)
-                        || unit.getCharacterDeclaration().equals(type)) {
+                if (type.isString() || type.isInteger() || type.isFloat() || type.isCharacter()) {
                     return true;
                 }
             }
@@ -257,19 +299,20 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
             tool.warningMissingDoc(d.getQualifiedNameString(), d);
         }
         around("div class='doc section'", doc);
-        if( d instanceof MethodOrValue ) {
+        if( d instanceof FunctionOrValue ) {
             writeAnnotations(d);
         	writeParameters(d);
             writeThrows(d);        
             writeBy(d);
             writeSee(d);
-            writeLinkToRefinedDeclaration((MethodOrValue)d);
+            writeLinkToRefinedDeclaration((FunctionOrValue)d);
         }
         if (d instanceof TypeAlias) {
             writeAnnotations(d);
             writeBy(d);
             writeSee(d);
         }
+        writeAliases(d);
         close("div"); // description
     }
     
@@ -301,7 +344,7 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
         }
     }
 
-    private void writeLinkToRefinedDeclaration(MethodOrValue d) throws IOException {
+    private void writeLinkToRefinedDeclaration(FunctionOrValue d) throws IOException {
         Declaration topMostRefinedDecl = d.getRefinedDeclaration();
         if (topMostRefinedDecl != null && topMostRefinedDecl != d) {
             Declaration bottomMostRefinedDecl = findBottomMostRefinedDeclaration(d);
@@ -321,7 +364,7 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
         }
     }
 
-    protected final void writeTypeParameters(List<TypeParameter> typeParameters) throws IOException {
+    protected final void writeTypeParameters(List<TypeParameter> typeParameters, Referenceable scope) throws IOException {
         if (typeParameters != null && !typeParameters.isEmpty()) {
             write("&lt;");
             write("<span class='type-parameter'>");
@@ -342,7 +385,7 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
                 if (typeParam.isDefaulted() && typeParam.getDefaultTypeArgument() != null){
                     write("<span class='type-parameter'> = </span>");
                     write("<span class='type-parameter-value'>");
-                    write(linkRenderer().to(typeParam.getDefaultTypeArgument()).getLink());
+                    write(linkRenderer().to(typeParam.getDefaultTypeArgument()).useScope(scope).getLink());
                     write("</span>");
                 }
             }
@@ -351,7 +394,7 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
         }
     }
     
-    protected final void writeTypeParametersConstraints(List<TypeParameter> typeParameters) throws IOException {
+    protected final void writeTypeParametersConstraints(List<TypeParameter> typeParameters, Referenceable scope) throws IOException {
         for (TypeParameter typeParam : typeParameters) {
             if (typeParam.isConstrained()) {
                 open("div class='type-parameter-constraint'");
@@ -360,12 +403,8 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
                 write(" ");
                 around("span class='type-parameter'", typeParam.getName());
                 
-                writeSatisfiedTypes(typeParam);
-                writeCaseTypes(typeParam);
-
-                if (typeParam.getParameterList() != null) {
-                    writeParameterList(typeParam);
-                }
+                writeSatisfiedTypes(typeParam, scope);
+                writeCaseTypes(typeParam, scope);
 
                 close("div");
             }
@@ -373,10 +412,10 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
     }
 
     protected final void writeInheritance(TypeDeclaration typeDeclaration) throws IOException {
-        if (typeDeclaration.getCaseTypes()!=null &&
-                !typeDeclaration.getCaseTypes().isEmpty()) {
+        List<Type> caseTypes = typeDeclaration.getCaseTypes();
+        if (caseTypes!=null && !caseTypes.isEmpty()) {
             open("div class='inheritance-satisfies'");
-            writeCaseTypes(typeDeclaration);
+            writeCaseTypes(typeDeclaration, typeDeclaration);
             close("div");
         }
         if (typeDeclaration instanceof Class &&
@@ -384,50 +423,50 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
             open("div class='inheritance-extends'");
             write("<span class='keyword'>extends</span>");
             write(" ");
-            linkRenderer().to(typeDeclaration.getExtendedType()).write();
+            linkRenderer().to(typeDeclaration.getExtendedType()).useScope(typeDeclaration).write();
             close("div");
         }
-        if (typeDeclaration.getSatisfiedTypes()!=null &&
-                !typeDeclaration.getSatisfiedTypes().isEmpty()) {
+        List<Type> satisfiedTypes = typeDeclaration.getSatisfiedTypes();
+        if (satisfiedTypes!=null && !satisfiedTypes.isEmpty()) {
             open("div class='inheritance-of'");
-            writeSatisfiedTypes(typeDeclaration);
+            writeSatisfiedTypes(typeDeclaration, typeDeclaration);
             close("div");
         }
     }
 
-    private void writeCaseTypes(TypeDeclaration typeDeclaration) throws IOException {
-        List<ProducedType> caseTypes = typeDeclaration.getCaseTypes();
+    private void writeCaseTypes(TypeDeclaration typeDeclaration, Referenceable scope) throws IOException {
+        List<Type> caseTypes = typeDeclaration.getCaseTypes();
         if (caseTypes != null && !caseTypes.isEmpty()) {
             write(" ");
             write("<span class='type-parameter-keyword'>of</span>");
             write(" ");
             boolean first = true;
-            for (ProducedType caseType : caseTypes) {
+            for (Type caseType : caseTypes) {
                 if (first) {
                     first = false;
                 } else {
                     write(" | ");
                 }
-                linkRenderer().to(caseType).write();
+                linkRenderer().to(caseType).useScope(scope).write();
             }
         }
     }
 
-    private void writeSatisfiedTypes(TypeDeclaration typeDeclaration)
+    private void writeSatisfiedTypes(TypeDeclaration typeDeclaration, Referenceable scope)
             throws IOException {
-        List<ProducedType> satisfiedTypes = typeDeclaration.getSatisfiedTypes();
+        List<Type> satisfiedTypes = typeDeclaration.getSatisfiedTypes();
         if (satisfiedTypes != null && !satisfiedTypes.isEmpty()) {
             write(" ");
             write("<span class='keyword'>satisfies</span>");
             write(" ");
             boolean first = true;
-            for (ProducedType satisfiedType : satisfiedTypes) {
+            for (Type satisfiedType : satisfiedTypes) {
                 if (first) {
                     first = false;
                 } else {
                     write(" &amp; ");
                 }
-                linkRenderer().to(satisfiedType).write();
+                linkRenderer().to(satisfiedType).useScope(scope).write();
             }
         }
     }
@@ -457,15 +496,15 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
                     around("a id='" + idPrefix + f.getName() + "-" + parameter.getName() + "'", "");
                     
                     // if parameter is function, we need to produce links to its parameters
-                    if (parameter.getModel() instanceof Method) {
-                        writeParameterLinksIfRequired((Method) parameter.getModel(), false, idPrefix + f.getName() + "-");
+                    if (parameter.getModel() instanceof Function) {
+                        writeParameterLinksIfRequired((Function) parameter.getModel(), false, idPrefix + f.getName() + "-");
                     }
                 }
             }
         }
     }
 
-    protected final void writeParameterList(Functional f) throws IOException {
+    protected final void writeParameterList(Functional f, Referenceable scope) throws IOException {
         for (ParameterList lists : f.getParameterLists()) {
             write("(");
             boolean first = true;
@@ -476,10 +515,10 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
                     first = false;
                 }
                 
-                if (param.getModel() instanceof Method) {
-                    writeFunctionalParameter(param);
+                if (param.getModel() instanceof Function) {
+                    writeFunctionalParameter(param, scope);
                 } else {
-                    linkRenderer().to(param.getType()).write();
+                    linkRenderer().to(param.getType()).useScope(scope).write();
                     write(" ");
                     around("span class='parameter'", param.getName());
                 }
@@ -532,15 +571,15 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
         return null;
     }
 
-    private void writeFunctionalParameter(Parameter functionParam) throws IOException {
+    private void writeFunctionalParameter(Parameter functionParam, Referenceable scope) throws IOException {
         if( functionParam.isDeclaredVoid() ) {
             around("span class='void'", "void");
         } else {
-            linkRenderer().to(functionParam.getType()).write();
+            linkRenderer().to(functionParam.getType()).useScope(scope).write();
         }
         write(" ");
         write(functionParam.getName());
-        writeParameterList((Method)functionParam.getModel());
+        writeParameterList((Function)functionParam.getModel(), scope);
     }
 
     protected final void writeParameters(Declaration decl) throws IOException {
@@ -564,8 +603,8 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
                         around("span class='parameter' id='" + decl.getName() + "-" + parameter.getName() + "'", parameter.getName());
                         
                         // if parameter is function, we need to produce links to its parameters
-                        if (parameter.getModel() instanceof Method) {
-                            writeParameterLinksIfRequired((Method) parameter.getModel(), false, decl.getName() + "-");
+                        if (parameter.getModel() instanceof Function) {
+                            writeParameterLinksIfRequired((Function) parameter.getModel(), false, decl.getName() + "-");
                         }
                         
                         if (!isEmpty(parameterDocData.defaultValue)) {
@@ -603,9 +642,9 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
         for (Tree.Assertion assertion : parameterAssertions.keySet()) {
 
             List<Annotation> annotations = new ArrayList<Annotation>();
-            com.redhat.ceylon.compiler.typechecker.analyzer.Util.buildAnnotations(assertion.getAnnotationList(), annotations);
+            buildAnnotations(assertion.getAnnotationList(), annotations);
 
-            String doc = Util.getRawDoc(annotations);
+            String doc = Util.getRawDoc(decl.getUnit(), annotations);
             if (!Util.isEmpty(doc)) {
                 open("li");
                 write("<i class='icon-assertion'></i>");
@@ -676,7 +715,7 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
     }
     
     protected final void writeSee(Declaration decl) throws IOException {
-        Annotation see = Util.getAnnotation(decl.getAnnotations(), "see");
+        Annotation see = Util.getAnnotation(decl.getUnit(), decl.getAnnotations(), "see");
         if(see == null)
             return;
 
@@ -700,17 +739,32 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
         close("div");
     }
 
-    protected final void writeTagged(Declaration decl) throws IOException {
-        List<String> tags = Util.getTags(decl);
-        if (!tags.isEmpty()) {
-            open("div class='tags section'");
-            Iterator<String> tagIterator = tags.iterator();
-            while (tagIterator.hasNext()) {
-                String tag = tagIterator.next();
-                write("<a class='tag label' name='" + tag + "' href='search.html?q=" + tag + "'>" + tag + "</a>");
+    protected final void writeAliases(Declaration decl) throws IOException {
+        Annotation see = Util.getAnnotation(decl.getUnit(), decl.getAnnotations(), "aliased");
+        if(see == null)
+            return;
+
+        open("div class='aliased section'");
+        around("span class='title'", "Aliases: ");
+        
+        open("span class='value'");
+        boolean first = true;
+        for (String target : see.getPositionalArguments()) {
+            if (!first) {
+                write(", ");
+            } else {
+                first = false;
             }
-            close("div");
+            open("code class='signature'");
+            String cssClass = decl instanceof TypeDeclaration ? "type-identifier" : "identifier";
+            open("span class='"+cssClass+"'");
+            write(target);
+            close("span");
+            close("code");
         }
+        close("span");
+        
+        close("div");
     }
 
     private String getSourceCode(PhasedUnit pu, Node node) throws IOException {
@@ -809,7 +863,7 @@ public abstract class ClassOrPackageDoc extends CeylonDoc {
             public void visit(Tree.BaseMemberExpression that) {
                 if (assertion != null) {
                     Declaration d = that.getDeclaration();
-                    Scope realScope = com.redhat.ceylon.compiler.typechecker.model.Util.getRealScope(d.getScope());
+                    Scope realScope = com.redhat.ceylon.model.typechecker.model.ModelUtil.getRealScope(d.getScope());
                     if (parametersNames.containsKey(d.getName()) && realScope == decl) {
                         referencedParameters.add(parametersNames.get(d.getName()));
                     }

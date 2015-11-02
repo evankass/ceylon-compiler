@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug14xx;
 
-class Bug1492_1a implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1492_1a implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1492_1a(final .java.lang.Object a) {
         (
@@ -11,6 +11,12 @@ class Bug1492_1a implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
             }
             returning null;
         );
+    }
+    
+    protected Bug1492_1a() {
+        super();
+        this.a = null;
+        this.b = null;
     }
     
     Bug1492_1a(final .java.lang.Object a, final .java.lang.Object b) {
@@ -38,7 +44,7 @@ class Bug1492_1a implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug14xx.Bug1492_1a.class);
 }
-class Bug1492_1b implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1492_1b implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1492_1b(final .java.lang.Object a) {
         (
@@ -49,6 +55,12 @@ class Bug1492_1b implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
             }
             returning null;
         );
+    }
+    
+    protected Bug1492_1b() {
+        super();
+        this.a = null;
+        this.b = null;
     }
     
     Bug1492_1b(final .java.lang.Object a, final .java.lang.Object b) {
@@ -76,7 +88,7 @@ class Bug1492_1b implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug14xx.Bug1492_1b.class);
 }
-class Bug1492_2a implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1492_2a implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1492_2a(final .ceylon.language.Callable<? extends .java.lang.Object> a) {
         (
@@ -87,6 +99,12 @@ class Bug1492_2a implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
             }
             returning null;
         );
+    }
+    
+    protected Bug1492_2a() {
+        super();
+        this.a = null;
+        this.b = null;
     }
     
     Bug1492_2a(final .ceylon.language.Callable<? extends .java.lang.Object> a, final .ceylon.language.Callable<? extends .java.lang.Object> b) {
@@ -120,7 +138,7 @@ class Bug1492_2a implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug14xx.Bug1492_2a.class);
 }
-class Bug1492_2b implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1492_2b implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1492_2b(final .ceylon.language.Callable<? extends .java.lang.Object> a) {
         (
@@ -131,6 +149,12 @@ class Bug1492_2b implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
             }
             returning null;
         );
+    }
+    
+    protected Bug1492_2b() {
+        super();
+        this.a = null;
+        this.b = null;
     }
     
     Bug1492_2b(final .ceylon.language.Callable<? extends .java.lang.Object> a, final .ceylon.language.Callable<? extends .java.lang.Object> b) {
@@ -158,7 +182,7 @@ class Bug1492_2b implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug14xx.Bug1492_2b.class);
 }
-class Bug1492_3 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug1492_3 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug1492_3(final .ceylon.language.Callable<? extends .java.lang.Object> a) {
         (
@@ -169,6 +193,12 @@ class Bug1492_3 implements .com.redhat.ceylon.compiler.java.runtime.model.Reifie
             }
             returning null;
         );
+    }
+    
+    protected Bug1492_3() {
+        super();
+        this.a = null;
+        this.b = null;
     }
     
     Bug1492_3(final .ceylon.language.Callable<? extends .java.lang.Object> a, final .ceylon.language.Callable<? extends .java.lang.Object> b) {

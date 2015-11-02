@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.invoke;
 
-class CallableArgumentAnything implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class CallableArgumentAnything implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     CallableArgumentAnything() {
     }
@@ -93,11 +93,6 @@ class CallableArgumentAnything implements .com.redhat.ceylon.compiler.java.runti
                 }
             };
         ));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.invoke.CallableArgumentAnything();
     }
     
     @.java.lang.Override

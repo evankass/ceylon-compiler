@@ -21,16 +21,17 @@
 package com.redhat.ceylon.compiler.java.codegen;
 
 import com.redhat.ceylon.compiler.java.codegen.recovery.HasErrorException;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedTypedReference;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypedReference;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCAnnotation;
 import com.sun.tools.javac.tree.JCTree.JCBlock;
 import com.sun.tools.javac.tree.JCTree.JCCatch;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
+import com.sun.tools.javac.tree.JCTree.JCExpressionStatement;
 import com.sun.tools.javac.tree.JCTree.JCIf;
 import com.sun.tools.javac.tree.JCTree.JCReturn;
 import com.sun.tools.javac.tree.JCTree.JCStatement;
@@ -49,12 +50,22 @@ public class AttributeDefinitionBuilder {
 
     private final TypedDeclaration attrTypedDecl;
     private final String attrName;
+    /** 
+     * If this is a wrapped attribute, and this builder is responsible for 
+     * generating the wrapper class, this is the name of the wrapper class 
+     */
     private final String javaClassName;
-    private final int typeFlags;
-    private final ProducedType attrType;
+    /**
+     * If this is a wrapped attribute, this is the class builder for the 
+     * wrapper class
+     */
     private final ClassDefinitionBuilder classBuilder;
+    private final int typeFlags;
+    private final Type attrType;
+    
     private final boolean toplevel;
     private final boolean late;
+    private final boolean lateWithInit;
     private final boolean variable;
     
     private long modifiers;
@@ -79,33 +90,34 @@ public class AttributeDefinitionBuilder {
     private ListBuffer<JCAnnotation> modelAnnotations;
     private ListBuffer<JCAnnotation> userAnnotations;
     private ListBuffer<JCAnnotation> userAnnotationsSetter;
+    private ListBuffer<JCAnnotation> fieldAnnotations;
     private boolean isHash;
     
     private JCExpression setterClass;
     private JCExpression getterClass;
 
     private AttributeDefinitionBuilder(AbstractTransformer owner, TypedDeclaration attrType, 
-            String javaClassName, String attrName, String fieldName, boolean toplevel, boolean indirect) {
+            String javaClassName, ClassDefinitionBuilder classBuilder, String attrName, String fieldName, boolean toplevel, boolean indirect) {
         int typeFlags = 0;
-        ProducedTypedReference typedRef = owner.getTypedReference(attrType);
-        ProducedTypedReference nonWideningTypedRef = owner.nonWideningTypeDecl(typedRef);
-        ProducedType nonWideningType = owner.nonWideningType(typedRef, nonWideningTypedRef);
+        TypedReference typedRef = owner.getTypedReference(attrType);
+        TypedReference nonWideningTypedRef = owner.nonWideningTypeDecl(typedRef);
+        Type nonWideningType = owner.nonWideningType(typedRef, nonWideningTypedRef);
         if(attrType.isActual()
                 && CodegenUtil.hasTypeErased(attrType))
             typeFlags |= AbstractTransformer.JT_RAW;
         if (!CodegenUtil.isUnBoxed(nonWideningTypedRef.getDeclaration())) {
             typeFlags |= AbstractTransformer.JT_NO_PRIMITIVES;
         }
-        this.isHash = CodegenUtil.isHashAttribute((MethodOrValue) attrType);
+        this.isHash = CodegenUtil.isHashAttribute((FunctionOrValue) attrType);
         this.attrTypedDecl = attrType;
         this.owner = owner;
         this.javaClassName = javaClassName;
         if (javaClassName != null) {
-            classBuilder = 
+            this.classBuilder = 
                     ClassDefinitionBuilder
                     .klass(owner, javaClassName, null, false);
         } else {
-            classBuilder = null;
+            this.classBuilder = classBuilder;
         }
         this.attrType = nonWideningType;
         this.typeFlags = typeFlags;
@@ -113,6 +125,7 @@ public class AttributeDefinitionBuilder {
         this.fieldName = fieldName;
         this.toplevel = toplevel;
         this.late = attrType.isLate();
+        this.lateWithInit = this.late && CodegenUtil.needsLateInitField(attrType, owner.typeFact());
         this.variable = attrType.isVariable();
         
         // Make sure we use the declaration for building the getter/setter names, as we might be trying to
@@ -129,7 +142,11 @@ public class AttributeDefinitionBuilder {
         pdb.modifiers(Flags.FINAL);
         
         pdb.aliasName(attrName);
-        pdb.type(MethodDefinitionBuilder.paramType(owner, nonWideningTypedRef.getDeclaration(), nonWideningType, 0, true), 
+        int seterParamFlags = 0;
+        if (owner.rawParameters(attrType)) {
+            seterParamFlags |= AbstractTransformer.JT_RAW;
+        }
+        pdb.type(MethodDefinitionBuilder.paramType(owner, nonWideningTypedRef.getDeclaration(), nonWideningType, seterParamFlags), 
                 owner.makeJavaTypeAnnotations(attrType));
         
         
@@ -142,20 +159,28 @@ public class AttributeDefinitionBuilder {
     }
     
     public static AttributeDefinitionBuilder wrapped(AbstractTransformer owner, 
-            String javaClassName, String attrName, TypedDeclaration attrType, 
+            String javaClassName, ClassDefinitionBuilder classBuilder, String attrName, TypedDeclaration attrType, 
             boolean toplevel) {
-        return new AttributeDefinitionBuilder(owner, attrType, javaClassName, attrName, "value", toplevel, false);
+        return new AttributeDefinitionBuilder(owner, attrType, javaClassName, classBuilder, attrName, "value", toplevel, false);
+    }
+    
+    public static AttributeDefinitionBuilder singleton(AbstractTransformer owner, 
+            String javaClassName, ClassDefinitionBuilder classBuilder, String attrName, TypedDeclaration attrType, 
+            boolean toplevel) {
+        AttributeDefinitionBuilder adb = new AttributeDefinitionBuilder(owner, attrType, javaClassName, classBuilder, attrName, attrName, toplevel, false);
+        adb.getterBuilder.realName(attrType.getName());
+        return adb;
     }
     
     public static AttributeDefinitionBuilder indirect(AbstractTransformer owner, 
             String javaClassName, String attrName, TypedDeclaration attrType, 
             boolean toplevel) {
-        return new AttributeDefinitionBuilder(owner, attrType, javaClassName, attrName, "value", toplevel, true);
+        return new AttributeDefinitionBuilder(owner, attrType, javaClassName, null, attrName, "value", toplevel, true);
     }
     
     public static AttributeDefinitionBuilder getter(AbstractTransformer owner, 
             String attrAndFieldName, TypedDeclaration attrType) {
-        return new AttributeDefinitionBuilder(owner, attrType, null, 
+        return new AttributeDefinitionBuilder(owner, attrType, null, null,
                 attrAndFieldName, attrAndFieldName, false, false)
             .skipField()
             .immutable();
@@ -163,7 +188,7 @@ public class AttributeDefinitionBuilder {
     
     public static AttributeDefinitionBuilder setter(AbstractTransformer owner, 
             String attrAndFieldName, TypedDeclaration attrType) {
-        return new AttributeDefinitionBuilder(owner, attrType, null, 
+        return new AttributeDefinitionBuilder(owner, attrType, null, null,
                 attrAndFieldName, attrAndFieldName, false, false)
             .skipField()
             .skipGetter();
@@ -185,6 +210,16 @@ public class AttributeDefinitionBuilder {
                 this.classAnnotations = ListBuffer.lb();
             }
             this.classAnnotations.appendList(annotations);
+        }
+        return this;
+    }
+    
+    public AttributeDefinitionBuilder fieldAnnotations(List<JCAnnotation> annotations) {
+        if (annotations != null) {
+            if (this.fieldAnnotations == null) {
+                this.fieldAnnotations = ListBuffer.lb();
+            }
+            this.fieldAnnotations.appendList(annotations);
         }
         return this;
     }
@@ -217,9 +252,9 @@ public class AttributeDefinitionBuilder {
         ListBuffer<JCTree> defs = ListBuffer.lb();
         appendDefinitionsTo(defs);
         if (javaClassName != null) {
+            classBuilder.getInitBuilder().modifiers(Flags.PRIVATE);
             classBuilder
                     .modifiers(Flags.FINAL | (modifiers & (Flags.PUBLIC | Flags.PRIVATE)))
-                    .constructorModifiers(Flags.PRIVATE)
                     .defs(defs.toList());
             if(getterClass == null){
                 classBuilder.annotations(owner.makeAtAttribute(setterClass))
@@ -248,7 +283,10 @@ public class AttributeDefinitionBuilder {
         if (hasField) {
             if (variableInitThrow == null) {
                 defs.append(generateField());
-                if(toplevel && !late)
+                if (hasInitFlag()) {
+                    defs.append(generateInitFlagField());
+                }
+                if(isDeferredInitError())
                     defs.append(generateInitExceptionField());
                 if(variableInit != null) {
                     defs.append(generateFieldInit());
@@ -285,8 +323,12 @@ public class AttributeDefinitionBuilder {
         }
     }
 
-    private List<ProducedType> getSatisfies() {
-        List<ProducedType> types = List.<ProducedType>nil();
+    private boolean isDeferredInitError() {
+        return toplevel && !late;
+    }
+
+    private List<Type> getSatisfies() {
+        List<Type> types = List.<Type>nil();
         if (javaClassName != null && readable && !toplevel) {
             types = types.append(owner.getGetterInterfaceType(attrTypedDecl));
         }
@@ -333,10 +375,23 @@ public class AttributeDefinitionBuilder {
         }
 
         return owner.make().VarDef(
-                owner.make().Modifiers(flags),
+                owner.make().Modifiers(flags, fieldAnnotations != null ? fieldAnnotations.toList() : List.<JCAnnotation>nil()),
                 owner.names().fromString(Naming.quoteFieldName(fieldName)),
-                (toplevel || late) ? owner.make().TypeArray(attrType()) : attrType(),
+                attrType(),
                 null
+        );
+    }
+    
+    private JCTree generateInitFlagField() {
+        long flags = Flags.PRIVATE | (modifiers & Flags.STATIC) | Flags.VOLATILE;
+        if((flags & Flags.STATIC) == 0)
+            flags |= Flags.TRANSIENT;
+        
+        return owner.make().VarDef(
+                owner.make().Modifiers(flags),
+                owner.names().fromString(Naming.getInitializationFieldName(fieldName)),
+                owner.make().Type(owner.syms().booleanType),
+                owner.make().Literal(false)
         );
     }
 
@@ -355,16 +410,12 @@ public class AttributeDefinitionBuilder {
         long flags = (modifiers & Flags.STATIC);
         
         JCTree.JCExpression varInit = variableInit;
-        if (toplevel || late) {
-            varInit = owner.make().NewArray(
-                    attrTypeRaw(),
-                    List.<JCTree.JCExpression>nil(),
-                    List.<JCTree.JCExpression>of(varInit)
-            );
+        if (hasInitFlag()) {
+            varInit = variableInit;
         }
-        JCTree.JCAssign init = owner.make().Assign(owner.makeUnquotedIdent(fieldName), varInit);
+        JCTree.JCAssign init = owner.make().Assign(owner.makeUnquotedIdent(Naming.quoteFieldName(fieldName)), varInit);
         List<JCStatement> stmts;
-        if(toplevel && !late){
+        if(isDeferredInitError()){
             // surround the init expression with a try/catch that saves the exception
             
             String exceptionName = "x"; // doesn't matter
@@ -374,9 +425,12 @@ public class AttributeDefinitionBuilder {
                     owner.makeUnquotedIdent(Naming.getToplevelAttributeSavedExceptionName()), 
                     owner.makeUnquotedIdent(exceptionName)));
             // value = null
-            JCStatement nullValue = owner.make().Exec(owner.make().Assign(owner.makeUnquotedIdent(fieldName), owner.makeNull()));
+            JCStatement nullValue = owner.make().Exec(owner.make().Assign(owner.makeUnquotedIdent(fieldName), owner.makeDefaultExprForType(this.attrType)));
             // the catch statements
-            JCBlock handlerBlock = owner.make().Block(0, List.<JCTree.JCStatement>of(saveException, nullValue));
+            JCStatement initFlagFalse = owner.make().Exec(owner.make().Assign(
+                    owner.naming.makeUnquotedIdent(Naming.getInitializationFieldName(fieldName)), 
+                    owner.make().Literal(false)));
+            JCBlock handlerBlock = owner.make().Block(0, List.<JCTree.JCStatement>of(saveException, nullValue, initFlagFalse));
             
             // the catch block
             JCExpression throwableType = owner.makeJavaType(owner.syms().throwableType.tsym);
@@ -388,8 +442,15 @@ public class AttributeDefinitionBuilder {
             // $initException$ = null
             JCTree.JCAssign nullException = owner.make().Assign(owner.makeUnquotedIdent(Naming.getToplevelAttributeSavedExceptionName()), 
                     owner.makeNull());
+            // $init$value = true;
+            JCTree.JCAssign initFlagTrue = owner.make().Assign(
+                    owner.naming.makeUnquotedIdent(Naming.getInitializationFieldName(fieldName)), 
+                    owner.make().Literal(true));
             // save the value, mark the exception as null
-            List<JCStatement> body = List.<JCTree.JCStatement>of(owner.make().Exec(init), owner.make().Exec(nullException));
+            List<JCStatement> body = List.<JCTree.JCStatement>of(
+                    owner.make().Exec(init), 
+                    owner.make().Exec(nullException),
+                    owner.make().Exec(initFlagTrue));
             
             // the try/catch
             JCTree.JCTry try_ = owner.make().Try(owner.make().Block(0, body), List.<JCTree.JCCatch>of(catchers), null);
@@ -402,24 +463,21 @@ public class AttributeDefinitionBuilder {
 
     private JCTree.JCBlock generateDefaultGetterBlock() {
         JCTree.JCExpression returnExpr = owner.makeQuotedIdent(fieldName);
-        if (toplevel || late) {
-            returnExpr = owner.make().Indexed(returnExpr, owner.make().Literal(0));
-        }
         // make sure we turn hash long to int properly
         if(isHash)
             returnExpr = owner.convertToIntForHashAttribute(returnExpr);
         JCReturn returnValue = owner.make().Return(returnExpr);
         List<JCStatement> stmts;
         
-        stmts = List.<JCTree.JCStatement>of(returnValue);   
+        stmts = List.<JCTree.JCStatement>of(returnValue);
         
-        JCTree.JCBlock block = owner.make().Block(0L, stmts);
-        if (toplevel || late) {            
+        JCTree.JCBlock block;
+        if (toplevel || late) {
             JCExpression msg = owner.make().Literal(late ? "Accessing uninitialized 'late' attribute '"+attrName+"'" : "Cyclic initialization trying to read the value of '"+attrName+"' before it was set");
             JCTree.JCThrow throwStmt = owner.make().Throw(owner.makeNewClass(owner.makeIdent(owner.syms().ceylonInitializationErrorType), 
                     List.<JCExpression>of(msg)));
             List<JCStatement> catchStmts;
-            if(toplevel && !late){
+            if(isDeferredInitError()){
                 JCStatement rethrow = owner.make().Exec(owner.utilInvocation().rethrow( 
                         owner.makeUnquotedIdent(Naming.getToplevelAttributeSavedExceptionName())));
                 // rethrow the init exception if we have one
@@ -429,44 +487,87 @@ public class AttributeDefinitionBuilder {
             }else{
                 catchStmts = List.<JCTree.JCStatement>of(throwStmt);
             }
-            JCTree.JCBlock catchBlock = owner.make().Block(0, catchStmts);
-            JCVariableDecl excepType = owner.makeVar("ex", owner.make().Type(owner.syms().nullPointerExceptionType), null);
-            JCTree.JCCatch catcher = owner.make().Catch(excepType , catchBlock);
-            JCTree.JCTry tryExpr = owner.make().Try(block, List.<JCTree.JCCatch>of(catcher), null);
-            block = owner.make().Block(0L, List.<JCTree.JCStatement>of(tryExpr));
+            block = owner.make().Block(0L, List.<JCTree.JCStatement>of(
+                    owner.make().If(makeInitFlagExpr(true), 
+                    owner.make().Block(0, stmts),
+                    owner.make().Block(0, catchStmts))));
+        } else {
+            block = owner.make().Block(0L, stmts);
         }
         return block;
+    }
+    
+    
+    private boolean hasInitFlag() {
+        return toplevel || lateWithInit;
     }
 
     public JCTree.JCBlock generateDefaultSetterBlock() {
         JCExpression fld = fld();
-        if (toplevel || late) {
-            fld = owner.make().Indexed(fld, owner.make().Literal(0));
-        }
-        List<JCStatement> stmts = List.<JCTree.JCStatement>of(
-                owner.make().Exec(
-                        owner.make().Assign(
-                                fld,
-                                owner.makeQuotedIdent(attrName))));
+        JCExpressionStatement assign = owner.make().Exec(
+                owner.make().Assign(
+                        fld,
+                        owner.makeQuotedIdent(attrName)));
+        List<JCStatement> stmts = List.<JCTree.JCStatement>of(assign);
         if (late) {
-            JCStatement init = owner.make().Exec(
-                    owner.make().Assign(fld(), 
-                            owner.make().NewArray(attrTypeRaw(), 
-                                    List.<JCExpression>of(owner.make().Literal(1)), 
-                                    null)));
-            if (variable) {  
-                stmts = stmts.prepend(owner.make().If(generateLateInitializedPred(JCTree.EQ),
-                        init, null));
+            
+            JCExpressionStatement makeInit = null;
+            if(lateWithInit)
+                makeInit = owner.make().Exec(owner.make().Assign(makeInitFlagExpr(true),
+                                                                 owner.make().Literal(true)));
+            if (variable) {
+                if(makeInit != null)
+                    stmts = List.<JCStatement>of(assign, makeInit);
+                //else stmts is already assign
             } else {
-                stmts = stmts.prepend(init);
-                stmts = stmts.prepend(owner.make().If(generateLateInitializedPred(JCTree.NE),
-                        owner.make().Throw(owner.makeNewClass( 
-                                owner.make().Type(owner.syms().ceylonInitializationErrorType), 
-                                List.<JCExpression>of(owner.make().Literal("Re-initialization of 'late' attribute")))),
-                                null));
+                List<JCStatement> then = List.<JCStatement>of(owner.make().Return(null));
+                if(makeInit != null)
+                    then = then.prepend(makeInit);
+                then = then.prepend(assign);
+                stmts = List.of(
+                    owner.make().If(
+                        makeInitFlagExpr(false),
+                        owner.make().Block(0, then), 
+                        null),
+                    owner.make().Throw(owner.makeNewClass( 
+                                       owner.make().Type(owner.syms().ceylonInitializationErrorType), 
+                                       List.<JCExpression>of(owner.make().Literal("Re-initialization of 'late' attribute")))
+                ));
             }
         }
+        if (hasInitFlag() && isDeferredInitError()){
+            JCStatement rethrow = owner.make().Exec(owner.utilInvocation().rethrow( 
+                    owner.makeUnquotedIdent(Naming.getToplevelAttributeSavedExceptionName())));
+            // rethrow the init exception if we have one
+            JCIf ifThrow = owner.make().If(owner.make().Binary(JCTree.NE, owner.makeUnquotedIdent(Naming.getToplevelAttributeSavedExceptionName()), 
+                    owner.makeNull()), rethrow, null);
+            stmts = stmts.prepend(ifThrow);
+        }
         return owner.make().Block(0L, stmts);
+    }
+
+    private JCExpression makeInitFlagExpr(boolean positiveIfTest) {
+        final JCExpression initFlagFieldOwner;
+        if (toplevel) {
+            if (classBuilder != null) {
+                // TODO Needs to be qualified name
+                initFlagFieldOwner = owner.naming.makeUnquotedIdent(classBuilder.getClassName());
+            } else {
+                initFlagFieldOwner = owner.naming.makeUnquotedIdent(javaClassName);
+            }
+        } else {
+            initFlagFieldOwner = owner.naming.makeThis();
+        }
+        // TODO this should be encapsulated so the s11n stuff and this
+        // code can just call something common
+        if(toplevel || lateWithInit){
+            JCExpression ret = owner.naming.makeQualIdent(initFlagFieldOwner, Naming.getInitializationFieldName(fieldName));
+            if(!positiveIfTest)
+                return owner.make().Unary(JCTree.NOT, ret);
+            return ret;
+        }else
+            return owner.make().Binary(positiveIfTest ? JCTree.NE : JCTree.EQ, 
+                                       owner.naming.makeQualIdent(initFlagFieldOwner, fieldName), owner.makeNull());
     }
 
     private JCExpression fld() {
@@ -477,12 +578,6 @@ public class AttributeDefinitionBuilder {
             fld = owner.makeQuotedIdent(fieldName);
         }
         return fld;
-    }
-    
-    private JCExpression generateLateInitializedPred(int cmp) {
-        return owner.make().Binary(cmp, 
-                fld(), 
-                owner.makeNull());
     }
 
     public AttributeDefinitionBuilder modifiers(long... modifiers) {

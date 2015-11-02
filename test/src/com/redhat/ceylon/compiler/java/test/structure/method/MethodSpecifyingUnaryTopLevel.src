@@ -8,7 +8,7 @@ final class methodSpecifyingUnaryTopLevel_f_ {
     static void methodSpecifyingUnaryTopLevel_f(final .java.lang.String s) {
     }
 }
-class MethodSpecifyingUnaryTopLevel implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodSpecifyingUnaryTopLevel implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodSpecifyingUnaryTopLevel() {
     }
@@ -21,11 +21,6 @@ class MethodSpecifyingUnaryTopLevel implements .com.redhat.ceylon.compiler.java.
             }
             returning null;
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.method.MethodSpecifyingUnaryTopLevel();
     }
     
     @.java.lang.Override

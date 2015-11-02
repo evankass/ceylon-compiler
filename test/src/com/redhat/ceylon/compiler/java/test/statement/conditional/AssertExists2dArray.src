@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class AssertExists2dArray implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class AssertExists2dArray implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     AssertExists2dArray() {
     }
@@ -9,9 +9,11 @@ class AssertExists2dArray implements .com.redhat.ceylon.compiler.java.runtime.mo
         final .ceylon.language.Array<.ceylon.language.Array<.ceylon.language.Integer>> t = .ceylon.language.arrayOfSize_.<.ceylon.language.Array<.ceylon.language.Integer>>arrayOfSize(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Array.class, .ceylon.language.Integer.$TypeDescriptor$), 2L, .ceylon.language.arrayOfSize_.<.ceylon.language.Integer>arrayOfSize(.ceylon.language.Integer.$TypeDescriptor$, 2L, .ceylon.language.Integer.instance(0L)));
         final .ceylon.language.Array<.ceylon.language.Integer> r$2;
         .ceylon.language.Array<.ceylon.language.Integer> r$1 = null;
-        if ((r$1 = t.get(.ceylon.language.Integer.instance(0L))) != null) {
+        if ((r$1 = t.getFromFirst(0L)) != null) {
             r$2 = r$1;
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        }
         r$2.set(0L, .ceylon.language.Integer.instance(100L));
     }
     
@@ -19,9 +21,11 @@ class AssertExists2dArray implements .com.redhat.ceylon.compiler.java.runtime.mo
         final .ceylon.language.Array<.ceylon.language.Array<.ceylon.language.String>> t = .ceylon.language.arrayOfSize_.<.ceylon.language.Array<.ceylon.language.String>>arrayOfSize(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Array.class, .ceylon.language.String.$TypeDescriptor$), 2L, .ceylon.language.arrayOfSize_.<.ceylon.language.String>arrayOfSize(.ceylon.language.String.$TypeDescriptor$, 2L, .ceylon.language.String.instance("")));
         final .ceylon.language.Array<.ceylon.language.String> r$5;
         .ceylon.language.Array<.ceylon.language.String> r$4 = null;
-        if ((r$4 = t.get(.ceylon.language.Integer.instance(0L))) != null) {
+        if ((r$4 = t.getFromFirst(0L)) != null) {
             r$5 = r$4;
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        }
         r$5.set(0L, .ceylon.language.String.instance(""));
     }
     
@@ -29,9 +33,11 @@ class AssertExists2dArray implements .com.redhat.ceylon.compiler.java.runtime.mo
         final .ceylon.language.Array<.ceylon.language.Array<.java.lang.Object>> t = .ceylon.language.arrayOfSize_.<.ceylon.language.Array<.java.lang.Object>>arrayOfSize(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Array.class, .ceylon.language.Null.$TypeDescriptor$), 2L, .ceylon.language.arrayOfSize_.<.java.lang.Object>arrayOfSize(.ceylon.language.Null.$TypeDescriptor$, 2L, null));
         final .ceylon.language.Array<.java.lang.Object> r$8;
         .ceylon.language.Array<.java.lang.Object> r$7 = null;
-        if ((r$7 = t.get(.ceylon.language.Integer.instance(0L))) != null) {
+        if ((r$7 = t.getFromFirst(0L)) != null) {
             r$8 = r$7;
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        }
         r$8.set(0L, null);
     }
     
@@ -39,9 +45,11 @@ class AssertExists2dArray implements .com.redhat.ceylon.compiler.java.runtime.mo
         final .ceylon.language.Array<.ceylon.language.Array<.java.lang.Object>> t = .ceylon.language.arrayOfSize_.<.ceylon.language.Array<.java.lang.Object>>arrayOfSize(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Array.class, .ceylon.language.Object.$TypeDescriptor$), 2L, .ceylon.language.arrayOfSize_.<.java.lang.Object>arrayOfSize(.ceylon.language.Object.$TypeDescriptor$, 2L, obj));
         final .ceylon.language.Array<.java.lang.Object> r$11;
         .ceylon.language.Array<.java.lang.Object> r$10 = null;
-        if ((r$10 = t.get(.ceylon.language.Integer.instance(0L))) != null) {
+        if ((r$10 = t.getFromFirst(0L)) != null) {
             r$11 = r$10;
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        }
         r$11.set(0L, obj);
     }
     
@@ -49,15 +57,12 @@ class AssertExists2dArray implements .com.redhat.ceylon.compiler.java.runtime.mo
         final .ceylon.language.Array<.ceylon.language.Array<.java.lang.Object>> t = .ceylon.language.arrayOfSize_.<.ceylon.language.Array<.java.lang.Object>>arrayOfSize(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Array.class, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.String.$TypeDescriptor$, .ceylon.language.Float.$TypeDescriptor$)), 2L, .ceylon.language.arrayOfSize_.<.java.lang.Object>arrayOfSize(.com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.union(.ceylon.language.String.$TypeDescriptor$, .ceylon.language.Float.$TypeDescriptor$), 2L, obj));
         final .ceylon.language.Array r$14;
         .ceylon.language.Array r$13 = null;
-        if ((r$13 = ((.ceylon.language.Correspondence<? super .ceylon.language.Integer, ? extends .ceylon.language.Array<.java.lang.Object>>)(.ceylon.language.Correspondence)t).get(.ceylon.language.Integer.instance(0L))) != null) {
+        if ((r$13 = (.ceylon.language.Array<.java.lang.Object>)((.ceylon.language.List<? extends .ceylon.language.Array<.java.lang.Object>>)(.ceylon.language.List)t).getFromFirst(0L)) != null) {
             r$14 = r$13;
-        } else throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
-        ((.ceylon.language.Array)r$14).set(0L, obj);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.AssertExists2dArray();
+        } else {
+            throw new .ceylon.language.AssertionError("Assertion failed" + (.java.lang.System.lineSeparator() + "\tviolated " + "exists r=t[0]"));
+        }
+        r$14.set(0L, obj);
     }
     
     @.java.lang.Override

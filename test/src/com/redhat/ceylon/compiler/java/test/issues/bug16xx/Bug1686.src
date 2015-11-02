@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug16xx;
 
-class Bug1686 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.Enumerable<.com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686> {
+class Bug1686 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.Enumerable<.com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686>, .java.io.Serializable {
     
     Bug1686() {
         this.$ceylon$language$Enumerable$this$ = new .ceylon.language.Enumerable$impl<.com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686>(.com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686.$TypeDescriptor$, this);
@@ -13,13 +13,13 @@ class Bug1686 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedT
     }
     
     @.java.lang.Override
-    public .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686 getSuccessor() {
-        return (.com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686)$ceylon$language$Enumerable$this$.getSuccessor();
+    public .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686 getPredecessor() {
+        return (.com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686)$ceylon$language$Enumerable$this$.getPredecessor();
     }
     
     @.java.lang.Override
-    public .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686 getPredecessor() {
-        return (.com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686)$ceylon$language$Enumerable$this$.getPredecessor();
+    public .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686 getSuccessor() {
+        return (.com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686)$ceylon$language$Enumerable$this$.getSuccessor();
     }
     
     @.java.lang.Override
@@ -41,11 +41,6 @@ class Bug1686 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedT
     @.java.lang.Override
     public final long offset(final .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686 other) {
         return ((.ceylon.language.Integer).ceylon.language.nothing_.get_()).longValue();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug16xx.Bug1686();
     }
     
     @.java.lang.Override

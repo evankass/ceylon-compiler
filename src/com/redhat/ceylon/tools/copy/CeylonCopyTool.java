@@ -1,6 +1,5 @@
 package com.redhat.ceylon.tools.copy;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +20,9 @@ import com.redhat.ceylon.common.tool.Option;
 import com.redhat.ceylon.common.tool.OptionArgument;
 import com.redhat.ceylon.common.tool.RemainingSections;
 import com.redhat.ceylon.common.tool.Summary;
+import com.redhat.ceylon.common.tools.CeylonTool;
 import com.redhat.ceylon.common.tools.ModuleSpec;
+import com.redhat.ceylon.model.cmr.ArtifactResult;
 
 @Summary("Copies modules from one module repository to another")
 @Description("Copies a module or a set of modules from one repository " +
@@ -44,7 +45,7 @@ public class CeylonCopyTool extends OutputRepoUsingTool {
     public CeylonCopyTool() {
         super(CeylonCopyMessages.RESOURCE_BUNDLE);
     }
-    
+
     @Argument(argumentName="module", multiplicity="+")
     public void setModules(List<String> modules) {
         setModuleSpecs(ModuleSpec.parseEachList(modules));
@@ -61,13 +62,13 @@ public class CeylonCopyTool extends OutputRepoUsingTool {
     }
 
     @Option
-    @Description("Include modules compiled for the JVM (.car) (default: true)")
+    @Description("Include artifacts compiled for the JVM (.car and .jar) (default: true)")
     public void setJvm(boolean jvm) {
         this.jvm = jvm;
     }
 
     @Option
-    @Description("Include modules compiled for the JSVM (.js) (default: true)")
+    @Description("Include artifacts compiled for JavaScript (.js and -model.js) (default: true)")
     public void setJs(boolean js) {
         this.js = js;
     }
@@ -91,7 +92,7 @@ public class CeylonCopyTool extends OutputRepoUsingTool {
     }
 
     @Option
-    @Description("Include everything (jvm,js,docs,src) (default: false)")
+    @Description("Include everything (jvm,js,docs,src,scripts) (default: false)")
     public void setAll(boolean all) {
         this.all = all;
     }
@@ -112,12 +113,16 @@ public class CeylonCopyTool extends OutputRepoUsingTool {
     }
 
     @Override
-    public void initialize() {
+    protected boolean doNotReadFromOutputRepo(){
+        return true;
+    }
+
+    @Override
+    public void initialize(CeylonTool mainTool) {
     }
     
     @Override
     public void run() throws Exception {
-        setSystemProperties();
         Set<String> artifacts = new LinkedHashSet<String>();
         boolean defaults = js == null 
                 && jvm == null
@@ -187,26 +192,41 @@ public class CeylonCopyTool extends OutputRepoUsingTool {
             public boolean beforeCopyModule(ArtifactContext ac, int count, int max) throws IOException {
                 String module = ModuleUtil.makeModuleName(ac.getName(), ac.getVersion());
                 msg("copying.module", module, count+1, max).flush();
-                if (logArtifacts) {
-                    newline().flush();
-                }
                 return true;
             }
             @Override
             public void afterCopyModule(ArtifactContext ac, int count, int max, boolean copied) throws IOException {
                 if (!logArtifacts) {
-                    append(" ").msg((copied) ? "copying.ok" : "copying.skipped").newline().flush();
+                    append(") ").msg((copied) ? "copying.ok" : "copying.skipped").newline().flush();
                 }
             }
             @Override
-            public boolean beforeCopyArtifact(ArtifactContext ac, File archive, int count, int max) throws IOException {
+            public boolean beforeCopyArtifact(ArtifactContext ac, ArtifactResult ar, int count, int max) throws IOException {
                 if (logArtifacts) {
-                    append("    ").msg("copying.artifact", archive.getName(), count+1, max).flush();
+                    if (count == 0) {
+                        append(" -- ");
+                        append(ar.repositoryDisplayString());
+                        newline().flush();
+                    }
+                    append("    ").msg("copying.artifact", ar.artifact().getName(), count+1, max).flush();
+                } else {
+                    if (count > 0) {
+                        append(", ");
+                    } else {
+                        append(" (");
+                    }
+                    String name = ArtifactContext.getSuffixFromFilename(ar.artifact().getName());
+                    if (name.startsWith(".") || name.startsWith("-")) {
+                        name = name.substring(1);
+                    } else if ("module-doc".equals(name)) {
+                        name = "doc";
+                    }
+                    append(name);
                 }
                 return true;
             }
             @Override
-            public void afterCopyArtifact(ArtifactContext ac, File archive, int count, int max, boolean copied) throws IOException {
+            public void afterCopyArtifact(ArtifactContext ac, ArtifactResult ar, int count, int max, boolean copied) throws IOException {
                 if (logArtifacts) {
                     append(" ").msg((copied) ? "copying.ok" : "copying.skipped").newline().flush();
                 }
@@ -222,8 +242,8 @@ public class CeylonCopyTool extends OutputRepoUsingTool {
     }
 
     @Override
-    protected CeylonRepoManagerBuilder createRepositoryManagerBuilder() {
-        return createRepositoryManagerBuilderNoOut();
+    protected CeylonRepoManagerBuilder createRepositoryManagerBuilder(boolean forInput) {
+        return createRepositoryManagerBuilderNoOut(forInput);
     }
 
 }

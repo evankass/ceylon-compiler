@@ -1,6 +1,11 @@
 package com.redhat.ceylon.compiler.java.test.structure.klass;
 
-class DefaultParameter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class DefaultParameter implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected DefaultParameter() {
+        super();
+        this.s = null;
+    }
     
     DefaultParameter(final .java.lang.String s) {
         this.s = s;

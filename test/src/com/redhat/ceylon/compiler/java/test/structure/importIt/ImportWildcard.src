@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.importIt;
 
-class ImportWildcard implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ImportWildcard implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ImportWildcard() {
     }
@@ -12,11 +12,6 @@ class ImportWildcard implements .com.redhat.ceylon.compiler.java.runtime.model.R
         b = .com.redhat.ceylon.compiler.java.test.structure.importIt.pkg.f2_.get_();
         .com.redhat.ceylon.compiler.java.test.structure.importIt.pkg.m1_.m1();
         .com.redhat.ceylon.compiler.java.test.structure.importIt.pkg.m2_.m2();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.importIt.ImportWildcard();
     }
     
     @.java.lang.Override

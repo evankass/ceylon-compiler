@@ -1,9 +1,8 @@
 package com.redhat.ceylon.compiler.java.test.annotations;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.ceylon.language.SharedAnnotation$annotation$
-@.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-public class Klass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class Klass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     @.com.redhat.ceylon.compiler.java.metadata.Ignore
     public Klass(final long p1) {
@@ -30,14 +29,20 @@ public class Klass implements .com.redhat.ceylon.compiler.java.runtime.model.Rei
         );
     }
     
+    @.com.redhat.ceylon.compiler.java.metadata.Jpa
+    @.com.redhat.ceylon.compiler.java.metadata.Ignore
+    protected Klass() {
+        super();
+    }
+    
     public Klass(@.com.redhat.ceylon.compiler.java.metadata.Name("p1")
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
     final long p1, @.com.redhat.ceylon.compiler.java.metadata.Name("p2")
     @.com.redhat.ceylon.compiler.java.metadata.Defaulted
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Null|ceylon.language::Integer")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer?")
     final .ceylon.language.Integer p2, @.com.redhat.ceylon.compiler.java.metadata.Name("p3")
     @.com.redhat.ceylon.compiler.java.metadata.Defaulted
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Sequential<ceylon.language::Integer>")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer[]")
     final .ceylon.language.Sequential<? extends .ceylon.language.Integer> p3) {
     }
     
@@ -52,7 +57,6 @@ public class Klass implements .com.redhat.ceylon.compiler.java.runtime.model.Rei
     }
     
     @.ceylon.language.SharedAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
     public final long m1(@.com.redhat.ceylon.compiler.java.metadata.Name("p1")
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer")
@@ -61,19 +65,17 @@ public class Klass implements .com.redhat.ceylon.compiler.java.runtime.model.Rei
     }
     
     @.ceylon.language.SharedAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Null|ceylon.language::Integer")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer?")
     public final .ceylon.language.Integer m2(@.com.redhat.ceylon.compiler.java.metadata.Name("p2")
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Null|ceylon.language::Integer")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer?")
     final .ceylon.language.Integer p2) {
         return .ceylon.language.Integer.instance(1L);
     }
     
     @.ceylon.language.SharedAnnotation$annotation$
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Sequential<ceylon.language::Integer>")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer[]")
     public final .ceylon.language.Sequential<? extends .ceylon.language.Integer> m3(@.com.redhat.ceylon.compiler.java.metadata.Name("p3")
-    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Sequential<ceylon.language::Integer>")
+    @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::Integer[]")
     final .ceylon.language.Sequential<? extends .ceylon.language.Integer> p3) {
         return (.ceylon.language.Sequence<? extends .ceylon.language.Integer>).ceylon.language.Tuple.instance(.ceylon.language.Integer.$TypeDescriptor$, new .java.lang.Object[]{.ceylon.language.Integer.instance(1L)});
     }

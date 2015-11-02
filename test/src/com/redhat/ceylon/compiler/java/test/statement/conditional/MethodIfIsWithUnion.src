@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfIsUnion implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfIsUnion implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfIsUnion() {
     }
@@ -17,11 +17,6 @@ class MethodIfIsUnion implements .com.redhat.ceylon.compiler.java.runtime.model.
             final .java.lang.Object x$4 = x$3;
             ((.com.redhat.ceylon.compiler.java.test.statement.conditional.Common)x$4).common();
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfIsUnion();
     }
     
     @.java.lang.Override

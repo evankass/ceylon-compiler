@@ -19,7 +19,8 @@
  */
 package com.redhat.ceylon.compiler.java.codegen;
 
-import static com.redhat.ceylon.compiler.typechecker.model.Util.getSignature;
+import static com.redhat.ceylon.compiler.typechecker.analyzer.AnalyzerUtil.isIndirectInvocation;
+import static com.redhat.ceylon.compiler.typechecker.tree.TreeUtil.unwrapExpressionUntilTerm;
 
 import java.util.List;
 import java.util.Map;
@@ -27,33 +28,31 @@ import java.util.Map;
 import com.redhat.ceylon.common.BooleanUtil;
 import com.redhat.ceylon.compiler.java.codegen.AbstractTransformer.BoxingStrategy;
 import com.redhat.ceylon.compiler.java.codegen.Naming.DeclNameFlag;
-import com.redhat.ceylon.compiler.java.codegen.Naming.Unfix;
-import com.redhat.ceylon.compiler.java.util.Util;
-import com.redhat.ceylon.compiler.typechecker.model.Class;
-import com.redhat.ceylon.compiler.typechecker.model.Declaration;
-import com.redhat.ceylon.compiler.typechecker.model.Functional;
-import com.redhat.ceylon.compiler.typechecker.model.Interface;
-import com.redhat.ceylon.compiler.typechecker.model.IntersectionType;
-import com.redhat.ceylon.compiler.typechecker.model.Method;
-import com.redhat.ceylon.compiler.typechecker.model.MethodOrValue;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
-import com.redhat.ceylon.compiler.typechecker.model.Parameter;
-import com.redhat.ceylon.compiler.typechecker.model.ProducedType;
-import com.redhat.ceylon.compiler.typechecker.model.Scope;
-import com.redhat.ceylon.compiler.typechecker.model.Specification;
-import com.redhat.ceylon.compiler.typechecker.model.TypeDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.TypeParameter;
-import com.redhat.ceylon.compiler.typechecker.model.TypedDeclaration;
-import com.redhat.ceylon.compiler.typechecker.model.UnionType;
-import com.redhat.ceylon.compiler.typechecker.model.Value;
+import com.redhat.ceylon.compiler.typechecker.analyzer.AnalyzerUtil;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.BaseMemberExpression;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.CompilerAnnotation;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree.Term;
+import com.redhat.ceylon.model.loader.JvmBackendUtil;
+import com.redhat.ceylon.model.loader.NamingBase.Unfix;
+import com.redhat.ceylon.model.typechecker.model.Class;
+import com.redhat.ceylon.model.typechecker.model.Declaration;
+import com.redhat.ceylon.model.typechecker.model.Function;
+import com.redhat.ceylon.model.typechecker.model.FunctionOrValue;
+import com.redhat.ceylon.model.typechecker.model.Interface;
+import com.redhat.ceylon.model.typechecker.model.Package;
+import com.redhat.ceylon.model.typechecker.model.Parameter;
+import com.redhat.ceylon.model.typechecker.model.Scope;
+import com.redhat.ceylon.model.typechecker.model.Specification;
+import com.redhat.ceylon.model.typechecker.model.Type;
+import com.redhat.ceylon.model.typechecker.model.TypeDeclaration;
+import com.redhat.ceylon.model.typechecker.model.TypedDeclaration;
+import com.redhat.ceylon.model.typechecker.model.Unit;
+import com.redhat.ceylon.model.typechecker.model.Value;
 
 /**
  * Utility functions that are specific to the codegen package
- * @see Util
+ * @see AnalyzerUtil
  */
 public class CodegenUtil {
 
@@ -95,17 +94,17 @@ public class CodegenUtil {
     }
 
     static boolean isRaw(TypedDeclaration decl){
-        ProducedType type = decl.getType();
+        Type type = decl.getType();
         return type != null && type.isRaw();
     }
 
     static boolean isRaw(Term node){
-        ProducedType type = node.getTypeModel();
+        Type type = node.getTypeModel();
         return type != null && type.isRaw();
     }
 
     static void markRaw(Term node) {
-        ProducedType type = node.getTypeModel();
+        Type type = node.getTypeModel();
         if(type != null)
             type.setRaw(true);
     }
@@ -228,7 +227,7 @@ public class CodegenUtil {
 
 
     static boolean isDirectAccessVariable(Term term) {
-        if(!(term instanceof BaseMemberExpression))
+        if(!(term instanceof BaseMemberExpression) || !term.getUnboxed())
             return false;
         Declaration decl = ((BaseMemberExpression)term).getDeclaration();
         if(decl == null) // typechecker error
@@ -242,99 +241,11 @@ public class CodegenUtil {
     }
 
     static Declaration getTopmostRefinedDeclaration(Declaration decl){
-        return getTopmostRefinedDeclaration(decl, null);
+        return JvmBackendUtil.getTopmostRefinedDeclaration(decl);
     }
 
-    static Declaration getTopmostRefinedDeclaration(Declaration decl, Map<Method, Method> methodOverrides){
-        if (decl instanceof MethodOrValue
-                && ((MethodOrValue)decl).isParameter()
-                && decl.getContainer() instanceof Class) {
-            // Parameters in a refined class are not considered refinements themselves
-            // We have in find the refined attribute
-            Class c = (Class)decl.getContainer();
-            boolean isAlias = c.isAlias();
-            boolean isActual = c.isActual();
-            // aliases and actual classes actually do refine their extended type parameters so the same rules apply wrt
-            // boxing and stuff
-            if (isAlias || isActual) {
-                int index = c.getParameterList().getParameters().indexOf(findParamForDecl(((TypedDeclaration)decl)));
-                // ATM we only consider aliases if we're looking at aliases, and same for actual, not mixing the two.
-                // Note(Stef): not entirely sure about that one, what about aliases of actual classes?
-                while ((isAlias && c.isAlias())
-                        || (isActual && c.isActual())) {
-                    c = c.getExtendedTypeDeclaration();
-                }
-                // be safe
-                if(c.getParameterList() == null
-                        || c.getParameterList().getParameters() == null
-                        || c.getParameterList().getParameters().size() <= index)
-                    return null;
-                decl = c.getParameterList().getParameters().get(index).getModel();
-            }
-            if (decl.isShared()) {
-                Declaration refinedDecl = c.getRefinedMember(decl.getName(), getSignature(decl), false);//?? ellipsis=false??
-                if(refinedDecl != null && !Decl.equal(refinedDecl, decl)) {
-                    return getTopmostRefinedDeclaration(refinedDecl, methodOverrides);
-                }
-            }
-            return decl;
-        } else if(decl instanceof MethodOrValue
-                && ((MethodOrValue)decl).isParameter() // a parameter
-                && ((decl.getContainer() instanceof Method && !(((Method)decl.getContainer()).isParameter())) // that's not parameter of a functional parameter 
-                        || decl.getContainer() instanceof Specification // or is a parameter in a specification
-                        || (decl.getContainer() instanceof Method  
-                            && ((Method)decl.getContainer()).isParameter() 
-                            && Strategy.createMethod((Method)decl.getContainer())))) {// or is a class functional parameter
-            // Parameters in a refined method are not considered refinements themselves
-            // so we have to look up the corresponding parameter in the container's refined declaration
-            Functional func = (Functional)getParameterized((MethodOrValue)decl);
-            if(func == null)
-                return decl;
-            Declaration kk = getTopmostRefinedDeclaration((Declaration)func, methodOverrides);
-            // error recovery
-            if(kk instanceof Functional == false)
-                return decl;
-            Functional refinedFunc = (Functional) kk;
-            // shortcut if the functional doesn't override anything
-            if (Decl.equal((Declaration)refinedFunc, (Declaration)func)) {
-                return decl;
-            }
-            if (func.getParameterLists().size() != refinedFunc.getParameterLists().size()) {
-                // invalid input
-                return decl;
-            }
-            for (int ii = 0; ii < func.getParameterLists().size(); ii++) {
-                if (func.getParameterLists().get(ii).getParameters().size() != refinedFunc.getParameterLists().get(ii).getParameters().size()) {
-                    // invalid input
-                    return decl;
-                }
-                // find the index of the parameter in the declaration
-                int index = 0;
-                for (Parameter px : func.getParameterLists().get(ii).getParameters()) {
-                    if (px.getModel().equals(decl)) {
-                        // And return the corresponding parameter from the refined declaration
-                        return refinedFunc.getParameterLists().get(ii).getParameters().get(index).getModel();
-                    }
-                    index++;
-                }
-                continue;
-            }
-        }else if(methodOverrides != null
-                && decl instanceof Method
-                && Decl.equal(decl.getRefinedDeclaration(), decl)
-                && decl.getContainer() instanceof Specification
-                && ((Specification)decl.getContainer()).getDeclaration() instanceof Method
-                && ((Method) ((Specification)decl.getContainer()).getDeclaration()).isShortcutRefinement()
-                // we do all the previous ones first because they are likely to filter out false positives cheaper than the
-                // hash lookup we do next to make sure it is really one of those cases
-                && methodOverrides.containsKey(decl)){
-            // special case for class X() extends T(){ m = function() => e; } which we inline
-            decl = methodOverrides.get(decl);
-        }
-        Declaration refinedDecl = decl.getRefinedDeclaration();
-        if(refinedDecl != null && !Decl.equal(refinedDecl, decl))
-            return getTopmostRefinedDeclaration(refinedDecl);
-        return decl;
+    static Declaration getTopmostRefinedDeclaration(Declaration decl, Map<Function, Function> methodOverrides){
+        return JvmBackendUtil.getTopmostRefinedDeclaration(decl, methodOverrides);
     }
     
     static Parameter findParamForDecl(Tree.TypedDeclaration decl) {
@@ -343,44 +254,38 @@ public class CodegenUtil {
     }
     
     static Parameter findParamForDecl(TypedDeclaration decl) {
-        String attrName = decl.getName();
-        return findParamForDecl(attrName, decl);
+        return JvmBackendUtil.findParamForDecl(decl);
     }
     
     static Parameter findParamForDecl(String attrName, TypedDeclaration decl) {
-        Parameter result = null;
-        if (decl.getContainer() instanceof Functional) {
-            Functional f = (Functional)decl.getContainer();
-            result = f.getParameter(attrName);
-        }
-        return result;
+        return JvmBackendUtil.findParamForDecl(attrName, decl);
     }
     
-    static MethodOrValue findMethodOrValueForParam(Parameter param) {
+    static FunctionOrValue findMethodOrValueForParam(Parameter param) {
         return param.getModel();
     }
 
-    static boolean isVoid(ProducedType type) {
+    static boolean isVoid(Type type) {
         return type != null && type.getDeclaration() != null
-                && type.getDeclaration().getUnit().getAnythingDeclaration().getType().isExactly(type);    
+                && type.getDeclaration().getUnit().getAnythingType().isExactly(type);    
     }
 
 
-    public static boolean canOptimiseMethodSpecifier(Term expression, Method m) {
+    public static boolean canOptimiseMethodSpecifier(Term expression, Function m) {
         if(expression instanceof Tree.FunctionArgument)
             return true;
         if(expression instanceof Tree.BaseMemberOrTypeExpression == false)
             return false;
         Declaration declaration = ((Tree.BaseMemberOrTypeExpression)expression).getDeclaration();
         // methods are fine because they are constant
-        if(declaration instanceof Method)
+        if(declaration instanceof Function)
             return true;
         // toplevel constructors are fine
         if(declaration instanceof Class)
             return true;
         // parameters are constant too
-        if(declaration instanceof MethodOrValue
-                && ((MethodOrValue)declaration).isParameter())
+        if(declaration instanceof FunctionOrValue
+                && ((FunctionOrValue)declaration).isParameter())
             return true;
         // the rest we can't know: we can't trust attributes that could be getters or overridden
         // we can't trust even toplevel attributes that could be made variable in the future because of
@@ -392,17 +297,8 @@ public class CodegenUtil {
         return parameter.getDeclaration();
     }
     
-    public static Declaration getParameterized(MethodOrValue methodOrValue) {
-        if (!methodOrValue.isParameter()) {
-            throw new BugException("required method or value to be a parameter");
-        }
-        Scope scope = methodOrValue.getContainer();
-        if (scope instanceof Specification) {
-            return ((Specification)scope).getDeclaration();
-        } else if (scope instanceof Declaration) {
-            return (Declaration)scope;
-        } 
-        throw new BugException();
+    public static Declaration getParameterized(FunctionOrValue methodOrValue) {
+        return JvmBackendUtil.getParameterized(methodOrValue);
     }
     
     public static boolean isContainerFunctionalParameter(Declaration declaration) {
@@ -415,16 +311,16 @@ public class CodegenUtil {
         } else {
             throw BugException.unhandledCase(containerScope);
         }
-        return containerDeclaration instanceof Method
-                && ((Method)containerDeclaration).isParameter();
+        return containerDeclaration instanceof Function
+                && ((Function)containerDeclaration).isParameter();
     }
     
     public static boolean isMemberReferenceInvocation(Tree.InvocationExpression expr) {
-        Tree.Term p = com.redhat.ceylon.compiler.typechecker.analyzer.Util.unwrapExpressionUntilTerm(expr.getPrimary());
-        if (com.redhat.ceylon.compiler.typechecker.analyzer.Util.isIndirectInvocation(expr)
+        Tree.Term p = unwrapExpressionUntilTerm(expr.getPrimary());
+        if (isIndirectInvocation(expr)
                 && p instanceof Tree.QualifiedMemberOrTypeExpression) {
             Tree.QualifiedMemberOrTypeExpression primary = (Tree.QualifiedMemberOrTypeExpression)p;
-            Tree.Term q = com.redhat.ceylon.compiler.typechecker.analyzer.Util.unwrapExpressionUntilTerm(primary.getPrimary());
+            Tree.Term q = unwrapExpressionUntilTerm(primary.getPrimary());
             if (q instanceof Tree.BaseTypeExpression
                     || q instanceof Tree.QualifiedTypeExpression) {
                 return true;
@@ -438,27 +334,24 @@ public class CodegenUtil {
      * Returns true if the given produced type is a type parameter or has type arguments which
      * are type parameters.
      */
-    public static boolean containsTypeParameter(ProducedType type) {
-        TypeDeclaration declaration = type.getDeclaration();
-        if(declaration == null)
-            return false;
-        if(declaration instanceof TypeParameter)
+    public static boolean containsTypeParameter(Type type) {
+        if(type.isTypeParameter())
             return true;
-        for(ProducedType pt : type.getTypeArgumentList()){
+        for(Type pt : type.getTypeArgumentList()){
             if(containsTypeParameter(pt)){
                 return true;
             }
         }
-        if(declaration instanceof IntersectionType){
-            List<ProducedType> types = declaration.getSatisfiedTypes();
+        if(type.isIntersection()){
+            List<Type> types = type.getSatisfiedTypes();
             for(int i=0,l=types.size();i<l;i++){
                 if(containsTypeParameter(types.get(i)))
                     return true;
             }
             return false;
         }
-        if(declaration instanceof UnionType){
-            List<ProducedType> types = declaration.getCaseTypes();
+        if(type.isUnion()){
+            List<Type> types = type.getCaseTypes();
             for(int i=0,l=types.size();i<l;i++){
                 if(containsTypeParameter(types.get(i)))
                     return true;
@@ -515,5 +408,37 @@ public class CodegenUtil {
             throw new RuntimeException();
         }
         return result;
+    }
+
+    public static boolean needsLateInitField(TypedDeclaration attrType, Unit unit) {
+        return attrType.isLate()
+                // must be unboxed (except String)
+                && ((isUnBoxed(attrType) && !attrType.getType().isString())
+                    // or must be optional
+                    || unit.isOptionalType(attrType.getType()));
+    }
+
+
+    public static boolean hasDelegatingConstructors(Tree.ClassOrInterface def) {
+        if(def instanceof Tree.ClassDefinition == false)
+            return false;
+        for (Tree.Statement stmt : ((Tree.ClassDefinition)def).getClassBody().getStatements()) {
+            if (stmt instanceof Tree.Constructor) {
+                Tree.Constructor ctor = (Tree.Constructor)stmt;
+                // find every constructor which delegates to another constructor
+                if (ctor.getDelegatedConstructor() != null
+                        && ctor.getDelegatedConstructor().getInvocationExpression() != null) {
+                    if (ctor.getDelegatedConstructor().getInvocationExpression().getPrimary() instanceof Tree.ExtendedTypeExpression) {
+                        Tree.ExtendedTypeExpression ete = (Tree.ExtendedTypeExpression)ctor.getDelegatedConstructor().getInvocationExpression().getPrimary();
+                        // are we delegating to a constructor (not a supertype) of the same class (this class)?
+                        if (Decl.isConstructor(ete.getDeclaration())
+                                && Decl.getConstructedClass(ete.getDeclaration()).equals(def.getDeclarationModel())) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

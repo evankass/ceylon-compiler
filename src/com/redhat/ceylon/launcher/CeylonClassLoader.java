@@ -13,11 +13,13 @@ import java.net.URLClassLoader;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarFile;
+
+import com.redhat.ceylon.common.Versions;
 
 /**
  * Ceylon-specific class loader that knows how to find and add
@@ -90,23 +92,11 @@ public class CeylonClassLoader extends URLClassLoader {
         // Determine the necessary folders
         File ceylonHome = LauncherUtil.determineHome();
         File ceylonRepo = LauncherUtil.determineRepo(ceylonHome);
-        File ceylonLib = LauncherUtil.determineLibs(ceylonHome);
 
         // Perform some sanity checks
-        if (!ceylonHome.isDirectory()) {
-            throw new FileNotFoundException("Could not determine the Ceylon home directory (" + ceylonHome + ")");
-        }
-        if (!ceylonRepo.isDirectory()) {
-            throw new FileNotFoundException("The Ceylon system repository could not be found (" + ceylonRepo + ")");
-        }
-        if (!ceylonLib.isDirectory()) {
-            throw new FileNotFoundException("The Ceylon system libraries could not be found (" + ceylonLib + ")");
-        }
+        checkFolders(ceylonHome, ceylonRepo);
 
         List<File> archives = new LinkedList<File>();
-
-        // List all the JARs we find in the LIB directory
-        findLibraries(archives, ceylonLib);
 
         // List all the necessary Ceylon JARs and CARs
         String version = LauncherUtil.determineSystemVersion();
@@ -116,9 +106,10 @@ public class CeylonClassLoader extends URLClassLoader {
         archives.add(getRepoJar(ceylonRepo, "com.redhat.ceylon.compiler.js", version));
         archives.add(getRepoJar(ceylonRepo, "com.redhat.ceylon.typechecker", version));
         archives.add(getRepoJar(ceylonRepo, "com.redhat.ceylon.common", version));
+        archives.add(getRepoJar(ceylonRepo, "com.redhat.ceylon.model", version));
         archives.add(getRepoJar(ceylonRepo, "com.redhat.ceylon.module-resolver", version));
-        archives.add(getRepoJar(ceylonRepo, "org.jboss.jandex", "1.0.3.Final"));
-        archives.add(getRepoJar(ceylonRepo, "org.jboss.modules", "1.3.3.Final"));
+        archives.add(getRepoJar(ceylonRepo, "org.jboss.jandex", Versions.DEPENDENCY_JANDEX_VERSION));
+        archives.add(getRepoJar(ceylonRepo, "org.jboss.modules", Versions.DEPENDENCY_JBOSS_MODULES_VERSION));
         archives.add(getRepoJar(ceylonRepo, "org.jboss.logmanager", "1.4.0.Final"));
         // Maven support for CMR
         archives.add(getRepoJar(ceylonRepo, "com.redhat.ceylon.maven-support", "2.0")); // optional
@@ -128,7 +119,7 @@ public class CeylonClassLoader extends URLClassLoader {
         archives.add(getRepoJar(ceylonRepo, "net.minidev.json-smart", "1.1.1"));
         // For the "doc" tool
         archives.add(getRepoJar(ceylonRepo, "org.tautua.markdownpapers.core", "1.2.7"));
-        archives.add(getRepoJar(ceylonRepo, "com.github.rjeschke.txtmark", "0.11"));
+        archives.add(getRepoJar(ceylonRepo, "com.github.rjeschke.txtmark", "0.13"));
         // For the --out http:// functionality of the compiler
         archives.add(getRepoJar(ceylonRepo, "com.github.lookfirst.sardine", "5.1"));
         archives.add(getRepoJar(ceylonRepo, "org.apache.httpcomponents.httpclient", "4.3.2"));
@@ -153,14 +144,31 @@ public class CeylonClassLoader extends URLClassLoader {
         return new File(repo, moduleName.replace('.', '/') + "/" + version + "/" + moduleName + "-" + version + "." + extension);
     }
 
-    private static void findLibraries(List<File> libs, File folder) {
-        File[] items = folder.listFiles();
-        for (File f : items) {
-            if (f.isDirectory()) {
-                findLibraries(libs, f);
-            } else if (f.getName().toLowerCase().endsWith(".jar")) {
-                libs.add(f);
-            }
+    public static File getRepoJar(String moduleName, String version) throws FileNotFoundException, URISyntaxException {
+        return getRepoUrl(moduleName, version, "jar");
+    }
+
+    public static File getRepoCar(String moduleName, String version) throws FileNotFoundException, URISyntaxException {
+        return getRepoUrl(moduleName, version, "car");
+    }
+
+    public static File getRepoUrl(String moduleName, String version, String extension) throws URISyntaxException, FileNotFoundException {
+        // Determine the necessary folders
+        File ceylonHome = LauncherUtil.determineHome();
+        File ceylonRepo = LauncherUtil.determineRepo(ceylonHome);
+
+        // Perform some sanity checks
+        checkFolders(ceylonHome, ceylonRepo);
+        
+        return new File(ceylonRepo, moduleName.replace('.', '/') + "/" + version + "/" + moduleName + "-" + version + "." + extension);
+    }
+
+    private static void checkFolders(File ceylonHome, File ceylonRepo) throws FileNotFoundException {
+        if (!ceylonHome.isDirectory()) {
+            throw new FileNotFoundException("Could not determine the Ceylon home directory (" + ceylonHome + ")");
+        }
+        if (!ceylonRepo.isDirectory()) {
+            throw new FileNotFoundException("The Ceylon system repository could not be found (" + ceylonRepo + ")");
         }
     }
 
@@ -216,16 +224,7 @@ public class CeylonClassLoader extends URLClassLoader {
                 urls.add(parentUrls.nextElement());
             }
         }
-        return new Enumeration<URL>() {
-            Iterator<URL> iter = urls.iterator();
-
-            public boolean hasMoreElements() {
-                return iter.hasNext();
-            }
-            public URL nextElement() {
-                return iter.next();
-            }
-        };
+        return Collections.enumeration(urls);
     }
 
     @Override

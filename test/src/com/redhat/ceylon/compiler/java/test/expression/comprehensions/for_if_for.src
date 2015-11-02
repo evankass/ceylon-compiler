@@ -4,11 +4,12 @@ final class forIfFor_ {
     
     private forIfFor_() {
     }
-    private static final .ceylon.language.Sequential<? extends .ceylon.language.Integer>[] value;
+    private static final .ceylon.language.Sequential<? extends .ceylon.language.Integer> value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new .ceylon.language.Sequential[]{new .com.redhat.ceylon.compiler.java.language.AbstractIterable<.ceylon.language.Integer, .java.lang.Object>(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Null.$TypeDescriptor$){
+            value = new .com.redhat.ceylon.compiler.java.language.AbstractIterable<.ceylon.language.Integer, .java.lang.Object>(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Null.$TypeDescriptor$){
                 
                 public final .ceylon.language.Iterator<.ceylon.language.Integer> iterator() {
                     return new .com.redhat.ceylon.compiler.java.language.AbstractIterator<.ceylon.language.Integer>(.ceylon.language.Integer.$TypeDescriptor$){
@@ -33,7 +34,8 @@ final class forIfFor_ {
                         private final boolean $next$1() {
                             ifcomp_1: while (true) {
                                 if (!this.x()) break ifcomp_1;
-                                if (x.remainder(.ceylon.language.Integer.instance(2L)).equals(.ceylon.language.Integer.instance(0L))) {
+                                final .ceylon.language.Integer x = this.x;
+                                if (x.longValue() % 2L == 0L) {
                                     break ifcomp_1;
                                 }
                             }
@@ -45,6 +47,7 @@ final class forIfFor_ {
                             if (x$exhausted$) return false;
                             if ($iterator$2 != null) return true;
                             if (!this.$next$1()) return false;
+                            final .ceylon.language.Integer x = this.x;
                             $iterator$2 = .ceylon.language.span_.<.ceylon.language.Integer>span(.ceylon.language.Integer.$TypeDescriptor$, .ceylon.language.Integer.instance(1L), .ceylon.language.Integer.instance(3L)).iterator();
                             return true;
                         }
@@ -68,25 +71,27 @@ final class forIfFor_ {
                         
                         public final .java.lang.Object next() {
                             if (this.y()) {
-                                final .ceylon.language.Integer x = this.x;
                                 final .ceylon.language.Integer y = this.y;
+                                final .ceylon.language.Integer x = this.x;
                                 return x.times(y);
                             } else return .ceylon.language.finished_.get_();
                         }
                     };
                 }
-            }.sequence()};
+            }.sequence();
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
             value = null;
+            $init$value = false;
         }
     }
     
     public static .ceylon.language.Sequential<? extends .ceylon.language.Integer> get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (forIfFor_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'forIfFor\' before it was set");
         }

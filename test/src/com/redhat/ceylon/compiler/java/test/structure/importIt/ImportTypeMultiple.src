@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.importIt;
 
-class ImportTypeMultiple implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ImportTypeMultiple implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ImportTypeMultiple() {
     }
@@ -8,11 +8,6 @@ class ImportTypeMultiple implements .com.redhat.ceylon.compiler.java.runtime.mod
     private final void m$priv$() {
         new .com.redhat.ceylon.compiler.java.test.structure.importIt.pkg.C1();
         new .com.redhat.ceylon.compiler.java.test.structure.importIt.pkg.C2();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.importIt.ImportTypeMultiple();
     }
     
     @.java.lang.Override

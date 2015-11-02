@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.loop;
 
-class MethodWhileExistsWithMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodWhileExistsWithMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodWhileExistsWithMethod() {
     }
@@ -15,14 +15,11 @@ class MethodWhileExistsWithMethod implements .com.redhat.ceylon.compiler.java.ru
             if ((y$0 = give$priv$()) != null) {
                 final long y$1 = y$0.longValue();
                 return y$1;
-            } else break loop_0;
+            } else {
+                break loop_0;
+            }
         }
         return 0L;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.loop.MethodWhileExistsWithMethod();
     }
     
     @.java.lang.Override

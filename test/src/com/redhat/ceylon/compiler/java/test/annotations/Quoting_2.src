@@ -11,14 +11,9 @@ package com.redhat.ceylon.compiler.java.test.annotations;
                 $toString = "",
                 hash = -2L,
                 $hashCode = 0L)})
-class Quoting_callsite implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Quoting_callsite implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Quoting_callsite() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.annotations.Quoting_callsite();
     }
     
     @.java.lang.Override

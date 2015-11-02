@@ -363,6 +363,10 @@ public class Flow extends TreeScanner {
               classDef.sym.isEnclosedBy((ClassSymbol)sym.owner)));
     }
 
+    protected boolean ceylonNoInitCheck(VarSymbol sym) {
+        return sourceLanguage.isCeylon() && sym.attribute(syms.ceylonAtNoInitCheckType.tsym) != null;
+    }
+
     /** Initialize new trackable variable by setting its address field
      *  to the next available sequence number and entering it under that
      *  index into the vars array.
@@ -412,7 +416,7 @@ public class Flow extends TreeScanner {
                 }
             }
             inits.incl(sym.adr);
-        } else if ((sym.flags() & FINAL) != 0) {
+        } else if ((sym.flags() & FINAL) != 0 && !ceylonNoInitCheck(sym)) {
             log.error(pos, "var.might.already.be.assigned", sym);
         }
     }
@@ -436,7 +440,8 @@ public class Flow extends TreeScanner {
     void checkInit(DiagnosticPosition pos, VarSymbol sym) {
         if ((sym.adr >= firstadr || sym.owner.kind != TYP) &&
             trackable(sym) &&
-            !inits.isMember(sym.adr)) {
+            !inits.isMember(sym.adr) && 
+            !ceylonNoInitCheck(sym)) {
             log.error(pos, "var.might.not.have.been.initialized",
                       sym);
             inits.incl(sym.adr);
@@ -570,6 +575,9 @@ public class Flow extends TreeScanner {
      *  rather than (un)inits on exit.
      */
     void scanCond(JCTree tree) {
+        // Ceylon: moved it up from the else block because with Let we can have true/false and
+        // still need scanning for expressions/statements
+        scan(tree);
         if (tree.type.isFalse()) {
             if (inits == null) merge();
             initsWhenTrue = inits.dup();
@@ -587,7 +595,6 @@ public class Flow extends TreeScanner {
             initsWhenTrue = inits;
             uninitsWhenTrue = uninits;
         } else {
-            scan(tree);
             if (inits != null)
                 split(tree.type != syms.unknownType);
         }
@@ -806,6 +813,16 @@ public class Flow extends TreeScanner {
     public void visitBlock(JCBlock tree) {
         int nextadrPrev = nextadr;
         scanStats(tree.stats);
+        nextadr = nextadrPrev;
+    }
+
+    @Override
+    public void visitLetExpr(LetExpr tree) {
+        int nextadrPrev = nextadr;
+        if(tree.stats != null)
+            scanStats(tree.stats);
+        if(tree.expr != null)
+            scanExpr(tree.expr);
         nextadr = nextadrPrev;
     }
 

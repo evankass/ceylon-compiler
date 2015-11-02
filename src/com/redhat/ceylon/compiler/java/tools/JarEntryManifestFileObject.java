@@ -20,10 +20,19 @@
 
 package com.redhat.ceylon.compiler.java.tools;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
@@ -34,10 +43,12 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.tools.JavaFileObject;
 
-import com.redhat.ceylon.cmr.api.JDKUtils;
-import com.redhat.ceylon.compiler.typechecker.model.Module;
-import com.redhat.ceylon.compiler.typechecker.model.ModuleImport;
-import com.redhat.ceylon.compiler.typechecker.model.Package;
+import com.redhat.ceylon.common.Backend;
+import com.redhat.ceylon.model.cmr.JDKUtils;
+import com.redhat.ceylon.model.typechecker.model.ModelUtil;
+import com.redhat.ceylon.model.typechecker.model.Module;
+import com.redhat.ceylon.model.typechecker.model.ModuleImport;
+import com.redhat.ceylon.model.typechecker.model.Package;
 
 public class JarEntryManifestFileObject implements JavaFileObject {
 
@@ -45,13 +56,15 @@ public class JarEntryManifestFileObject implements JavaFileObject {
     private String fileName;
     private String jarFileName;
     private Module module;
+    private String osgiProvidedBundles;
 
-    public JarEntryManifestFileObject(String jarFileName, JarOutputStream jarFile, String fileName, Module module) {
+    public JarEntryManifestFileObject(String jarFileName, JarOutputStream jarFile, String fileName, Module module, String osgiProvidedBundles) {
         super();
         this.jarFileName = jarFileName;
         this.jarFile = jarFile;
         this.fileName = fileName;
         this.module = module;
+        this.osgiProvidedBundles = osgiProvidedBundles;
     }
 
     /*
@@ -70,7 +83,7 @@ public class JarEntryManifestFileObject implements JavaFileObject {
     }
 
     private void writeManifestJarEntry(Manifest originalManifest) throws IOException {
-        Manifest manifest = new OsgiManifest(module, originalManifest).build();
+        Manifest manifest = new OsgiManifest(module, originalManifest, osgiProvidedBundles).build();
         jarFile.putNextEntry(new ZipEntry(fileName));
         manifest.write(jarFile);
     }
@@ -180,6 +193,8 @@ public class JarEntryManifestFileObject implements JavaFileObject {
         static {
             formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
         }
+        
+        private String osgiProvidedBundles;
 
         public static boolean isManifestFileName(String fileName) {
             return MANIFEST_FILE_NAME.equalsIgnoreCase(fileName);
@@ -188,13 +203,14 @@ public class JarEntryManifestFileObject implements JavaFileObject {
         private final Manifest originalManifest;
         private final Module module;
 
-        public OsgiManifest(Module module) {
-            this(module, null);
+        public OsgiManifest(Module module, String osgiProvidedBundles) {
+            this(module, null, osgiProvidedBundles);
         }
 
-        public OsgiManifest(Module module, Manifest originalManifest) {
+        public OsgiManifest(Module module, Manifest originalManifest, String osgiProvidedBundles) {
             this.module = module;
             this.originalManifest = originalManifest;
+            this.osgiProvidedBundles = osgiProvidedBundles;
         }
 
         private String toOSGIBundleVersion(String ceylonVersion) {
@@ -250,8 +266,6 @@ public class JarEntryManifestFileObject implements JavaFileObject {
 
             applyActivationPolicyNonLazy(main);
 
-            main.put(Bundle_Activator, "com.redhat.ceylon.dist.osgi.Activator");
-            
             // Get all the attributes and entries from original manifest
             appendOriginalManifest(manifest, main);
 
@@ -280,8 +294,11 @@ public class JarEntryManifestFileObject implements JavaFileObject {
             for (ModuleImport moduleImport : module.getImports()) {
                 Module importedModule = moduleImport.getModule();
                 if (JDKUtils.isJDKModule(importedModule.getNameAsString())) {
-                    String version = importedModule.getVersion();
-                    main.put(Require_Capability, getRequireCapabilityJavaSE(version));
+                    // FIXME Hard-coding version 7 for now because we don't officially
+                    // support Java 8 yet and compiling with that compiler generates
+                    // the wrong requirements
+                    // String version = importedModule.getVersion();
+                    main.put(Require_Capability, getRequireCapabilityJavaSE("7"));
                     break;
                 }
             }
@@ -306,7 +323,7 @@ public class JarEntryManifestFileObject implements JavaFileObject {
             if (originalManifest != null) {
                 Attributes attributes = originalManifest.getMainAttributes();
                 for (Object key : attributes.keySet()) {
-                    if (!main.containsKey(key) || key.equals(Bundle_Activator)) {
+                    if (!main.containsKey(key)) {
                         main.put(key, attributes.get(key));
                     }
                 }
@@ -323,11 +340,24 @@ public class JarEntryManifestFileObject implements JavaFileObject {
          * Composes OSGi Require-Bundle header content.
          */
         private String getRequireBundle() {
+            List<String> providedBundles = null;
+            if (osgiProvidedBundles != null && !osgiProvidedBundles.isEmpty()) {
+                providedBundles = Arrays.asList(osgiProvidedBundles.split("(,| )+"));
+            }
+            
             StringBuilder requires = new StringBuilder();
             boolean distImportAlreadyFound = false;
             for (ModuleImport anImport : module.getImports()) {
+                if (!ModelUtil.isForBackend(anImport.getNativeBackends(), Backend.Java)) {
+                    continue;
+                }
                 Module m = anImport.getModule();
                 String moduleName = m.getNameAsString();
+                
+                if (providedBundles != null && providedBundles.contains(moduleName)) {
+                    continue;
+                }
+                
                 if ("com.redhat.ceylon.dist".equals(moduleName)) {
                     distImportAlreadyFound = true;
                 }

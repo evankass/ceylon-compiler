@@ -24,7 +24,7 @@ final class arrayOfSome_ {
     }
     
     static <Element>.ceylon.language.Array<Element> arrayOfSome(final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $reified$Element, final .ceylon.language.Sequential<? extends Element> elements) {
-        return (.ceylon.language.Array).ceylon.language.nothing_.get_();
+        return (.ceylon.language.Array<Element>).ceylon.language.nothing_.get_();
     }
 }
 final class bug647test_ {
@@ -53,11 +53,9 @@ final class bug647test_ {
             }
             returning null;
         );
-        final .ceylon.language.Array<.java.lang.Object> objs = .com.redhat.ceylon.compiler.java.test.issues.bug06xx.arrayOfSome_.<.java.lang.Object>arrayOfSome(.ceylon.language.Object.$TypeDescriptor$, (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, .ceylon.language.empty_.get_(), .ceylon.language.String.instance("one"), .ceylon.language.String.instance("two"), .ceylon.language.String.instance("three")));
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug06xx.bug647test_.bug647test();
+        final .ceylon.language.Array<.java.lang.Object> objs = .com.redhat.ceylon.compiler.java.test.issues.bug06xx.arrayOfSome_.<.java.lang.Object>arrayOfSome(.ceylon.language.Object.$TypeDescriptor$, (.ceylon.language.Sequence).com.redhat.ceylon.compiler.java.Util.sequentialCopy(.ceylon.language.Object.$TypeDescriptor$, new .java.lang.Object[]{
+                .ceylon.language.String.instance("one"),
+                .ceylon.language.String.instance("two"),
+                .ceylon.language.String.instance("three")}, .ceylon.language.empty_.get_()));
     }
 }

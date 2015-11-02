@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class InitializerIfElse implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class InitializerIfElse implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     InitializerIfElse() {
         boolean b = false;
@@ -9,11 +9,6 @@ class InitializerIfElse implements .com.redhat.ceylon.compiler.java.runtime.mode
         } else {
             b = false;
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.InitializerIfElse();
     }
     
     @.java.lang.Override

@@ -1,13 +1,8 @@
 package com.redhat.ceylon.compiler.java.test.expression.invoke;
 
-class CallableReturnReturningClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class CallableReturnReturningClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     CallableReturnReturningClass() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.invoke.CallableReturnReturningClass();
     }
     
     @.java.lang.Override
@@ -29,10 +24,5 @@ final class callableReturnReturningClass_bar_ {
                 return new .com.redhat.ceylon.compiler.java.test.expression.invoke.CallableReturnReturningClass();
             }
         };
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.expression.invoke.callableReturnReturningClass_bar_.callableReturnReturningClass_bar();
     }
 }

@@ -6,10 +6,10 @@ public final class run_ {
     }
     
     public static void run(final .ceylon.language.meta.model.Value nameValue) {
-        final .ceylon.language.Callable<? extends .ceylon.language.String> getName = (.ceylon.language.Callable<? extends .ceylon.language.String>)(.ceylon.language.Callable)(
+        final .ceylon.language.Callable<? extends .ceylon.language.String> getName = (.ceylon.language.Callable<? extends .ceylon.language.String>)(
             let
             {
-                final .ceylon.language.meta.model.Value $instance$ = nameValue;
+                final .ceylon.language.meta.model.Gettable $instance$ = nameValue;
             }
             returning new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.ceylon.language.String>(.ceylon.language.String.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$, "String()", (short)-1){
                 
@@ -22,7 +22,12 @@ public final class run_ {
         final .java.lang.String name = ((.ceylon.language.String)nameValue.get()).toString();
     }
 }
-class Person implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Person implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected Person() {
+        super();
+        this.name = null;
+    }
     
     Person(final .java.lang.String name) {
         this.name = name;

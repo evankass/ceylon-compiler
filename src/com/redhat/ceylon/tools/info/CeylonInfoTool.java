@@ -1,10 +1,17 @@
 package com.redhat.ceylon.tools.info;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import com.redhat.ceylon.cmr.api.ArtifactContext;
 import com.redhat.ceylon.cmr.api.ModuleDependencyInfo;
@@ -15,31 +22,45 @@ import com.redhat.ceylon.cmr.api.ModuleVersionArtifact;
 import com.redhat.ceylon.cmr.api.ModuleVersionDetails;
 import com.redhat.ceylon.cmr.api.ModuleVersionQuery;
 import com.redhat.ceylon.cmr.api.RepositoryManager;
+import com.redhat.ceylon.cmr.api.VersionComparator;
 import com.redhat.ceylon.cmr.ceylon.RepoUsingTool;
 import com.redhat.ceylon.common.Versions;
+import com.redhat.ceylon.common.config.DefaultToolOptions;
 import com.redhat.ceylon.common.tool.Argument;
 import com.redhat.ceylon.common.tool.Description;
 import com.redhat.ceylon.common.tool.Option;
 import com.redhat.ceylon.common.tool.OptionArgument;
+import com.redhat.ceylon.common.tool.ParsedBy;
+import com.redhat.ceylon.common.tool.RemainingSections;
+import com.redhat.ceylon.common.tool.StandardArgumentParsers;
 import com.redhat.ceylon.common.tool.Summary;
+import com.redhat.ceylon.common.tools.CeylonTool;
 import com.redhat.ceylon.common.tools.ModuleSpec;
 
 @Summary("Prints information about modules in repositories")
 @Description("When passed a search query like `*foo*` it will look at all the modules in all " +
         "repositories and see if the word `foo` appears anywhere in the name, description, " +
-        "version, license or any other field in the module's desciptor and print their names. " +
+        "version, license or any other field in the module's descriptor and print their names. " +
         "\n\n" +
         "When passed a partial module name like `com.acme.foo*` it will look at all the " +
-        "modules in all the repositoriues and see if their names start with `com.acme.foo` " +
+        "modules in all the repositories and see if their names start with `com.acme.foo` " +
         "and print their names." +
         "\n\n" +
         "When passed a complete module name like `com.acme.foobar` it will print the list " +
-        "of available versions for that module. Versions marked with `*` are not currently " +
-        "available on the local system but can be downloaded on-demand from remote servers." +
+        "of available versions for that module, with the module repository in which each " +
+        "version was found. Versions marked with `*` are not currently available on the local " +
+        "file system but will be downloaded on-demand from remote servers." +
         "\n\n" +
         "When passed a complete module name and version like `com.acme.foobar/1.0` it will " +
         "print information about the contents of a module archive, its description, its licence " +
         "and its dependencies")
+@RemainingSections("## EXAMPLE\n\n"
+        + "First list the available modules in the 'ceylon' namespace:\n\n"
+        + "    ceylon info 'ceylon.*'\n\n"
+        + "Next list the versions of a module:\n\n"
+        + "    ceylon info ceylon.collection\n\n"
+        + "Then view information for a particular version:\n\n"
+        + "    ceylon info ceylon.collection/1.2.0\n\n")
 public class CeylonInfoTool extends RepoUsingTool {
 
     private static final int INFINITE_DEPTH = -1;
@@ -48,10 +69,14 @@ public class CeylonInfoTool extends RepoUsingTool {
         simple, fancy
     }
     
+    public enum Incompatible {
+        yes, no, auto
+    }
+    
     private List<ModuleSpec> modules;
     private boolean showVersions;
     private boolean showDependencies;
-    private boolean showIncompatible;
+    private Incompatible showIncompatible = Incompatible.auto;
     private boolean showFullDescription;
     private String showType;
     private int depth = 1;
@@ -60,14 +85,33 @@ public class CeylonInfoTool extends RepoUsingTool {
     private boolean showNames;
     private boolean exactMatch;
     private boolean requireAll;
+    private boolean printOverrides;
     private Formatting formatting;
-    
+    private List<File> sourceFolders = DefaultToolOptions.getCompilerSourceDirs();
+
     private Integer binaryMajor = null;
     private Integer binaryMinor = null;
     private ModuleQuery.Type queryType = ModuleQuery.Type.ALL;
     
     public CeylonInfoTool() {
         super(CeylonInfoMessages.RESOURCE_BUNDLE);
+    }
+    
+    @Override
+    protected boolean includeJDK() {
+        return true;
+    }
+    
+    @Override
+    protected List<File> getSourceDirs() {
+        return sourceFolders;
+    }
+    
+    @OptionArgument(longName="src", argumentName="dir")
+    @ParsedBy(StandardArgumentParsers.PathArgumentParser.class)
+    @Description("A directory containing Ceylon and/or Java source code (default: `./source`)")
+    public void setSourceFolders(List<File> sourceFolders) {
+        this.sourceFolders = sourceFolders;
     }
     
     @Argument(argumentName="module", multiplicity="+")
@@ -84,16 +128,23 @@ public class CeylonInfoTool extends RepoUsingTool {
     public void setShowVersions(boolean showVersions) {
         this.showVersions = showVersions;
     }
-    
+
+    @Option(longName="print-overrides")
+    @Description("Print a usable module overrides file when there are duplicate versions, selecting the latest versions")
+    public void setPrintOverrides(boolean printOverrides) {
+        this.printOverrides = printOverrides;
+    }
+
     @Option(longName="show-dependencies")
     @Description("Show the dependencies whenever versions are shown")
     public void setShowDependencies(boolean showDependencies) {
         this.showDependencies = showDependencies;
     }
     
-    @Option(longName="show-incompatible")
-    @Description("Also show versions incompatible with the current Ceylon installation")
-    public void setShowIncompatible(boolean showIncompatible) {
+    @OptionArgument(argumentName="mode")
+    @Description("Also show versions incompatible with the current Ceylon installation. " +
+            "allowed values are: 'yes', 'no' and 'auto'")
+    public void setShowIncompatible(Incompatible showIncompatible) {
         this.showIncompatible = showIncompatible;
     }
     
@@ -170,7 +221,7 @@ public class CeylonInfoTool extends RepoUsingTool {
     }
 
     @Override
-    public void initialize() {
+    public void initialize(CeylonTool mainTool) {
         if (showType != null) {
             if ("car".equalsIgnoreCase(showType)) {
                 queryType = ModuleQuery.Type.CAR;
@@ -205,12 +256,12 @@ public class CeylonInfoTool extends RepoUsingTool {
     
     @Override
     public void run() throws Exception {
-        setSystemProperties();
-        if (!showIncompatible) {
+        if (showIncompatible != Incompatible.yes) {
             binaryMajor = Versions.JVM_BINARY_MAJOR_VERSION;
             binaryMinor = Versions.JVM_BINARY_MINOR_VERSION;
         }
-        
+        String msgkey = showIncompatible == Incompatible.no ? "module.not.found.compat" : "module.not.found";
+
         for (ModuleSpec module : modules) {
             String name = module.getName();
             if (!module.isVersioned() && (name.startsWith("*") || name.endsWith("*"))) {
@@ -220,7 +271,7 @@ public class CeylonInfoTool extends RepoUsingTool {
                     if (name.startsWith("*") || name.endsWith("*")) {
                         err = CeylonInfoMessages.msg("no.match", name);
                     } else {
-                        err = getModuleNotFoundErrorMessage(getRepositoryManager(), module.getName(), module.getVersion());
+                        err = getModuleNotFoundErrorMessage(getRepositoryManager(), module.getName(), module.getVersion(), msgkey);
                     }
                     errorAppend(err);
                     errorNewline();
@@ -230,10 +281,25 @@ public class CeylonInfoTool extends RepoUsingTool {
             } else {
                 Collection<ModuleVersionDetails> versions = getModuleVersions(getRepositoryManager(), module.getName(), module.getVersion(), queryType, binaryMajor, binaryMinor);
                 if (versions.isEmpty()) {
-                    String err = getModuleNotFoundErrorMessage(getRepositoryManager(), module.getName(), module.getVersion());
-                    errorAppend(err);
-                    errorNewline();
-                    continue;
+                    // try from source
+                    ModuleVersionDetails fromSource = getVersionFromSource(name);
+                    if (fromSource != null) {
+                        // is it the version we're after?
+                        versions = Arrays.asList(fromSource);
+                    } else {
+                        if (showIncompatible == Incompatible.auto &&
+                                (binaryMajor != null || binaryMinor != null)) {
+                            // If we were called with a specific version and we didn't find a "compatible"
+                            // artifact then lets see if we can find an "incompatible" one
+                            versions = getModuleVersions(getRepositoryManager(), module.getName(), module.getVersion(), queryType, null, null);
+                        }
+                        if (versions.isEmpty()) {
+                            String err = getModuleNotFoundErrorMessage(getRepositoryManager(), module.getName(), module.getVersion(), msgkey);
+                            errorAppend(err);
+                            errorNewline();
+                            continue;
+                        }
+                    }
                 }
                 if (module.getVersion() == null || module.getVersion().isEmpty() || versions.size() > 1) {
                     outputVersions(module, versions);
@@ -283,10 +349,12 @@ public class CeylonInfoTool extends RepoUsingTool {
     
     private void outputModules(ModuleSpec query, Collection<ModuleDetails> modules) throws IOException {
         if (formatting == Formatting.fancy) {
-            if (findMember == null) {
-                msg("module.query", query.getName()).newline();
+            if (findMember != null) {
+                msg("module.query.member", query.getName(), findMember).newline();
+            } else if (findPackage != null) {
+                msg("module.query.package", query.getName(), findPackage).newline();
             } else {
-                msg("module.query.find", query.getName(), findMember).newline();
+                msg("module.query", query.getName()).newline();
             }
         }
         outputModules(modules);
@@ -311,14 +379,17 @@ public class CeylonInfoTool extends RepoUsingTool {
     }
 
     private void outputVersions(ModuleSpec module, Collection<ModuleVersionDetails> versions) throws IOException {
+        String prefix = (formatting == Formatting.fancy) ? "    " : "";
         if (formatting == Formatting.fancy) {
-            if (findMember == null) {
-                msg("version.query", module.getName()).newline();
+            if (findMember != null) {
+                msg("version.query.member", module.getName(), findMember).newline();
+            } else if (findPackage != null) {
+                msg("version.query.package", module.getName(), findPackage).newline();
             } else {
-                msg("version.query.find", module.getName(), findMember).newline();
+                msg("version.query", module.getName()).newline();
             }
         }
-        outputVersions(module.getName(), versions, "    ");
+        outputVersions(module.getName(), versions, prefix);
     }
 
     private void outputVersions(String moduleName, Collection<ModuleVersionDetails> versions, String prefix) throws IOException {
@@ -330,8 +401,16 @@ public class CeylonInfoTool extends RepoUsingTool {
                     append(moduleName).append("/");
                 }
                 append(version.getVersion());
-                if (version.isRemote() && formatting == Formatting.fancy) {
-                    append(" *");
+                if (formatting == Formatting.fancy) {
+                    append(" - ").append(version.getOrigin());
+                    if (hasOnlyIncompatibleBinaries(version)) {
+                        append(" ");
+                        msg("label.incompatible.version");
+                    }
+                    if (version.isRemote()) {
+                        append(" ");
+                        msg("label.remote");
+                    }
                 }
                 newline();
             }
@@ -353,6 +432,29 @@ public class CeylonInfoTool extends RepoUsingTool {
                 outputNames(moduleName, version, namePrefix);
             }
         }
+    }
+
+    private boolean hasOnlyIncompatibleBinaries(ModuleVersionDetails version) {
+        boolean hasBinaries = false;
+        for (ModuleVersionArtifact at : version.getArtifactTypes()) {
+            if (at.getSuffix().equals(ArtifactContext.CAR)) {
+                if (Versions.isJvmBinaryVersionSupported(
+                            at.getMajorBinaryVersion(),
+                            at.getMinorBinaryVersion())) {
+                    return false;
+                }
+                hasBinaries = true;
+            }
+            if (at.getSuffix().equals(ArtifactContext.JS)) {
+                if (Versions.isJvmBinaryVersionSupported(
+                            at.getMajorBinaryVersion(),
+                            at.getMinorBinaryVersion())) {
+                    return false;
+                }
+                hasBinaries = true;
+            }
+        }
+        return hasBinaries;
     }
 
     private void outputNames(String moduleName, ModuleVersionDetails version, String prefix) throws IOException {
@@ -391,8 +493,91 @@ public class CeylonInfoTool extends RepoUsingTool {
             outputAuthors(version.getAuthors());
         }
         if (!version.getDependencies().isEmpty()) {
-            msg("module.dependencies", (depth == INFINITE_DEPTH ? "∞" : String.valueOf(depth))).newline();
-            recurseDependencies(version, 0);
+            msg("module.dependencies.tree", (depth == INFINITE_DEPTH ? "∞" : String.valueOf(depth))).newline();
+            SortedMap<String, SortedSet<String>> names = new TreeMap<>();
+            recurseDependencies(version, names, 0);
+
+            if (depth != 1) {
+                newline();
+                msg("module.dependencies.flat", (depth == INFINITE_DEPTH ? "∞" : String.valueOf(depth))).newline();
+                listDependencies(names);
+            }
+            
+            listDependencyConflictsIfAny(names);
+        }
+    }
+
+    private void listDependencyConflictsIfAny(SortedMap<String, SortedSet<String>> names) throws IOException {
+        boolean hasNoDuplicate = true;
+        StringBuilder overridesFile = null;
+        if(printOverrides){
+            overridesFile = new StringBuilder();
+            overridesFile.append("<overrides>\n");
+        }
+        for(Map.Entry<String,SortedSet<String>> entry : names.entrySet()){
+            if(entry.getValue().size() > 1){
+                if(hasNoDuplicate){
+                    hasNoDuplicate = false;
+                    newline();
+                    msg("module.dependencies.conflicts", (depth == INFINITE_DEPTH ? "∞" : String.valueOf(depth))).newline();
+                }
+                append("  ");
+                append(entry.getKey());
+                if(entry.getValue().size() > 1){
+                    append(": ");
+                    boolean first = true;
+                    for(String v : entry.getValue()){
+                        if(first)
+                            first = false;
+                        else
+                            append(", ");
+                        append(v);
+                    }
+                    if(printOverrides){
+                        overridesFile.append(" <set");
+                        String name = entry.getKey();
+                        if(name.contains(":")){
+                            int p = name.indexOf(':');
+                            String groupId = name.substring(0, p);
+                            String artifactId = name.substring(p+1);
+                            overridesFile.append(" groupId=\"").append(groupId).append("\" artifactId=\"").append(artifactId).append("\"");
+                        }else{
+                            overridesFile.append(" module=\"").append(name).append("\"");
+                        }
+                        overridesFile.append(" version=\"").append(entry.getValue().last()).append("\"/>\n");
+                    }
+                }
+                newline();
+            }
+        }
+        if(printOverrides && !hasNoDuplicate){
+            overridesFile.append("</overrides>\n");
+            newline();
+            msg("module.dependencies.overrides").newline();
+            newline();
+            append(overridesFile.toString());
+        }
+    }
+
+    private void listDependencies(SortedMap<String, SortedSet<String>> names) throws IOException {
+        for(Map.Entry<String,SortedSet<String>> entry : names.entrySet()){
+            append("  ");
+            append(entry.getKey());
+            if(entry.getValue().size() > 1){
+                append(": ");
+                boolean first = true;
+                for(String v : entry.getValue()){
+                    if(first)
+                        first = false;
+                    else
+                        append(", ");
+                    append(v);
+                }
+            }else{
+                append("/");
+                append(entry.getValue().first());
+            }
+            newline();
         }
     }
 
@@ -441,8 +626,9 @@ public class CeylonInfoTool extends RepoUsingTool {
                         append(".");
                         append(minor);
                     }
-                    if (major != Versions.JVM_BINARY_MAJOR_VERSION && minor != Versions.JVM_BINARY_MINOR_VERSION) {
-                        append(" *incompatible*");
+                    if (!Versions.isJvmBinaryVersionSupported(major, minor)) {
+                        append(" ");
+                        msg("label.incompatible.version");
                     }
                     append(")");
                 } else if (suffix.equalsIgnoreCase(ArtifactContext.JAR)) {
@@ -458,8 +644,9 @@ public class CeylonInfoTool extends RepoUsingTool {
                         append(".");
                         append(minor);
                     }
-                    if (major != Versions.JS_BINARY_MAJOR_VERSION && minor != Versions.JS_BINARY_MINOR_VERSION) {
-                        append(" *incompatible*");
+                    if (!Versions.isJsBinaryVersionSupported(major, minor)) {
+                        append(" ");
+                        msg("label.incompatible.version");
                     }
                     append(")");
                     js = true;
@@ -490,23 +677,37 @@ public class CeylonInfoTool extends RepoUsingTool {
         return this;
     }
     
-    private void recurseDependencies(ModuleVersionDetails version, final int depth) throws IOException {
+    private void recurseDependencies(ModuleVersionDetails version, Map<String, SortedSet<String>> names, final int depth) throws IOException {
         for (ModuleDependencyInfo dep : version.getDependencies()) {
-            dependency(dep, depth+1);
+            dependency(dep, names, depth+1);
         }
     }
     
-    private void dependency(ModuleDependencyInfo dep, final int depth) throws IOException {
+    private void dependency(ModuleDependencyInfo dep, Map<String, SortedSet<String>> names, final int depth) throws IOException {
         for (int ii = 0; ii < depth; ii++) {
             append("  ");
         }
         append(dep);
+        SortedSet<String> seenVersions = names.get(dep.getName());
+        boolean recurse = this.depth == -1 || depth < this.depth;
+        if(seenVersions != null){
+            // already seen
+            if(seenVersions.size() == 1 && seenVersions.first().equals(dep.getVersion()))
+                append(" (already imported)");
+            else
+                append(" (already imported other version)");
+            recurse = false;
+        }else{
+            seenVersions = new TreeSet<>(VersionComparator.INSTANCE);
+            names.put(dep.getName(), seenVersions);
+        }
+        seenVersions.add(dep.getVersion());
         newline();
         
-        if (depth < this.depth) {
+        if (recurse && !"ceylon.language".equals(dep.getName())) {
             Collection<ModuleVersionDetails> versions = getModuleVersions(dep.getName(), dep.getVersion(), queryType, binaryMajor, binaryMinor);
             if (!versions.isEmpty()) {
-                recurseDependencies(versions.iterator().next(), depth + 1);
+                recurseDependencies(versions.iterator().next(), names, depth + 1);
             }
         }
     }

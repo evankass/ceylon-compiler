@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.trycatch;
 
-class ThrowMethodResult implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class ThrowMethodResult implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     ThrowMethodResult() {
     }
@@ -11,11 +11,6 @@ class ThrowMethodResult implements .com.redhat.ceylon.compiler.java.runtime.mode
     
     private final void t$priv$() {
         throw e$priv$();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.trycatch.ThrowMethodResult();
     }
     
     @.java.lang.Override

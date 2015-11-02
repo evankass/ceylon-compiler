@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.structure.klass;
 
-class OverrideDefaultedInitParam implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class OverrideDefaultedInitParam implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     OverrideDefaultedInitParam() {
         (
@@ -18,11 +18,6 @@ class OverrideDefaultedInitParam implements .com.redhat.ceylon.compiler.java.run
     
     public static .java.lang.String $default$id() {
         return "";
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.klass.OverrideDefaultedInitParam();
     }
     
     @.java.lang.Override
@@ -50,11 +45,6 @@ class OverrideDefaultedInitParamSub extends .com.redhat.ceylon.compiler.java.tes
     
     public static .java.lang.String $default$id() {
         return "";
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.structure.klass.OverrideDefaultedInitParamSub();
     }
     
     @.java.lang.Override

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.attribute;
 
-class MethodLocalAccess implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodLocalAccess implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodLocalAccess() {
     }
@@ -42,11 +42,6 @@ class MethodLocalAccess implements .com.redhat.ceylon.compiler.java.runtime.mode
         }
         final .com.redhat.ceylon.compiler.java.language.GetterLong selfref$getter$_ = new selfref$getter$_();
         return selfref$getter$_.get_();
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.attribute.MethodLocalAccess();
     }
     
     @.java.lang.Override

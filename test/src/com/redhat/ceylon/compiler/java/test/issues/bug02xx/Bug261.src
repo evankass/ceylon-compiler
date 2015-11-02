@@ -9,7 +9,7 @@ final class bug261_ {
         long vk = 0L;
         long vl = 0L;
         
-        class Inner implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+        class Inner implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
             
             Inner() {
                 this.vi = 0L;
@@ -57,10 +57,5 @@ final class bug261_ {
             }
             returning $ceylontmp$op$2;
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.issues.bug02xx.bug261_.bug261();
     }
 }

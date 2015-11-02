@@ -85,6 +85,8 @@ public class Gen extends JCTree.Visitor {
      */
     private final Type methodType;
 
+    private SourceLanguage sourceLanguage;
+
     public static Gen instance(Context context) {
         Gen instance = context.get(genKey);
         if (instance == null)
@@ -117,9 +119,8 @@ public class Gen extends JCTree.Visitor {
             options.isUnset(G_CUSTOM) ||
             options.isSet(G_CUSTOM, "lines");
         varDebugInfo =
-            options.isUnset(G_CUSTOM)
-            ? options.isSet(G)
-            : options.isSet(G_CUSTOM, "vars");
+            options.isUnset(G_CUSTOM) ||
+            options.isSet(G_CUSTOM, "vars");
         genCrt = options.isSet(XJCOV);
         debugCode = options.isSet("debugcode");
         allowInvokedynamic = target.hasInvokedynamic() || options.isSet("invokedynamic");
@@ -151,6 +152,8 @@ public class Gen extends JCTree.Visitor {
         }
         this.jsrlimit = setjsrlimit;
         this.useJsrLocally = false; // reset in visitTry
+        
+        this.sourceLanguage = SourceLanguage.instance(context);
     }
 
     /** Switches
@@ -1640,14 +1643,18 @@ public class Gen extends JCTree.Visitor {
 
     public void visitBreak(JCBreak tree) {
         Env<GenContext> targetEnv = unwind(tree.target, env);
-        Assert.check(code.state.stacksize == 0);
+        if(!sourceLanguage.isCeylon()) {
+            Assert.check(code.state.stacksize == 0);
+        }
         targetEnv.info.addExit(code.branch(goto_));
         endFinalizerGaps(env, targetEnv);
     }
 
     public void visitContinue(JCContinue tree) {
         Env<GenContext> targetEnv = unwind(tree.target, env);
-        Assert.check(code.state.stacksize == 0);
+        if(!sourceLanguage.isCeylon()) {
+            Assert.check(code.state.stacksize == 0);
+        }
         targetEnv.info.addCont(code.branch(goto_));
         endFinalizerGaps(env, targetEnv);
     }
@@ -1673,6 +1680,9 @@ public class Gen extends JCTree.Visitor {
     }
 
     public void visitThrow(JCThrow tree) {
+        while (code.state.stacksize > 0) { 
+            code.emitop0(pop);
+        }
         genExpr(tree.expr, tree.expr.type).load();
         code.emitop0(athrow);
     }
@@ -1683,6 +1693,7 @@ public class Gen extends JCTree.Visitor {
 
     public void visitApply(JCMethodInvocation tree) {
         // Generate code for method.
+        code.statBegin(tree.pos);
         Item m = genExpr(tree.meth, methodType);
         // Generate code for all arguments, where the expected types are
         // the parameters of the method's external type (that is, any implicit
@@ -1721,7 +1732,7 @@ public class Gen extends JCTree.Visitor {
         // Enclosing instances or anonymous classes should have been eliminated
         // by now.
         Assert.check(tree.encl == null && tree.def == null);
-
+        code.statBegin(tree.pos);
         code.emitop2(new_, makeRef(tree.pos(), tree.type));
         code.emitop0(dup);
 

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.loop;
 
-class MethodWhileIsNull implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodWhileIsNull implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodWhileIsNull() {
     }
@@ -19,7 +19,9 @@ class MethodWhileIsNull implements .com.redhat.ceylon.compiler.java.runtime.mode
             if ((x$0 = x) != null) {
                 final long x$1 = ((.ceylon.language.Integer)x$0).longValue();
                 return x$1;
-            } else break loop_0;
+            } else {
+                break loop_0;
+            }
         }
         return owt$priv$(x);
     }
@@ -30,7 +32,9 @@ class MethodWhileIsNull implements .com.redhat.ceylon.compiler.java.runtime.mode
             if ((y$2 = x) != null) {
                 final long y$3 = ((.ceylon.language.Integer)y$2).longValue();
                 return y$3;
-            } else break loop_1;
+            } else {
+                break loop_1;
+            }
         }
         return owt$priv$(x);
     }
@@ -39,7 +43,9 @@ class MethodWhileIsNull implements .com.redhat.ceylon.compiler.java.runtime.mode
         loop_2: while (true) {
             if (x == null) {
                 return nowt$priv$(x);
-            } else break loop_2;
+            } else {
+                break loop_2;
+            }
         }
         return owt$priv$(x);
     }
@@ -50,14 +56,11 @@ class MethodWhileIsNull implements .com.redhat.ceylon.compiler.java.runtime.mode
             if ((y$5 = x) == null) {
                 final .java.lang.Object y$6 = y$5;
                 return nowt$priv$(y$6);
-            } else break loop_3;
+            } else {
+                break loop_3;
+            }
         }
         return owt$priv$(x);
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.loop.MethodWhileIsNull();
     }
     
     @.java.lang.Override

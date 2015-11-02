@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfIsFoo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfIsFoo implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfIsFoo() {
     }
@@ -29,11 +29,6 @@ class MethodIfIsFoo implements .com.redhat.ceylon.compiler.java.runtime.model.Re
                 x$8$11.foo2();
             }
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfIsFoo();
     }
     
     @.java.lang.Override

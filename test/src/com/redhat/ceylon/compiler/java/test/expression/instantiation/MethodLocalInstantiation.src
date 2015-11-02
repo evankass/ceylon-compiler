@@ -1,13 +1,13 @@
 package com.redhat.ceylon.compiler.java.test.expression.instantiation;
 
-class OuterClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class OuterClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     OuterClass() {
     }
     
     private final long m$priv$() {
         
-        class LocalClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+        class LocalClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
             
             LocalClass() {
             }
@@ -19,11 +19,6 @@ class OuterClass implements .com.redhat.ceylon.compiler.java.runtime.model.Reifi
         }
         final LocalClass l = new LocalClass();
         return 0L;
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.instantiation.OuterClass();
     }
     
     @.java.lang.Override

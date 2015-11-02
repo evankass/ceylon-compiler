@@ -1,9 +1,8 @@
 package com.redhat.ceylon.compiler.java.test.interop;
 
-@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 7)
+@.com.redhat.ceylon.compiler.java.metadata.Ceylon(major = 8)
 @.ceylon.language.SharedAnnotation$annotation$
-@.com.redhat.ceylon.compiler.java.metadata.Annotations({@.com.redhat.ceylon.compiler.java.metadata.Annotation("shared")})
-public class AnnotationInteropQualifiedEnum implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+public class AnnotationInteropQualifiedEnum implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     public AnnotationInteropQualifiedEnum() {
         this.field1 = "";
@@ -14,16 +13,12 @@ public class AnnotationInteropQualifiedEnum implements .com.redhat.ceylon.compil
     
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.VariableAnnotation$annotation$
-    @.javax.annotation.Resource(authenticationType = .javax.annotation.Resource.AuthenticationType.APPLICATION)
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("variable"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("resource")})
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::String")
     public final .java.lang.String getField1() {
         return field1;
     }
     
+    @.javax.annotation.Resource(authenticationType = .javax.annotation.Resource.AuthenticationType.APPLICATION)
     public final void setField1(@.com.redhat.ceylon.compiler.java.metadata.Name("field1")
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::String")
     final .java.lang.String field1) {
@@ -34,16 +29,12 @@ public class AnnotationInteropQualifiedEnum implements .com.redhat.ceylon.compil
     
     @.ceylon.language.SharedAnnotation$annotation$
     @.ceylon.language.VariableAnnotation$annotation$
-    @.javax.annotation.Resource(authenticationType = .javax.annotation.Resource.AuthenticationType.APPLICATION)
-    @.com.redhat.ceylon.compiler.java.metadata.Annotations({
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("shared"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("variable"),
-            @.com.redhat.ceylon.compiler.java.metadata.Annotation("resource")})
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::String")
     public final .java.lang.String getField2() {
         return field2;
     }
     
+    @.javax.annotation.Resource(authenticationType = .javax.annotation.Resource.AuthenticationType.APPLICATION)
     public final void setField2(@.com.redhat.ceylon.compiler.java.metadata.Name("field2")
     @.com.redhat.ceylon.compiler.java.metadata.TypeInfo("ceylon.language::String")
     final .java.lang.String field2) {

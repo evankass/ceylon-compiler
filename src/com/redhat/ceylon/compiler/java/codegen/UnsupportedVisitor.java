@@ -1,41 +1,25 @@
 package com.redhat.ceylon.compiler.java.codegen;
 
+import java.util.EnumSet;
+import java.util.List;
+
+import com.redhat.ceylon.common.Backend;
 import com.redhat.ceylon.compiler.typechecker.tree.Tree;
+import com.redhat.ceylon.compiler.typechecker.tree.Tree.Annotation;
 import com.redhat.ceylon.compiler.typechecker.tree.Visitor;
+import com.redhat.ceylon.compiler.typechecker.util.NativeUtil;
+import com.redhat.ceylon.model.loader.model.OutputElement;
 
 public class UnsupportedVisitor extends Visitor {
     
+    static final String DYNAMIC_UNSUPPORTED_ERR = "dynamic is not supported on the JVM";
+
     @Override
     public void visit(Tree.Annotation that) {
         String msg = AnnotationInvocationVisitor.checkForBannedJavaAnnotation(that);
         if (msg != null) {
-            that.addError(msg);
+            that.addError(msg, Backend.Java);
         }
-        super.visit(that);
-    }
-    
-    @Override
-    public void visit(Tree.DynamicStatement that) {
-        that.addUnsupportedError("dynamic is not yet supported on this platform");
-        super.visit(that);
-    }
-    
-    @Override
-    public void visit(Tree.Dynamic that) {
-        that.addUnsupportedError("dynamic is not yet supported on this platform");
-        super.visit(that);
-    }
-
-    @Override
-    public void visit(Tree.DynamicClause that) {
-        // do not report an error for a dynamic clause as that can only occur inside a dynamic statement and
-        // we already reported an error for that one
-        super.visit(that);
-    }
-
-    @Override
-    public void visit(Tree.DynamicModifier that) {
-        that.addUnsupportedError("dynamic is not yet supported on this platform");
         super.visit(that);
     }
 
@@ -44,7 +28,7 @@ public class UnsupportedVisitor extends Visitor {
         try {
             ExpressionTransformer.literalValue(that);
         } catch (ErroneousException e) {
-            that.addError(e.getMessage());
+            that.addError(e.getMessage(), Backend.Java);
         }
         super.visit(that);
     }
@@ -54,7 +38,7 @@ public class UnsupportedVisitor extends Visitor {
         try {
             ExpressionTransformer.literalValue(that);
         } catch (ErroneousException e) {
-            that.addError(e.getMessage());
+            that.addError(e.getMessage(), Backend.Java);
         }
         super.visit(that);
     }
@@ -64,10 +48,84 @@ public class UnsupportedVisitor extends Visitor {
             try {
                 ExpressionTransformer.literalValue(that);
             } catch (ErroneousException e) {
-                that.addError(e.getMessage());
+                that.addError(e.getMessage(), Backend.Java);
             }
         } else {
             super.visit(that);
         }
     }
+
+    public void visit(Tree.AttributeGetterDefinition that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+
+    public void visit(Tree.AttributeSetterDefinition that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+    
+    public void visit(Tree.AttributeDeclaration that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+    
+    public void visit(Tree.ObjectDefinition that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+    
+    public void visit(Tree.AnyClass that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+    
+    public void visit(Tree.Constructor that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+    
+    public void visit(Tree.Enumerated that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+    
+    public void visit(Tree.AnyInterface that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+    
+    public void visit(Tree.AnyMethod that) {
+        if (!NativeUtil.isForBackend(that, Backend.Java))
+            return;
+        interopAnnotationTargeting(AnnotationUtil.outputs(that), that.getAnnotationList());
+        super.visit(that);
+    }
+
+    private void interopAnnotationTargeting(EnumSet<OutputElement> outputs,
+            Tree.AnnotationList annotationList) {
+        List<Annotation> annotations = annotationList.getAnnotations();
+        for (Tree.Annotation annotation : annotations) {
+            AnnotationUtil.interopAnnotationTargeting(outputs, annotation, true);
+        }
+        AnnotationUtil.duplicateInteropAnnotation(outputs, annotations);
+    }
+    
+
 }

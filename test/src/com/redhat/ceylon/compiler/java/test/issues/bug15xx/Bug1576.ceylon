@@ -23,10 +23,12 @@ shared native object bug1576angular {
 }
 
 @noanno
-shared native class Bug1576Class(){}
+shared native class Bug1576Class(){
+    shared native void foo();
+}
 
 @noanno
-shared native void bug1576Method(){}
+shared native void bug1576Method();
 
 @noanno
 shared native Integer bug1576Attr;

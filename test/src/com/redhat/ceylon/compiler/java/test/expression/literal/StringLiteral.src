@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.literal;
 
-class StringLiteral implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class StringLiteral implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     StringLiteral() {
     }
@@ -11,11 +11,6 @@ class StringLiteral implements .com.redhat.ceylon.compiler.java.runtime.model.Re
         final .java.lang.String s3 = "This\nis\nanother\ntest";
         final .java.lang.String s4 = "\\\b\t\n\f\r\'\"`\\b";
         final .java.lang.String s5 = "\ud834\udd1e\ud834\udd1e";
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.literal.StringLiteral();
     }
     
     @.java.lang.Override

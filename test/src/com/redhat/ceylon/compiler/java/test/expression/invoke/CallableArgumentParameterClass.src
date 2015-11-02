@@ -1,13 +1,8 @@
 package com.redhat.ceylon.compiler.java.test.expression.invoke;
 
-class CallableArgumentParameterClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class CallableArgumentParameterClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     CallableArgumentParameterClass() {
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.invoke.CallableArgumentParameterClass();
     }
     
     @.java.lang.Override
@@ -38,7 +33,7 @@ final class callableArgumentParameterClass_m_ {
     }
     
     static void callableArgumentParameterClass_m() {
-        .com.redhat.ceylon.compiler.java.test.expression.invoke.callableArgumentParameterClass_f_.callableArgumentParameterClass_f(new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.ceylon.language.Tuple.class, .com.redhat.ceylon.compiler.java.test.expression.invoke.CallableArgumentParameterClass.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.test.expression.invoke.CallableArgumentParameterClass.$TypeDescriptor$, .ceylon.language.Empty.$TypeDescriptor$), "Anything(CallableArgumentParameterClass)", (short)-1){
+        .com.redhat.ceylon.compiler.java.test.expression.invoke.callableArgumentParameterClass_f_.callableArgumentParameterClass_f(new .com.redhat.ceylon.compiler.java.language.AbstractCallable<.java.lang.Object>(.ceylon.language.Anything.$TypeDescriptor$, .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.tuple(false, false, -1, .com.redhat.ceylon.compiler.java.test.expression.invoke.CallableArgumentParameterClass.$TypeDescriptor$), "Anything(CallableArgumentParameterClass)", (short)-1){
             
             @.java.lang.Override
             public .java.lang.Object $call$(final .java.lang.Object $param$0) {
@@ -52,10 +47,5 @@ final class callableArgumentParameterClass_m_ {
                 );
             }
         });
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        .com.redhat.ceylon.compiler.java.test.expression.invoke.callableArgumentParameterClass_m_.callableArgumentParameterClass_m();
     }
 }

@@ -1,6 +1,10 @@
 package com.redhat.ceylon.compiler.java.test.issues.bug05xx;
 
-class Bug544 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug544 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected Bug544() {
+        super();
+    }
     
     Bug544(final .java.lang.String s) {
     }
@@ -12,6 +16,11 @@ class Bug544 implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedTy
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544.class);
 }
 class Bug544SharedAttribute extends .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544 {
+    
+    protected Bug544SharedAttribute() {
+        super();
+        this.s = null;
+    }
     
     Bug544SharedAttribute(final .java.lang.String s) {
         super(s);
@@ -30,6 +39,11 @@ class Bug544SharedAttribute extends .com.redhat.ceylon.compiler.java.test.issues
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544SharedAttribute.class);
 }
 class Bug544Captured extends .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544 {
+    
+    protected Bug544Captured() {
+        super();
+        this.s = null;
+    }
     
     Bug544Captured(final .java.lang.String s) {
         super(s);
@@ -53,6 +67,10 @@ class Bug544Captured extends .com.redhat.ceylon.compiler.java.test.issues.bug05x
 }
 class Bug544NonSharedAttr extends .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544 {
     
+    protected Bug544NonSharedAttr() {
+        super();
+    }
+    
     Bug544NonSharedAttr(final .java.lang.String s) {
         super(s);
     }
@@ -69,11 +87,6 @@ class Bug544Toplevel extends .com.redhat.ceylon.compiler.java.test.issues.bug05x
         super(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.s_.get_());
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544Toplevel();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544Toplevel.$TypeDescriptor$;
@@ -81,6 +94,10 @@ class Bug544Toplevel extends .com.redhat.ceylon.compiler.java.test.issues.bug05x
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544Toplevel.class);
 }
 class Bug544Qualified extends .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544 {
+    
+    protected Bug544Qualified() {
+        super();
+    }
     
     Bug544Qualified(final .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544SharedAttribute b) {
         super(b.getS());
@@ -92,7 +109,7 @@ class Bug544Qualified extends .com.redhat.ceylon.compiler.java.test.issues.bug05
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544Qualified.class);
 }
-class Bug544ContainerClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class Bug544ContainerClass implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     Bug544ContainerClass() {
         this.s = "";
@@ -115,11 +132,6 @@ class Bug544ContainerClass implements .com.redhat.ceylon.compiler.java.runtime.m
         }
     }
     
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544ContainerClass();
-    }
-    
     @.java.lang.Override
     public .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $getType$() {
         return .com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544ContainerClass.$TypeDescriptor$;
@@ -133,7 +145,7 @@ interface Bug544ContainerInterface {
     public abstract .java.lang.String getS();
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544ContainerInterface.class);
 }
-final class Bug544ContainerInterface$impl {
+final class Bug544ContainerInterface$impl implements .java.io.Serializable {
     
     Bug544ContainerInterface$impl(.com.redhat.ceylon.compiler.java.test.issues.bug05xx.Bug544ContainerInterface $this) {
         this.$this = $this;
@@ -156,22 +168,25 @@ final class s_ {
     
     private s_() {
     }
-    private static final .java.lang.String[] value;
+    private static final .java.lang.String value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new .java.lang.String[]{""};
+            value = "";
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
             value = null;
+            $init$value = false;
         }
     }
     
     public static .java.lang.String get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (s_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'s\' before it was set");
         }

@@ -46,6 +46,12 @@ abstract class IsOptSelfType<T>() of T
         given T satisfies IsOptSelfType<T> {
 }
 @noanno
+class IsOptSelfTypeA() extends IsOptSelfType<IsOptSelfTypeA>(){
+}
+@noanno
+class IsOptSelfTypeB() extends IsOptSelfType<IsOptSelfTypeB>(){
+}
+@noanno
 class IsOpt() {
     void testClassShortcircuit(Anything val, IsOptCov<Anything> val2) {
         if (is IsOptCov<Integer> val) {}// instanceof shortcircuit
@@ -85,14 +91,15 @@ class IsOpt() {
     
     void testSelfTypes<T>(Anything val) {
         if (is IsOptSelfType<T> val) {//reified
-        } else if (is IsOptSelfType<Integer|String> val) {//potentially optimizable
-        } else if (is IsOptSelfType<Boolean> val) {// optimizable via self type
+        } else if (is IsOptSelfType<IsOptSelfTypeA|IsOptSelfTypeB> val) {//potentially optimizable
+        } else if (is IsOptSelfType<IsOptSelfTypeA> val) {// optimizable via self type
+        } else if (is IsOptSelfType<Boolean> val) {// not inhabited
         }
     }
     
     void testComplement<T>(Integer|String|IsOptInvar<T> val) {
         if (is IsOptInvar<T> val) {// ! (instanceof String || instanceof Integer)
-        } else if (is IsOptInvar<Integer> val) {// reified
+        } else if (is Integer val) {// reified
         } 
     }
     

@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.statement.conditional;
 
-class MethodIfIsWithMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class MethodIfIsWithMethod implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     MethodIfIsWithMethod() {
     }
@@ -19,11 +19,6 @@ class MethodIfIsWithMethod implements .com.redhat.ceylon.compiler.java.runtime.m
         if ((y$4 = give$priv$()) == null) {
             final .java.lang.Object y$5 = y$4;
         }
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.statement.conditional.MethodIfIsWithMethod();
     }
     
     @.java.lang.Override

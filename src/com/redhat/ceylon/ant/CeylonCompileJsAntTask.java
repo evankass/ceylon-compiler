@@ -39,6 +39,7 @@ import org.apache.tools.ant.types.Commandline;
 import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
 
+import com.redhat.ceylon.ant.CeylonCompileAntTask.SuppressWarning;
 import com.redhat.ceylon.common.Constants;
 
 public class CeylonCompileJsAntTask extends LazyCeylonAntTask {
@@ -54,6 +55,8 @@ public class CeylonCompileJsAntTask extends LazyCeylonAntTask {
 
     private List<File> compileList = new ArrayList<File>(2);
     private Set<Module> modules = null;
+    private List<SuppressWarning> suppressWarnings = new ArrayList<SuppressWarning>(0);
+    private boolean suppressAllWarnings = false;
     
     private static final FileFilter ARTIFACT_FILTER = new FileFilter() {
         @Override
@@ -67,6 +70,13 @@ public class CeylonCompileJsAntTask extends LazyCeylonAntTask {
         super("compile-js");
     }
 
+    public void addConfiguredSuppressWarning(SuppressWarning sw) {
+        this.suppressWarnings.add(sw);
+        if (sw.value == null || sw.value.isEmpty()) {
+            suppressAllWarnings = true;
+        }
+    }
+
     /**
      * Set the resource directories to find the resource files.
      * @param res the resource directories as a path
@@ -76,6 +86,15 @@ public class CeylonCompileJsAntTask extends LazyCeylonAntTask {
             this.res = res;
         } else {
             this.res.append(res);
+        }
+    }
+
+    public void addConfiguredResource(Src res) {
+        Path p = new Path(getProject(), res.value);
+        if (this.res == null) {
+            this.res = p;
+        } else {
+            this.res.append(p);
         }
     }
 
@@ -228,7 +247,17 @@ public class CeylonCompileJsAntTask extends LazyCeylonAntTask {
         for (File res : getResource()) {
             appendOptionArgument(cmd, "--resource", res.getAbsolutePath());
         }
-        
+
+        if (suppressWarnings != null) {
+            if (suppressAllWarnings) {
+                appendOption(cmd, "--suppress-warning");
+            } else {
+                for (SuppressWarning sw : suppressWarnings) {
+                    appendOption(cmd, "--suppress-warning=" + sw.value);
+                }
+            }
+        }
+
         for (File file : compileList) {
             log("Adding source file: "+file.getAbsolutePath(), Project.MSG_VERBOSE);
             cmd.createArgument().setValue(file.getAbsolutePath());

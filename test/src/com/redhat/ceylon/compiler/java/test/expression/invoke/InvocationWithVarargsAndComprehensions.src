@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.invoke;
 
-class InvocationWithVarargsAndComprehensions implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class InvocationWithVarargsAndComprehensions implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
     
     InvocationWithVarargsAndComprehensions() {
     }
@@ -31,11 +31,6 @@ class InvocationWithVarargsAndComprehensions implements .com.redhat.ceylon.compi
             }
             returning null;
         );
-    }
-    
-    public static void main(.java.lang.String[] args) {
-        .ceylon.language.process_.get_().setupArguments(args);
-        new .com.redhat.ceylon.compiler.java.test.expression.invoke.InvocationWithVarargsAndComprehensions();
     }
     
     @.java.lang.Override

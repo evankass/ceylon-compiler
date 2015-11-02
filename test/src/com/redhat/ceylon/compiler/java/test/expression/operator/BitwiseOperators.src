@@ -1,6 +1,6 @@
 package com.redhat.ceylon.compiler.java.test.expression.operator;
 
-abstract class BWMyInteger extends .java.lang.Object implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.Binary<.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger>, .ceylon.language.Integral<.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger>, .ceylon.language.Exponentiable<.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger, .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger> {
+abstract class BWMyInteger extends .java.lang.Object implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .ceylon.language.Binary<.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger>, .ceylon.language.Integral<.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger>, .ceylon.language.Exponentiable<.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger, .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger>, .java.io.Serializable {
     
     BWMyInteger() {
         super();
@@ -35,7 +35,12 @@ abstract class BWMyInteger extends .java.lang.Object implements .com.redhat.ceyl
     }
     
     @.java.lang.Override
-    public final boolean divides(final .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger other) {
+    public .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger modulo(final .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger modulus) {
+        return (.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger)$ceylon$language$Integral$this$.modulo(modulus);
+    }
+    
+    @.java.lang.Override
+    public boolean divides(final .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger other) {
         return $ceylon$language$Integral$this$.divides(other);
     }
     protected final .ceylon.language.Number$impl<.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger> $ceylon$language$Number$this$;
@@ -46,13 +51,13 @@ abstract class BWMyInteger extends .java.lang.Object implements .com.redhat.ceyl
     }
     
     @.java.lang.Override
-    public .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger getMagnitude() {
-        return (.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger)$ceylon$language$Number$this$.getMagnitude();
+    public long getSign() {
+        return $ceylon$language$Number$this$.getSign();
     }
     
     @.java.lang.Override
-    public long getSign() {
-        return $ceylon$language$Number$this$.getSign();
+    public .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger getMagnitude() {
+        return (.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger)$ceylon$language$Number$this$.getMagnitude();
     }
     protected final .ceylon.language.Invertible$impl<.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger> $ceylon$language$Invertible$this$;
     
@@ -99,13 +104,13 @@ abstract class BWMyInteger extends .java.lang.Object implements .com.redhat.ceyl
     }
     
     @.java.lang.Override
-    public .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger getSuccessor() {
-        return (.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger)$ceylon$language$Enumerable$this$.getSuccessor();
+    public .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger getPredecessor() {
+        return (.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger)$ceylon$language$Enumerable$this$.getPredecessor();
     }
     
     @.java.lang.Override
-    public .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger getPredecessor() {
-        return (.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger)$ceylon$language$Enumerable$this$.getPredecessor();
+    public .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger getSuccessor() {
+        return (.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger)$ceylon$language$Enumerable$this$.getSuccessor();
     }
     
     @.java.lang.Override
@@ -119,7 +124,19 @@ abstract class BWMyInteger extends .java.lang.Object implements .com.redhat.ceyl
     }
     public static final .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor $TypeDescriptor$ = .com.redhat.ceylon.compiler.java.runtime.model.TypeDescriptor.klass(.com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger.class);
 }
-class BitwiseOperators implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType {
+class BitwiseOperators implements .com.redhat.ceylon.compiler.java.runtime.model.ReifiedType, .java.io.Serializable {
+    
+    protected BitwiseOperators() {
+        super();
+        this.initN = null;
+        this.initI = null;
+        this.n1 = 0L;
+        this.n2 = 0L;
+        this.i1 = 0L;
+        this.boxedN1 = null;
+        this.boxedN2 = null;
+        this.boxedI1 = null;
+    }
     
     BitwiseOperators(final .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger initN, final .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger initI) {
         this.initN = initN;
@@ -409,6 +426,10 @@ class BitwiseOperators implements .com.redhat.ceylon.compiler.java.runtime.model
 }
 class BitwiseOperatorsSub extends .com.redhat.ceylon.compiler.java.test.expression.operator.BitwiseOperators {
     
+    protected BitwiseOperatorsSub() {
+        super();
+    }
+    
     BitwiseOperatorsSub(final .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger initN, final .com.redhat.ceylon.compiler.java.test.expression.operator.BWMyInteger initI) {
         super(initN, initI);
     }
@@ -459,87 +480,99 @@ final class bwToplevelN1_ {
     
     private bwToplevelN1_() {
     }
-    private static long[] value;
+    private static long value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new long[]{0L};
+            value = 0L;
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
-            value = null;
+            value = 0L;
+            $init$value = false;
         }
     }
     
     public static long get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (bwToplevelN1_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'bwToplevelN1\' before it was set");
         }
     }
     
     public static void set_(final long bwToplevelN1) {
-        value[0] = bwToplevelN1;
+        if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
+        value = bwToplevelN1;
     }
 }
 final class bwToplevelN2_ {
     
     private bwToplevelN2_() {
     }
-    private static long[] value;
+    private static long value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new long[]{0L};
+            value = 0L;
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
-            value = null;
+            value = 0L;
+            $init$value = false;
         }
     }
     
     public static long get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (bwToplevelN2_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'bwToplevelN2\' before it was set");
         }
     }
     
     public static void set_(final long bwToplevelN2) {
-        value[0] = bwToplevelN2;
+        if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
+        value = bwToplevelN2;
     }
 }
 final class bwToplevelI1_ {
     
     private bwToplevelI1_() {
     }
-    private static long[] value;
+    private static long value;
+    private static volatile boolean $init$value = false;
     private static final .java.lang.Throwable $initException$;
     static {
         try {
-            value = new long[]{0L};
+            value = 0L;
             $initException$ = null;
+            $init$value = true;
         } catch (.java.lang.Throwable x) {
             $initException$ = x;
-            value = null;
+            value = 0L;
+            $init$value = false;
         }
     }
     
     public static long get_() {
-        try {
-            return value[0];
-        } catch (.java.lang.NullPointerException ex) {
+        if (bwToplevelI1_.$init$value) {
+            return value;
+        } else {
             if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
             throw new .ceylon.language.InitializationError("Cyclic initialization trying to read the value of \'bwToplevelI1\' before it was set");
         }
     }
     
     public static void set_(final long bwToplevelI1) {
-        value[0] = bwToplevelI1;
+        if ($initException$ != null) .com.redhat.ceylon.compiler.java.Util.rethrow($initException$);
+        value = bwToplevelI1;
     }
 }
 final class bwToplevelGetterN1_ {
